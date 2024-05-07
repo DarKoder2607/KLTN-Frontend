@@ -66,6 +66,7 @@ const SignUpPage = () => {
               }}
             >{
               isShowPassword ? (
+              isShowPassword ? (
                 <EyeFilled/>
               ) : (
                 <EyeInvisibleFilled/>
@@ -86,6 +87,7 @@ const SignUpPage = () => {
                 right: '8px'
               }}
             >{
+              isShowConfirmPassword ? (
               isShowConfirmPassword ? (
                 <EyeFilled/>
               ) : (

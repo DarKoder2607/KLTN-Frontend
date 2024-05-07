@@ -8,6 +8,7 @@ import {
   } from '@ant-design/icons';
 import ButtonInputSearch from '../ButtonInputSearch/ButtonInputSearch';
 import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 const HeaderComponent = () => {
     const navigate = useNavigate()
 
@@ -40,17 +41,17 @@ const HeaderComponent = () => {
                             <CaretDownOutlined />
                         </div>
 
+                        </div>
+                    </WrapperHeaderAccount>
+                    <div>
+                        <Badge count={5} size='small'>
+                            <ShoppingCartOutlined style={{fontSize: '30px', color: '#fff'}} />
+                        </Badge>
+                        <WrapperTextHeaderSmall>Giỏ hàng</WrapperTextHeaderSmall>
                     </div>
-                </WrapperHeaderAccount>
-                <div>
-                    <Badge count={5} size='small'>
-                        <ShoppingCartOutlined style={{fontSize: '30px', color: '#fff'}} />
-                    </Badge>
-                    <WrapperTextHeaderSmall>Giỏ hàng</WrapperTextHeaderSmall>
-                </div>
-            </Col>
-        </WrapperHeader>
-    </div>
+                </Col>
+            </WrapperHeader>
+        </div>
   )
 }
 
