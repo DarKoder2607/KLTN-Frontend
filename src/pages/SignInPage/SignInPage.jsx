@@ -6,7 +6,7 @@ import { Image } from 'antd'
 import imagelogo from '../../assets/images/Shipper_CPS3.webp'
 import { EyeFilled, EyeInvisibleFilled } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
-import * as UserService from '../../service/UserService'
+import * as UserService from '../../services/UserService'
 import { useMutationHooks } from '../../hooks/useMutationHook'
 import Loading from '../../components/LoadingComponent/Loading'
 

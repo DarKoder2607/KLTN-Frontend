@@ -6,7 +6,7 @@ import imagelogo from '../../assets/images/Shipper_CPS3.webp'
 import { Image } from 'antd'
 import { EyeFilled, EyeInvisibleFilled } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
-import * as UserService from '../../service/UserService'
+import * as UserService from '../../services/UserService'
 import { useMutationHooks } from '../../hooks/useMutationHook'
 import Loading from '../../components/LoadingComponent/Loading'
 
@@ -65,7 +65,7 @@ const SignUpPage = () => {
                 right: '8px'
               }}
             >{
-              isShowPassword ? (
+               
               isShowPassword ? (
                 <EyeFilled/>
               ) : (
@@ -87,7 +87,7 @@ const SignUpPage = () => {
                 right: '8px'
               }}
             >{
-              isShowConfirmPassword ? (
+               
               isShowConfirmPassword ? (
                 <EyeFilled/>
               ) : (
