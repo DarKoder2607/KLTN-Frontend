@@ -65,4 +65,4 @@ const TableComponent = (props) => {
   )
 }
 
-export default TableComponent
+export default TableComponent   

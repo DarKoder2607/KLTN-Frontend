@@ -12,7 +12,7 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { resetUser } from '../../redux/slides/userSlide.js'
 import Loading from '../LoadingComponent/Loading.jsx';
-const HeaderComponent = (isHiddenSearch = false, isHiddenCart =false) => {
+const HeaderComponent = ({isHiddenSearch = false, isHiddenCart =false}) => {
 
     const navigate = useNavigate()
     const user =  useSelector((state) => state.user)

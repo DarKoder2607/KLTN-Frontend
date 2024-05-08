@@ -1,5 +1,4 @@
 import React from 'react'
-import React from 'react'
 import { WrapperInputStyle } from './Style'
 
 const InputForm = (props) => {
