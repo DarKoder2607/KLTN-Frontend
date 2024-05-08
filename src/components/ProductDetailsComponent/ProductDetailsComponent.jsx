@@ -67,7 +67,7 @@ const ProductDetailsComponent = () => {
             </div>
             <div style={{display: 'flex', alignItems: 'center', gap: '12px'}}>
                 <ButtonComponent
-                    bordered={false}
+                    bordered="false"
                     size={20} 
                     // variant = "borderless"
                     styleButton={{background: 'rgb(255,57,69)', height: '48px', width: '220px', border: 'none', borderRadius: '4px'}} 
