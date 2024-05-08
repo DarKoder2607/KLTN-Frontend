@@ -1,11 +1,16 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import InputForm from '../../components/InputForm/InputForm'
 import { WrapperContainerLeft, WrapperContainerRight, WrapperTextLight } from './Style'
 import ButtonComponent from '../../components/ButtonComponent/ButtonComponent'
 import imagelogo from '../../assets/images/Shipper_CPS3.webp'
 import { Image } from 'antd'
 import { EyeFilled, EyeInvisibleFilled } from '@ant-design/icons'
+import * as UserService from '../../services/UserService'
 import { useNavigate } from 'react-router-dom'
+import { useMutationHooks } from '../../hooks/useMutationHook'
+import Loading from '../../components/LoadingComponent/Loading'
+import * as message from '../../components/Message/Message'
+
 const SignUpPage = () => {
   const navigate = useNavigate()
   const [isShowPassword, setIsShowPasswword] = useState(false)
@@ -24,11 +29,31 @@ const SignUpPage = () => {
     setConfirmPassword (value)
   }
 
+  const mutation = useMutationHooks(
+    data => UserService.signupUser(data)   
+  )
+
+  const {data, isPending, isSuccess, isError} = mutation
+
+  useEffect(() =>{
+    if(isSuccess){
+      message.success()
+      handleNavigateSignIn()
+    }else if(isError){
+      message.error()
+    }
+  })
+  
+
   const handleNavigateSignIn = () =>{
       navigate('/sign-in')
   }
   const handleSignUp = () =>{
-    console.log('su', email, password, confirmPassword)
+    mutation.mutate({
+      email, 
+      password, 
+      confirmPassword
+    })
   }
 
   return (
@@ -76,18 +101,19 @@ const SignUpPage = () => {
             </span>
             <InputForm placeholder = "password" type = {isShowConfirmPassword ? "text" : "password"} value={confirmPassword} onChange={handleOnchangeConfirmPassword}/>
           </div>
-          <ButtonComponent
-            disabled = {!email.length || !password.length || !confirmPassword.length}
-            onClick= {handleSignUp}
-            
-            size={20} 
-            // variant = "borderless"
-            styleButton={{background: 'rgb(255,57,69)', height: '48px', width: '100%', border: 'none', borderRadius: '4px', margin: '26px 0 10px'}} 
-            textButton={'Đăng ký'}
-            styleTextButton={{color: '#fff', fontSize: '15px', fontWeight:' 700'}}
-                  > 
-          </ButtonComponent>
-          
+          {data?.status === 'ERR' && <span style={{color : 'red'}}>{data?.message}</span>}
+          <Loading isPending={isPending}>
+            <ButtonComponent
+              disabled = {!email.length || !password.length || !confirmPassword.length}
+              onClick= {handleSignUp}
+              size={20} 
+              // variant = "borderless"
+              styleButton={{background: 'rgb(255,57,69)', height: '48px', width: '100%', border: 'none', borderRadius: '4px', margin: '26px 0 10px'}} 
+              textButton={'Đăng ký'}
+              styleTextButton={{color: '#fff', fontSize: '15px', fontWeight:' 700'}}
+                    > 
+            </ButtonComponent>
+          </Loading>
           <p>Bạn đã có tài khoản? <WrapperTextLight onClick={handleNavigateSignIn}> Đăng nhập</WrapperTextLight></p>
         </WrapperContainerLeft>
         <WrapperContainerRight>
