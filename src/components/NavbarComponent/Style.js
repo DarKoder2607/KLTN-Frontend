@@ -26,3 +26,8 @@ export const WrapperTextPrice = styled.div`
     width: fit-content
 
 `
+export const WrapperTypeProduct = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+`;

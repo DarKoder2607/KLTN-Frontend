@@ -7,7 +7,6 @@ import { jwtDecode} from "jwt-decode";
 import * as UserService from './services/UserService'
 import { useDispatch, useSelector } from 'react-redux'
 import { updateUser } from './redux/slides/userSlide'
-import axios from 'axios'
 import Loading from './components/LoadingComponent/Loading'
 
 
@@ -50,8 +49,17 @@ function App() {
   })
 
   const handleGetDetailsUser = async (id, token) => {
-    const res = await UserService.getDetailsUser(id, token)
-    dispatch(updateUser({...res?.data, access_token: token}))
+    try {
+      const res = await UserService.getDetailsUser(id, token);
+      if (res && res.data) {
+        dispatch(updateUser({ ...res.data, access_token: token }));
+      }
+    } catch (error) {
+      console.error('Error fetching user details:', error);
+      // Handle error appropriately, e.g., show a message to the user
+    }
+    
+    
   }
 
   return (
