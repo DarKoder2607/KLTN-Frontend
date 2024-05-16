@@ -20,7 +20,7 @@ import { DeleteOutlined, EditOutlined, SearchOutlined } from '@ant-design/icons'
 const AdminUser = () => {
   const [rowSelected, setRowSelected] = useState('')
   const [isOpenDrawer, setIsOpenDrawer] = useState(false)
-  const [isPendingUpdate, setisPendingUpdate] = useState(false)
+  const [isPendingUpdate, setIsLoadingUpdate] = useState(false)
   const [isModalOpenDelete, setIsModalOpenDelete] = useState(false)
   const user = useSelector((state) => state?.user)
   const searchInput = useRef(null);
@@ -62,8 +62,7 @@ const AdminUser = () => {
   const handleDelteManyUsers = (ids) => {
     mutationDeletedMany.mutate({ ids: ids, token: user?.access_token }, {
       onSettled: () => {
-        // queryClient.invalidateQueries(['users'])
-        queryUser.refetch()
+        queryClient.invalidateQueries(['users'])
       }
     })
   }
@@ -80,11 +79,6 @@ const AdminUser = () => {
     },
   )
 
-  const getAllUsers = async () => {
-    const res = await UserService.getAllUser()
-    return res
-  }
-
   const fetchGetDetailsUser = async (rowSelected) => {
     const res = await UserService.getDetailsUser(rowSelected)
     if (res?.data) {
@@ -97,7 +91,7 @@ const AdminUser = () => {
         avatar: res.data?.avatar
       })
     }
-    setisPendingUpdate(false)
+    setIsLoadingUpdate(false)
   }
 
   useEffect(() => {
@@ -106,7 +100,7 @@ const AdminUser = () => {
 
   useEffect(() => {
     if (rowSelected && isOpenDrawer) {
-      setisPendingUpdate(true)
+      setIsLoadingUpdate(true)
       fetchGetDetailsUser(rowSelected)
     }
   }, [rowSelected, isOpenDrawer])
@@ -119,13 +113,9 @@ const AdminUser = () => {
   const { data: dataDeleted, isPending: isPendingDeleted, isSuccess: isSuccessDelected, isError: isErrorDeleted } = mutationDeleted
   const { data: dataDeletedMany, isPending: isPendingDeletedMany, isSuccess: isSuccessDelectedMany, isError: isErrorDeletedMany } = mutationDeletedMany
 
-  // const queryClient = useQueryClient()
-
-  const queryUser = useQuery({ queryKey: ['users'], queryFn: getAllUsers })
-  const { isPending: isPendingUsers, data: users } = queryUser
-
-  // const users = queryClient.getQueryData(['users'])
-  // const isFetchingUser = useIsFetching(['users'])
+  const queryClient = useQueryClient()
+  const users = queryClient.getQueryData(['users'])
+  const isFetchingUser = useIsFetching(['users'])
   const renderAction = () => {
     return (
       <div>
@@ -311,8 +301,7 @@ const AdminUser = () => {
   const handleDeleteUser = () => {
     mutationDeleted.mutate({ id: rowSelected, token: user?.access_token }, {
       onSettled: () => {
-        // queryClient.invalidateQueries(['users'])
-        queryUser.refetch()
+        queryClient.invalidateQueries(['users'])
       }
     })
   }
@@ -337,8 +326,7 @@ const AdminUser = () => {
   const onUpdateUser = () => {
     mutationUpdate.mutate({ id: rowSelected, token: user?.access_token, ...stateUserDetails }, {
       onSettled: () => {
-        // queryClient.invalidateQueries(['users'])
-        queryUser.refetch()
+        queryClient.invalidateQueries(['users'])
       }
     })
   }
@@ -347,7 +335,7 @@ const AdminUser = () => {
     <div>
       <WrapperHeader>Quản lý người dùng</WrapperHeader>
       <div style={{ marginTop: '20px' }}>
-        <TableComponent handleDelteMany={handleDelteManyUsers} columns={columns} isPending={isPendingUsers} data={dataTable} onRow={(record, rowIndex) => {
+        <TableComponent handleDelteMany={handleDelteManyUsers} columns={columns} isPending={isFetchingUser} data={dataTable} onRow={(record, rowIndex) => {
           return {
             onClick: event => {
               setRowSelected(record._id)

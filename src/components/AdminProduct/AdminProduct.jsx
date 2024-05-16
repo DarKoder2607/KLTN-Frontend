@@ -268,19 +268,19 @@ const AdminProduct = () => {
       sorter: (a, b) => a.price - b.price,
       filters: [
         {
-          text: '>= 50',
+          text: '>= 10.000.000',
           value: '>=',
         },
         {
-          text: '<= 50',
-          value: '<=',
+          text: '< 10.000.000',
+          value: '<',
         }
       ],
       onFilter: (value, record) => {
         if (value === '>=') {
-          return record.price >= 50
+          return record.price >= 10000000
         }
-        return record.price <= 50
+        return record.price < 10000000
       },
     },
     {
@@ -307,6 +307,7 @@ const AdminProduct = () => {
     {
       title: 'Type',
       dataIndex: 'type',
+      ...getColumnSearchProps('type')
     },
     {
       title: 'Action',

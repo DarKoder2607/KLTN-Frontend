@@ -36,8 +36,8 @@ const SignUpPage = () => {
   const {data, isPending, isSuccess, isError} = mutation
 
   useEffect(() =>{
-    if(isSuccess){
-      message.success()
+    if(isSuccess && data?.status !== 'ERR'){
+      message.successSignup()
       handleNavigateSignIn()
     }else if(isError){
       message.error()
@@ -60,9 +60,10 @@ const SignUpPage = () => {
     <div style={{ display: 'flex', alignItems: 'center', justifyContent : 'center', background: 'rgba(0,0,0,0.53)', height: "100vh"}}>
       <div style={{width: '800px', height:'445px', borderRadius: '6px', background: '#fff', display: 'flex'}}>
         <WrapperContainerLeft>
-          <h1>Xin chào</h1>
-          <p>Đăng nhập và tạo tài khoản</p>
-          <InputForm  style={{marginBottom: '10px'}} placeholder="abc@gmail.com" value={email} onChange={handleOnchangeEmail} />
+          <h1 style={{color: 'red'}}>WELCOME TO DH PHONESTORE !</h1>
+          <p style={{fontSize: "15px",display: 'flex',justifyContent : 'center', 
+                  alignItems: 'center', fontWeight : 'bold'}}>Sign up USER</p>
+          <InputForm  style={{marginBottom: '10px'}} placeholder="Nhập vào email..." value={email} onChange={handleOnchangeEmail} />
           <div style={{position:'relative'}}>
             <span
               onClick={() => setIsShowPasswword(!isShowPassword)}
@@ -80,7 +81,7 @@ const SignUpPage = () => {
               )
             }
             </span>
-            <InputForm placeholder = "password" style ={{marginBottom: ' 10px'}} type={isShowPassword ? "text": "password"} value={password} onChange={handleOnchangePassword}/>
+            <InputForm placeholder = "Nhập vào Password..." style ={{marginBottom: ' 10px'}} type={isShowPassword ? "text": "password"} value={password} onChange={handleOnchangePassword}/>
           </div>
           <div style={{position:'relative'}}>
             <span 
@@ -99,7 +100,7 @@ const SignUpPage = () => {
               )
             }
             </span>
-            <InputForm placeholder = "password" type = {isShowConfirmPassword ? "text" : "password"} value={confirmPassword} onChange={handleOnchangeConfirmPassword}/>
+            <InputForm placeholder = "Nhập xác nhận lại Password..." type = {isShowConfirmPassword ? "text" : "password"} value={confirmPassword} onChange={handleOnchangeConfirmPassword}/>
           </div>
           {data?.status === 'ERR' && <span style={{color : 'red'}}>{data?.message}</span>}
           <Loading isPending={isPending}>
@@ -109,7 +110,7 @@ const SignUpPage = () => {
               size={20} 
               // variant = "borderless"
               styleButton={{background: 'rgb(255,57,69)', height: '48px', width: '100%', border: 'none', borderRadius: '4px', margin: '26px 0 10px'}} 
-              textButton={'Đăng ký'}
+              textbutton={'Đăng ký'}
               styleTextButton={{color: '#fff', fontSize: '15px', fontWeight:' 700'}}
                     > 
             </ButtonComponent>

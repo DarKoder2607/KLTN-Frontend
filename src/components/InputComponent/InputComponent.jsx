@@ -5,8 +5,7 @@ const InputComponent = ({size, placeholder, bordered, style, ...rests}) => {
   return (
     <Input
             size= {size}
-            variant={bordered ? "bordered" : "borderless"}
-            //bordered = {bordered} 
+            variant= {bordered ? "bordered" : "borderless" }
             placeholder={placeholder} 
             style={{backgroundColor: style, borderRadius: 0}} 
             {...rests}

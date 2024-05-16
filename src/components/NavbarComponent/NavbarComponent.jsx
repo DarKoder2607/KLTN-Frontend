@@ -1,65 +1,47 @@
-import React from 'react'
-import { WrapperContent, WrapperLableText, WrapperTextPrice, WrapperTextValue } from './Style'
-import { Checkbox, Rate } from 'antd'
+import { Checkbox, Col, Rate, Row } from 'antd'
+import React, { useEffect, useState } from 'react'
+import { WrapperContent, WrapperLableText, WrapperTextPrice, WrapperTextValue, WrapperTypeProduct } from './Style'
+import * as ProductService from '../../services/ProductService'
 
-const NavbarComponent = () => {
-  const onChange = () => {}
-  const renderContent = (type, options) => {
-    switch(type){
-      case 'text':
-        return options.map((option) =>{
-          return <WrapperTextValue>{option}</WrapperTextValue>
-        })
-      case 'checkbox':
-        return(
-          <Checkbox.Group style={{ width: '100%', display: 'flex', flexDirection: 'column' }} onChange={onChange}>
-            {options.map((option) => {
-              return(
-                <Checkbox value={option.value}>{option.label}</Checkbox>
-              )
-            })}    
-          </Checkbox.Group>
-        )
-      case 'star':
-        return options.map((option) => {
-              return(
-                <div style={{display:'flex', gap: '4px'}}>
-                  <Rate style={{fontSize: '12px'}} disabled defaultValue={option}/>
-                  <span>  {`Từ ${option} sao`}</span>
-                </div>
-              )
-            })
-      case 'price':
-        return options.map((option) => {
-              return(
-                <WrapperTextPrice>{option}</WrapperTextPrice>
-              )
-            })     
-      default:
-        return {}
-    }
-  }
-  return (
-    <div>
-      <WrapperLableText>Lable</WrapperLableText>
-      <WrapperContent>
-        {renderContent('text', ['Samsung', 'Oppo', 'Apple', 'Nokia', 'Xiami'])}
-      </WrapperContent>
-      {/* <WrapperContent>
-        {renderContent('checkbox', [
-          {value: 'a', label: 'A'},
-          {value: 'b', label: 'B'}    
-        ])}
-      </WrapperContent>
-      <WrapperContent>
-        {renderContent('star', [1, 2, 3, 4, 5])}
-      </WrapperContent>
+import TypeProduct from '../TypeProduct/TypeProduct'
 
-      <WrapperContent>
-        {renderContent('price', ['dưới 400.000đ', '400.000-1.000.000đ','1.000.000đ+'])}
-      </WrapperContent> */}
-    </div>
-  )
+const NavBarComponent = () => {
+
+    const [typeProducts, setTypeProducts] = useState([])
+
+    const fetchAllTypeProduct = async () => {
+        try {
+            const res = await ProductService.getAllTypeProduct();
+            if (res?.data && Array.isArray(res.data)) {
+                setTypeProducts(res.data);
+            } else {
+                console.error('Invalid type product data:', res.data);
+            }
+        } catch (error) {
+            console.error('Error fetching type products:', error);
+        }
+    };
+    useEffect(() => {
+        fetchAllTypeProduct()
+    
+    }, [])
+
+
+
+    return (
+        <div>
+            <WrapperLableText>Thương hiệu</WrapperLableText>
+            <WrapperContent>
+                    <WrapperTypeProduct style={{ display: 'flex', flexDirection: 'column', gap: '0px' }}>
+                        {typeProducts.map((item) =>{
+                            return(
+                                <TypeProduct name={item} key = {item}/>
+                            )
+                        })}        
+                    </WrapperTypeProduct>
+            </WrapperContent>
+        </div>
+    )
 }
 
-export default NavbarComponent
+export default NavBarComponent

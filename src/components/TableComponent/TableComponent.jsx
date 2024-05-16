@@ -40,7 +40,7 @@ const TableComponent = (props) => {
     <Loading isPending={isPending}>
       {!!rowSelectedKeys.length && (
         <div style={{
-          background: '#1d1ddd',
+          background: 'red',
           color: '#fff',
           fontWeight: 'bold',
           padding: '10px',
@@ -51,7 +51,7 @@ const TableComponent = (props) => {
           Xóa tất cả
         </div>
       )}
-      <button onClick={exportExcel}>Export Excel</button>
+      <button style={{ color: 'rgb(26, 148, 255)', fontSize: '15px', fontWeight: '700' }} onClick={exportExcel}>Export Excel</button>
       <Table
         rowSelection={{
           type: selectionType,

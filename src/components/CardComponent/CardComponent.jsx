@@ -2,19 +2,35 @@ import React from 'react'
 import { StyleNameProduct, WrapperCardStyle, WrapperDiscountTest, WrapperPriceTest, WrapperReportTest, WrapperStyleTextSell } from './Style'
 import { StarFilled } from '@ant-design/icons'
 import logo from '../../assets/images/shirt-1491020410-3cc3d617c7b22cc6a862e9cefd96bd74.jpg'
+import { useNavigate } from 'react-router-dom'
 const CardComponent = (props ) => {
 
-  const  {countInStock, decription, image, name, price, rating, type, selled, discount  } = props
- 
+  const  {countInStock, decription, image, name, price, rating, type, selled, discount, id  } = props
+  const navigate = useNavigate()
+  const handleDetailsProduct = (id) => {
+    navigate(`/product-details/${id}`)
+  }
   return (
     <WrapperCardStyle
         hoverable
         styles={{
-          header: {width: '200px', height: '200px'},
-          body: {padding: '10px'}
+          head :{width: '200px', height: '200px'},
+          body :{padding: '10px'}
         }}
-        style={{ width: 200 }}
-        cover={<img alt="example" src="https://os.alipayobjects.com/rmsportal/QBnOOoLaAfKPirc.png" />}>
+        
+        style={{ width: 200, height: 350}}
+       
+        cover={<img alt="example" src={image} />}
+        onClick={() => countInStock !==0 && handleDetailsProduct(id)}    
+        disabled = {countInStock ===0}
+    >
+        {countInStock === 0 && (
+        <div style={{ background: '#FFCCCC',position: 'absolute', fontSize: '18px', 
+          top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center', color: 'red' ,width: '100%',
+          }}>
+          Đã hết hàng
+        </div>
+        )}
           <img 
             src ={logo}
             alt='logo' 
@@ -31,13 +47,14 @@ const CardComponent = (props ) => {
             <span style={{ marginRight:'4px'}}>
               <span>{rating}</span> <StarFilled style={{fontSize: '12px', color: 'yellow'}}/> 
             </span>
-            <WrapperStyleTextSell> | Đã bán {selled || 1000}+</WrapperStyleTextSell>
+            <WrapperStyleTextSell> | Đã bán {selled || 0} sản phẩm</WrapperStyleTextSell>
             
           </WrapperReportTest>
           <WrapperPriceTest>
-            <span style={{marginRight: '8px'}}>{price} </span>  
-            <WrapperDiscountTest> {discount || 5}% </WrapperDiscountTest>
+            <span style={{marginRight: '8px'}}>{price?.toLocaleString()}VNĐ</span>  
+       
           </WrapperPriceTest>
+          <WrapperDiscountTest>{discount > 0 ?  '-'+discount + '%': "No discount"} </WrapperDiscountTest>
         </WrapperCardStyle>
   )
 }
