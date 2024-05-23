@@ -27,7 +27,15 @@ const AdminProduct = () => {
   const inittial = () => ({
     name: '',
     price: '',
-    description: '',
+    screen: '',
+    os: '',
+    camera: '',
+    cameraFront: '',
+    cpu: '',
+    ram: '',
+    rom: '',
+    microUSB: '',
+    battery: '',
     rating: '',
     image: '',
     type: '',
@@ -42,17 +50,35 @@ const AdminProduct = () => {
 
   const mutation = useMutationHooks(
     (data) => {
-      const { name,
+      const { 
+        name,
         price,
-        description,
+        screen,
+        os,
+        camera,
+        cameraFront,
+        cpu,
+        ram,
+        rom,
+        microUSB,
+        battery,
         rating,
         image,
         type,
-        countInStock,discount } = data
+        countInStock,
+        discount } = data
       const res = ProductService.createProduct({
         name,
         price,
-        description,
+        screen,
+        os,
+        camera,
+        cameraFront,
+        cpu,
+        ram,
+        rom,
+        microUSB,
+        battery,
         rating,
         image,
         type,
@@ -109,7 +135,17 @@ const AdminProduct = () => {
       setStateProductDetails({
         name: res?.data?.name,
         price: res?.data?.price,
-        description: res?.data?.description,
+    
+        screen: res?.data?.screen,
+        os: res?.data?.os,
+        camera: res?.data?.camera,
+        cameraFront: res?.data?.cameraFront,
+        cpu: res?.data?.cpu,
+        ram: res?.data?.ram,
+        rom: res?.data?.rom,
+        microUSB: res?.data?.microUSB,
+        battery: res?.data?.battery,
+
         rating: res?.data?.rating,
         image: res?.data?.image,
         type: res?.data?.type,
@@ -350,7 +386,15 @@ const AdminProduct = () => {
     setStateProductDetails({
       name: '',
       price: '',
-      description: '',
+      screen: '',
+      os: '',
+      camera: '',
+      cameraFront: '',
+      cpu: '',
+      ram: '',
+      rom: '',
+      microUSB: '',
+      battery: '',
       rating: '',
       image: '',
       type: '',
@@ -386,7 +430,15 @@ const AdminProduct = () => {
     setStateProduct({
       name: '',
       price: '',
-      description: '',
+      screen: '',
+      os: '',
+      camera: '',
+      cameraFront: '',
+      cpu: '',
+      ram: '',
+      rom: '',
+      microUSB: '',
+      battery: '',
       rating: '',
       image: '',
       type: '',
@@ -400,7 +452,15 @@ const AdminProduct = () => {
     const params = {
       name: stateProduct.name,
       price: stateProduct.price,
-      description: stateProduct.description,
+      screen: stateProduct.screen,
+      os: stateProduct.os,
+      camera: stateProduct.camera,
+      cameraFront: stateProduct.cameraFront,
+      cpu: stateProduct.cpu,
+      ram: stateProduct.ram,
+      rom: stateProduct.rom,
+      microUSB: stateProduct.microUSB,
+      battery: stateProduct.battery,
       rating: stateProduct.rating,
       image: stateProduct.image,
       type: stateProduct.type === 'add_type' ? stateProduct.newType : stateProduct.type,
@@ -536,12 +596,70 @@ const AdminProduct = () => {
               <InputComponent value={stateProduct.price} onChange={handleOnchange} name="price" />
             </Form.Item>
             <Form.Item
-              label="Description"
-              name="description"
-              rules={[{ required: true, message: 'Please input your count description!' }]}
+              label="Screen"
+              name="screen"
+              rules={[{ required: true, message: 'Please input your count screen!' }]}
             >
-              <InputComponent value={stateProduct.description} onChange={handleOnchange} name="description" />
+              <InputComponent value={stateProduct.screen} onChange={handleOnchange} name="screen" />
             </Form.Item>
+            <Form.Item
+              label="Os"
+              name="os"
+              rules={[{ required: true, message: 'Please input your count OS!' }]}
+            >
+              <InputComponent value={stateProduct.os} onChange={handleOnchange} name="os" />
+            </Form.Item>
+            <Form.Item
+              label="Camera"
+              name="camera"
+              rules={[{ required: true, message: 'Please input your count camera!' }]}
+            >
+              <InputComponent value={stateProduct.camera} onChange={handleOnchange} name="camera" />
+            </Form.Item>
+            <Form.Item
+              label="CameraFront"
+              name="cameraFront"
+              rules={[{ required: true, message: 'Please input your count cameraFront!' }]}
+            >
+              <InputComponent value={stateProduct.cameraFront} onChange={handleOnchange} name="cameraFront" />
+            </Form.Item>
+            <Form.Item
+              label="Cpu"
+              name="cpu"
+              rules={[{ required: true, message: 'Please input your count CPU!' }]}
+            >
+              <InputComponent value={stateProduct.cpu} onChange={handleOnchange} name="cpu" />
+            </Form.Item>
+            <Form.Item
+              label="Ram"
+              name="ram"
+              rules={[{ required: true, message: 'Please input your count RAM!' }]}
+            >
+              <InputComponent value={stateProduct.ram} onChange={handleOnchange} name="ram" />
+            </Form.Item>
+            <Form.Item
+              label="Rom"
+              name="rom"
+              rules={[{ required: true, message: 'Please input your count ROM!' }]}
+            >
+              <InputComponent value={stateProduct.rom} onChange={handleOnchange} name="rom" />
+            </Form.Item>
+            <Form.Item
+              label="MicroUSB"
+              name="microUSB"
+              rules={[{ required: true, message: 'Please input your count MicroUSB!' }]}
+            >
+              <InputComponent value={stateProduct.microUSB} onChange={handleOnchange} name="microUSB" />
+            </Form.Item>
+            <Form.Item
+              label="Battery"
+              name="battery"
+              rules={[{ required: true, message: 'Please input your count Battery!' }]}
+            >
+              <InputComponent value={stateProduct.battery} onChange={handleOnchange} name="battery" />
+            </Form.Item>
+
+
             <Form.Item
               label="Rating"
               name="rating"
@@ -622,13 +740,71 @@ const AdminProduct = () => {
             >
               <InputComponent value={stateProductDetails.price} onChange={handleOnchangeDetails} name="price" />
             </Form.Item>
+
             <Form.Item
-              label="Description"
-              name="description"
-              rules={[{ required: true, message: 'Please input your count description!' }]}
+              label="Screen"
+              name="screen"
+              rules={[{ required: true, message: 'Please input your count screen!' }]}
             >
-              <InputComponent value={stateProductDetails.description} onChange={handleOnchangeDetails} name="description" />
+              <InputComponent value={stateProductDetails.screen} onChange={handleOnchangeDetails} name="screen" />
             </Form.Item>
+            <Form.Item
+              label="Os"
+              name="os"
+              rules={[{ required: true, message: 'Please input your count OS!' }]}
+            >
+              <InputComponent value={stateProductDetails.os} onChange={handleOnchangeDetails} name="os" />
+            </Form.Item>
+            <Form.Item
+              label="Camera"
+              name="camera"
+              rules={[{ required: true, message: 'Please input your count camera!' }]}
+            >
+              <InputComponent value={stateProductDetails.camera} onChange={handleOnchangeDetails} name="camera" />
+            </Form.Item>
+            <Form.Item
+              label="CameraFront"
+              name="cameraFront"
+              rules={[{ required: true, message: 'Please input your count cameraFront!' }]}
+            >
+              <InputComponent value={stateProductDetails.cameraFront} onChange={handleOnchangeDetails} name="cameraFront" />
+            </Form.Item>
+            <Form.Item
+              label="Cpu"
+              name="cpu"
+              rules={[{ required: true, message: 'Please input your count CPU!' }]}
+            >
+              <InputComponent value={stateProductDetails.cpu} onChange={handleOnchangeDetails} name="cpu" />
+            </Form.Item>
+            <Form.Item
+              label="Ram"
+              name="ram"
+              rules={[{ required: true, message: 'Please input your count RAM!' }]}
+            >
+              <InputComponent value={stateProductDetails.ram} onChange={handleOnchangeDetails} name="ram" />
+            </Form.Item>
+            <Form.Item
+              label="Rom"
+              name="rom"
+              rules={[{ required: true, message: 'Please input your count ROM!' }]}
+            >
+              <InputComponent value={stateProductDetails.rom} onChange={handleOnchangeDetails} name="rom" />
+            </Form.Item>
+            <Form.Item
+              label="MicroUSB"
+              name="microUSB"
+              rules={[{ required: true, message: 'Please input your count MicroUSB!' }]}
+            >
+              <InputComponent value={stateProductDetails.microUSB} onChange={handleOnchangeDetails} name="microUSB" />
+            </Form.Item>
+            <Form.Item
+              label="Battery"
+              name="battery"
+              rules={[{ required: true, message: 'Please input your count battery!' }]}
+            >
+              <InputComponent value={stateProductDetails.battery} onChange={handleOnchangeDetails} name="battery" />
+            </Form.Item>
+
             <Form.Item
               label="Rating"
               name="rating"

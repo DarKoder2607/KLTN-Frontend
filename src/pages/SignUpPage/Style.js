@@ -1,6 +1,7 @@
 import styled from "styled-components";
 
 export const WrapperContainerLeft = styled.div`
+    position: relative;
     flex: 1;
     padding: 40px 45px 24px;
     display: flex;
@@ -9,6 +10,7 @@ export const WrapperContainerLeft = styled.div`
 ` 
 
 export const WrapperContainerRight = styled.div`
+    position: relative;
     width: 300px;
     background: linear-gradient(136deg, rgb(240, 248, 255) -1%, rgb(219, 238, 255) 85%);
     display: flex;

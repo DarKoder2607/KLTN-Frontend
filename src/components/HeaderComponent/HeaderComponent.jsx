@@ -105,7 +105,7 @@ const HeaderComponent = ({isHiddenSearch = false, isHiddenCart =false}) => {
                         placeholder="Nhập vào tên thiết bị bạn muốn tìm kiếm..."
                         textbutton="Tìm kiếm"
                         size="large"
-                         onChange={onSearch}
+                        onChange={onSearch}
                     />
                     </Col>
                 )}
@@ -155,7 +155,7 @@ const HeaderComponent = ({isHiddenSearch = false, isHiddenCart =false}) => {
             </WrapperHeader>
             <Modal
                 title="Xác nhận đăng xuất"
-                visible={isLogoutModalVisible}
+                open={isLogoutModalVisible}
                 onOk={handleConfirmLogout}
                 onCancel={handleCancelLogout}
                 okText="Đăng xuất"
