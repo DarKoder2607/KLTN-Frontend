@@ -1,6 +1,6 @@
-import { Checkbox, Col, Rate, Row } from 'antd'
+
 import React, { useEffect, useState } from 'react'
-import { WrapperContent, WrapperLableText, WrapperTextPrice, WrapperTextValue, WrapperTypeProduct } from './Style'
+import { WrapperContent, WrapperLableText, WrapperTypeProduct } from './Style'
 import * as ProductService from '../../services/ProductService'
 
 import TypeProduct from '../TypeProduct/TypeProduct'

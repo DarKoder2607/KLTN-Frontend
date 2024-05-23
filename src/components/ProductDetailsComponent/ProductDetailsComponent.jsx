@@ -1,4 +1,4 @@
-import { Col, Image, Rate, Row, Form } from 'antd'
+import { Col, Image, Rate, Row, Form, Modal, Table } from 'antd'
 import React, { useEffect, useState } from 'react'
 import imageProduct from '../../assets/images/test.webp'
 import imageProductSmall from '../../assets/images/test1.webp'
@@ -33,6 +33,7 @@ const ProductDetailsComponent = ({idProduct}) => {
 
     const [isOpenModalUpdateInfo, setIsOpenModalUpdateInfo] = useState(false)
     const [stateUserDetails, setStateUserDetails] = useState({address: ''})
+    const [isSpecsVisible, setIsSpecsVisible] = useState(false); 
     const [form] = Form.useForm();
 
     useEffect(() => {
@@ -169,6 +170,27 @@ const ProductDetailsComponent = ({idProduct}) => {
           [e.target.name]: e.target.value
         })
       }
+
+    const toggleSpecsTable = () => {
+        setIsSpecsVisible(!isSpecsVisible);
+    }
+
+    const specsData = [
+        { key: '1', name: 'Màn hình:', value: productDetails?.screen },
+        { key: '2', name: 'Hệ điều hành:', value: productDetails?.os },
+        { key: '3', name: 'Camera:', value: productDetails?.camera },
+        { key: '4', name: 'Camera trước:', value: productDetails?.cameraFront },
+        { key: '5', name: 'CPU:', value: productDetails?.cpu },
+        { key: '6', name: 'RAM:', value: productDetails?.ram },
+        { key: '7', name: 'ROM:', value: productDetails?.rom },
+        { key: '8', name: 'MicroUSB:', value: productDetails?.microUSB },
+        { key: '9', name: 'Pin:', value: productDetails?.battery },
+    ]
+
+    const columns = [
+        { title: 'Thông số', dataIndex: 'name', key: 'name' },
+        { title: 'Chi tiết', dataIndex: 'value', key: 'value' },
+    ]
   
   return (
     <div>
@@ -272,8 +294,9 @@ const ProductDetailsComponent = ({idProduct}) => {
                                     border: '1px solid rgb(13, 92, 182)',
                                     borderRadius: '4px'
                                 }}
-                                textbutton={'Mua trả sau'}
+                                textbutton={'Thông số kĩ thuật'}
                                 styleTextButton={{ color: 'rgb(13, 92, 182)', fontSize: '15px' }}
+                                onClick={toggleSpecsTable}
                             ></ButtonComponent>
                     </div>
                 </Col>
@@ -285,6 +308,19 @@ const ProductDetailsComponent = ({idProduct}) => {
                 />
             </Row>
         </Loading>
+
+        <Modal
+            title="Thông số kỹ thuật"
+            open={isSpecsVisible}
+            onCancel={toggleSpecsTable}
+            footer={null}
+        >
+            <Table
+                columns={columns}
+                dataSource={specsData}
+                pagination={false}
+            />
+        </Modal>
 
         <ModalComponent title="Cập nhật địa chỉ giao hàng" open={isOpenModalUpdateInfo} onCancel={handleCancleUpdate} onOk={handleUpdateInforUser}>
             <Loading isPending={isPending}>

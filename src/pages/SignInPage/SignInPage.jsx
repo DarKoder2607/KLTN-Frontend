@@ -4,7 +4,7 @@ import InputForm from '../../components/InputForm/InputForm'
 import ButtonComponent from '../../components/ButtonComponent/ButtonComponent'
 import { Image } from 'antd'
 import imagelogo from '../../assets/images/Shipper_CPS3.webp'
-import { EyeFilled, EyeInvisibleFilled } from '@ant-design/icons'
+import { EyeFilled, EyeInvisibleFilled, HomeOutlined } from '@ant-design/icons'
 import { useLocation, useNavigate } from 'react-router-dom'
 import * as UserService from '../../services/UserService'
 import { useMutationHooks } from '../../hooks/useMutationHook'
@@ -53,6 +53,14 @@ const SignInPage = () => {
     const res = await UserService.getDetailsUser(id, token)
     dispatch(updateUser({...res?.data, access_token: token}))
  
+  }
+
+  const handleNavigateHome = () => {
+    navigate('/')
+  }
+
+  const handleNavigateForgotPasswword= () =>{
+    navigate('/forgot-password')
   }
 
   const handleNavigateSignup = () =>{
@@ -112,10 +120,21 @@ const SignInPage = () => {
                     > 
             </ButtonComponent>
           </Loading>
-          <p><WrapperTextLight>Quên mật khẩu?</WrapperTextLight></p>
+          <p><WrapperTextLight onClick={handleNavigateForgotPasswword}>Quên mật khẩu?</WrapperTextLight></p>
           <p>Chưa có tài khoản? <WrapperTextLight onClick={handleNavigateSignup}> Tạo tài khoản</WrapperTextLight></p>
         </WrapperContainerLeft>
         <WrapperContainerRight>
+          <HomeOutlined 
+            onClick={handleNavigateHome}
+            style={{
+              position: 'absolute',
+              top: '16px',
+              right: '16px',
+              fontSize: '24px',
+              cursor: 'pointer',
+              color: 'rgb(13, 92, 182)',
+            }}> 
+           </HomeOutlined>
           <Image  src={imagelogo} preview = {false} alt='image-logo' height="203px" width="203px" />
           <h4>Mua sắm tại HDStore</h4>
         </WrapperContainerRight>

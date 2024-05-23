@@ -82,3 +82,13 @@ export const getAllUser = async (access_token) => {
     return res.data
 }
 
+export const forgotPassword = async (data) => {
+    const res = await axios.post(`${process.env.REACT_APP_API_KEY}/user/forgot-password`, data);
+    return res.data;
+}
+
+export const resetPassword = async (data) => {
+    const res = await axios.post(`${process.env.REACT_APP_API_KEY}/user/reset-password`, data);
+    return res.data;
+}
+
