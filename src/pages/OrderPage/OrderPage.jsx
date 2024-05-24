@@ -58,6 +58,7 @@ const OrderPage = () => {
 
   const handleDeleteOrder = (idProduct) => {
     dispatch(removeOrderProduct({idProduct}))
+    message.success('Đã xóa sản phẩm khỏi giỏ hàng !')
   }
 
   const handleOnchangeCheckAll = (e) => {
