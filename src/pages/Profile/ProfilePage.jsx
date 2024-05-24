@@ -29,7 +29,7 @@ const ProfilePage = () => {
     )
 
     const dispatch = useDispatch()
-    const { data, isPending, isSuccess, isError } = mutation
+    const { data, isPending, isSuccess, isError, reset  } = mutation
 
     useEffect(() => {
         setEmail(user?.email)
@@ -41,10 +41,12 @@ const ProfilePage = () => {
 
     useEffect(() => {
         if (isSuccess) {
-            message.success()
+            message.success('Cập nhật thông tin thành công')
             handleGetDetailsUser(user?.id, user?.access_token)
+            reset()
         } else if (isError) {
             message.error()
+            reset()
         }
     }, [isSuccess, isError])
 
