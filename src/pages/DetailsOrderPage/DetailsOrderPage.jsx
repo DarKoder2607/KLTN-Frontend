@@ -1,5 +1,5 @@
 import React from 'react'
-import { WrapperAllPrice, WrapperContentInfo, WrapperHeaderUser, WrapperInfoUser, WrapperItem, WrapperItemLabel, WrapperLabel, WrapperNameProduct, WrapperProduct, WrapperStyleContent } from './style'
+import { WrapperAllPrice, WrapperContentInfo, WrapperContentProduct, WrapperContentProductBill, WrapperContentProductInfo, WrapperHeaderUser, WrapperInfoUser, WrapperItem, WrapperItemLabel, WrapperLabel, WrapperNameProduct, WrapperProduct, WrapperStyleContent } from './style'
 import logo from '../../assets/images/Shipper_CPS3.webp'
 import { useLocation, useParams } from 'react-router-dom'
 import { useEffect } from 'react'
@@ -30,10 +30,21 @@ const DetailsOrderPage = () => {
 
   const priceMemo = useMemo(() => {
     const result = data?.orderItems?.reduce((total, cur) => {
-      return total + ((cur.price * cur.amount))
-    },0)
-    return result
-  },[data])
+      const discountPrice = cur.price - (cur.price * (cur.discount || 0) / 100);
+      return total + (discountPrice * cur.amount);
+    }, 0);
+    return result;
+  }, [data])
+
+  const shippingFee = useMemo(() => {
+    if (priceMemo < 2000000) {
+      return 20000;
+    } else if (priceMemo <= 5000000) {
+      return 10000;
+    } else {
+      return 2000;
+    }
+  }, [priceMemo]);
 
   return (
    <Loading isPending={isPending}>
@@ -52,8 +63,9 @@ const DetailsOrderPage = () => {
           <WrapperInfoUser>
             <WrapperLabel>Hình thức giao hàng</WrapperLabel>
             <WrapperContentInfo>
-              <div className='delivery-info'><span className='name-delivery'>FAST </span>Giao hàng tiết kiệm</div>
-              <div className='delivery-fee'><span>Phí giao hàng: </span> {data?.shippingPrice}</div>
+             
+              <div className='delivery-fee'><span>Phí giao hàng: </span> {shippingFee}</div>
+              <div className='status-payment'>{data?.isDelivered ? 'Đã giao hàng' : 'Đang giao hàng'}</div>
             </WrapperContentInfo>
           </WrapperInfoUser>
           <WrapperInfoUser>
@@ -72,48 +84,66 @@ const DetailsOrderPage = () => {
             <WrapperItemLabel>Giảm giá</WrapperItemLabel>
           </div>
           {data?.orderItems?.map((order) => {
+            const discountAmount = order?.price * (order?.discount || 0) / 100;
+            const discountPrice = order?.price - discountAmount;
             return (
               <WrapperProduct>
-                <WrapperNameProduct>
-                  <img src={order?.image} 
-                    style={{
-                      width: '70px', 
-                      height: '70px', 
-                      objectFit: 'cover',
-                      border: '1px solid rgb(238, 238, 238)',
-                      padding: '2px'
-                    }}
-                  />
-                  <div style={{
-                    width: 260,
-                    overflow: 'hidden',
-                    textOverflow:'ellipsis',
-                    whiteSpace:'nowrap',
-                    marginLeft: '10px',
-                    height: '70px',
-                  }}>Điện thoại: {order?.name}</div>
-                </WrapperNameProduct>
-                <WrapperItem>{convertPrice(order?.price)}</WrapperItem>
-                <WrapperItem>{order?.amount}</WrapperItem>
-                <WrapperItem>{order?.discount ? convertPrice(priceMemo * order?.discount / 100) : '0 VND'}</WrapperItem>
-                
+                 <WrapperContentProduct>
+                  <WrapperNameProduct>
+                    <img src={order?.image} 
+                      style={{
+                        width: '70px', 
+                        height: '70px', 
+                        objectFit: 'cover',
+                        border: '1px solid rgb(238, 238, 238)',
+                        padding: '2px'
+                      }}
+                    />
+                    <div style={{
+                      width: 260,
+                      overflow: 'hidden',
+                      textOverflow:'ellipsis',
+                      whiteSpace:'nowrap',
+                      marginLeft: '10px',
+                      height: '70px',
+                    }}>Điện thoại: {order?.name}</div>
+                  </WrapperNameProduct>
+                </WrapperContentProduct>
+                <WrapperContentProductInfo>
+                  <WrapperItem>{convertPrice(order?.price)}</WrapperItem>
+                </WrapperContentProductInfo>
+                <WrapperContentProductInfo>
+                  <WrapperItem>{order?.amount}</WrapperItem>
+                  </WrapperContentProductInfo>
+                <WrapperContentProductInfo>
+                  <WrapperItem>{order?.discount ? convertPrice(discountAmount * order?.amount) : '0 VND'}</WrapperItem>
+                </WrapperContentProductInfo>
                 
               </WrapperProduct>
+              
             )
           })}
           
+          
           <WrapperAllPrice>
-            <WrapperItemLabel>Tạm tính</WrapperItemLabel>
-            <WrapperItem>{convertPrice(priceMemo)}</WrapperItem>
+            <WrapperContentProductBill>
+              <WrapperItemLabel style={{ fontSize : '15px' , fontWeight : 'bold'}}>Tạm tính</WrapperItemLabel>
+              <WrapperItem style={{ fontSize : '20px'}}>{convertPrice(priceMemo)}</WrapperItem>
+            </WrapperContentProductBill>
           </WrapperAllPrice>
           <WrapperAllPrice>
-            <WrapperItemLabel>Phí vận chuyển</WrapperItemLabel>
-            <WrapperItem>{convertPrice(data?.shippingPrice)}</WrapperItem>
+            <WrapperContentProductBill>
+              <WrapperItemLabel style={{ fontSize : '15px', fontWeight : 'bold'}}>Phí vận chuyển</WrapperItemLabel>
+              <WrapperItem style={{ fontSize : '20px'}}>{convertPrice(shippingFee)}</WrapperItem>
+            </WrapperContentProductBill>
           </WrapperAllPrice>
           <WrapperAllPrice>
-            <WrapperItemLabel>Tổng cộng</WrapperItemLabel>
-            <WrapperItem><WrapperItem>{convertPrice(data?.totalPrice)}</WrapperItem></WrapperItem>
+            <WrapperContentProductBill>
+              <WrapperItemLabel style={{ fontSize : '15px', fontWeight : 'bold'}}>Tổng cộng</WrapperItemLabel>
+              <WrapperItem style={{ fontSize : '20px'}}>{convertPrice(priceMemo + shippingFee )}</WrapperItem>
+            </WrapperContentProductBill>
           </WrapperAllPrice>
+         
       </WrapperStyleContent>
       </div>
     </div>

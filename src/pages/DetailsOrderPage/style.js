@@ -42,7 +42,28 @@ export const WrapperContentInfo = styled.div`
   border-radius: 6px;
   padding: 10px;
 `
+export const WrapperContentProduct = styled.div`
+  height: 80px;
+  width: 650px;
+  background-color: #fff;
+  border-radius: 6px;
+  padding: 10px;
+`
 
+export const WrapperContentProductInfo = styled.div`
+  height: 80px;
+  width: 180px;
+  background-color: #fff;
+  border-radius: 6px;
+  padding: 10px;
+`
+export const WrapperContentProductBill = styled.div`
+  height: 30px;
+  width: 150px;
+  background-color: #fff;
+  border-radius: 6px;
+  padding: 10px;
+`
 export const WrapperStyleContent = styled.div`
   display:flex;
   flex-direction: column;
@@ -70,7 +91,7 @@ export const WrapperItem = styled.div`
   }
 `
 export const WrapperItemLabel = styled.div`
-  width: 200px;
+  width: 190px;
   &:last-child {
     font-weight: bold;
   }

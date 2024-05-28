@@ -17,6 +17,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { resetUser } from '../../redux/slides/userSlide.js'
 import Loading from '../LoadingComponent/Loading.jsx';
 import { searchProduct } from '../../redux/slides/productSlide.js';
+import { removeAllOrderLogout} from '../../redux/slides/orderSlide.js';
 const HeaderComponent = ({isHiddenSearch = false, isHiddenCart =false}) => {
 
     const navigate = useNavigate()
@@ -38,6 +39,7 @@ const HeaderComponent = ({isHiddenSearch = false, isHiddenCart =false}) => {
         setLoading(true)
         await UserService.logoutUser()
         dispatch(resetUser())
+        dispatch(removeAllOrderLogout())
         setLoading(false)
         navigate('/')
     }
