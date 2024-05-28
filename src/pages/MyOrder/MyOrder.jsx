@@ -46,11 +46,15 @@ const MyOrderPage = () => {
   )
 
   const handleCanceOrder = (order) => {
-    mutation.mutate({id : order._id, token:state?.token, orderItems: order?.orderItems, userId: user.id }, {
-      onSuccess: () => {
-        queryOrder.refetch()
-      },
-    })
+    if (!order?.isDelivered && !order?.isPaid)
+    {
+      mutation.mutate({id : order._id, token:state?.token, orderItems: order?.orderItems, userId: user.id }, {
+        onSuccess: () => {
+          queryOrder.refetch()
+        },
+      })
+    }  
+    
   }
   const { isPending: isPendingCancel, isSuccess: isSuccessCancel, isError: isErrorCancle, data: dataCancel } = mutation
 
@@ -120,6 +124,7 @@ const MyOrderPage = () => {
                     </div>
                     <div style={{display: 'flex', gap: '10px'}}>
                     <ButtonComponent
+                        disabled = {order.isPaid || order.isDelivered }
                         onClick={() => handleCanceOrder(order)}
                         size={40}
                         styleButton={{

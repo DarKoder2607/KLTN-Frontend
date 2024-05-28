@@ -20,6 +20,7 @@ const ProfilePage = () => {
     const [name, setName] = useState('')
     const [phone, setPhone] = useState('')
     const [address, setAddress] = useState('')
+    const [city, setCity] = useState('')
     const [avatar, setAvatar] = useState('')
     const mutation = useMutationHooks(
         (data) => {
@@ -36,6 +37,7 @@ const ProfilePage = () => {
         setName(user?.name)
         setPhone(user?.phone)
         setAddress(user?.address)
+        setCity(user?.city)
         setAvatar(user?.avatar)
     }, [user])
 
@@ -67,6 +69,9 @@ const ProfilePage = () => {
     const handleOnchangeAddress = (value) => {
         setAddress(value)
     }
+    const handleOnchangeCity = (value) => {
+        setCity(value)
+    }
 
     const handleOnchangeAvatar = async ({fileList}) => {
         const file = fileList[0]
@@ -77,7 +82,7 @@ const ProfilePage = () => {
     }
 
     const handleUpdate = () => {
-        mutation.mutate({ id: user?.id, email, name, phone, address, avatar, access_token: user?.access_token })
+        mutation.mutate({ id: user?.id, email, name, phone, address, city, avatar, access_token: user?.access_token })
 
     }
     return (
@@ -163,6 +168,22 @@ const ProfilePage = () => {
                     <WrapperInput>
                         <WrapperLabel htmlFor="address">Address</WrapperLabel>
                         <InputForm style={{ width: '300px' }} id="address" value={address} onChange={handleOnchangeAddress} />
+                        <ButtonComponent
+                            onClick={handleUpdate}
+                            size={40}
+                            styleButton={{
+                                height: '30px',
+                                width: 'fit-content',
+                                borderRadius: '4px',
+                                padding: '2px 6px 6px'
+                            }}
+                            textbutton={'Cập nhật'}
+                            styleTextButton={{ color: 'rgb(26, 148, 255)', fontSize: '15px', fontWeight: '700' }}
+                        ></ButtonComponent>
+                    </WrapperInput>
+                    <WrapperInput>
+                        <WrapperLabel htmlFor="address">City</WrapperLabel>
+                        <InputForm style={{ width: '300px' }} id="city" value={city} onChange={handleOnchangeCity} />
                         <ButtonComponent
                             onClick={handleUpdate}
                             size={40}

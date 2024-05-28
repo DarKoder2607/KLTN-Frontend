@@ -1,21 +1,21 @@
-import { Button, Form, Space } from 'antd'
+import { Button, Space } from 'antd'
 import React from 'react'
-import { WrapperHeader, WrapperUploadFile } from './style'
+import { WrapperHeader } from './style'
 import TableComponent from '../TableComponent/TableComponent'
 import InputComponent from '../InputComponent/InputComponent'
-import DrawerComponent from '../DrawerComponent/DrawerComponent'
-import Loading from '../LoadingComponent/Loading'
-import ModalComponent from '../ModalComponent/ModalComponent'
-import { convertPrice, getBase64 } from '../../utils'
-import { useEffect } from 'react'
+
+import { convertPrice } from '../../utils'
+
 import * as message from '../Message/Message'
 
 import * as OrderService from '../../services/OrderService'
 import { useQuery } from '@tanstack/react-query'
-import { DeleteOutlined, EditOutlined, SearchOutlined } from '@ant-design/icons'
+import { SearchOutlined } from '@ant-design/icons'
 import { useSelector } from 'react-redux'
 import { orderContant } from '../../contant'
 import PieChartComponent from './PieChart'
+import moment from 'moment'
+import { useMutationHooks } from '../../hooks/useMutationHook'
 
 const OrderAdmin = () => {
   const user = useSelector((state) => state?.user)
@@ -26,9 +26,44 @@ const OrderAdmin = () => {
     return res
   }
 
+  const formatDate = (dateString) => {
+    return moment(dateString).format('HH:mm:ss  DD/MM/YYYY');
+  }
 
   const queryOrder = useQuery({ queryKey: ['orders'], queryFn: getAllOrder })
   const { isPending: isPendingOrders, data: orders } = queryOrder
+
+  const markAsDelivered = useMutationHooks(async (id) => {
+    await OrderService.markAsDelivered(id, user?.access_token)
+  })
+
+  const markAsPaid = useMutationHooks(async (id) => {
+    await OrderService.markAsPaid(id, user?.access_token)
+  })
+
+  const handleMarkAsDelivered = (id) => {
+    markAsDelivered.mutate(id, {
+      onSuccess: () => {
+        queryOrder.refetch()
+        message.success('Đã chuyển sang trạng thái đã giao hàng thành công')
+      },
+      onError: () => {
+        message.error('Failed to mark as delivered')
+      }
+    })
+  }
+
+  const handleMarkAsPaid = (id) => {
+    markAsPaid.mutate(id, {
+      onSuccess: () => {
+        queryOrder.refetch()
+        message.success('Đã chuyển sang trạng thái đã thanh toán thành công')
+      },
+      onError: () => {
+        message.error('Failed to mark as paid')
+      }
+    })
+  }
 
   const getColumnSearchProps = (dataIndex) => ({
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
@@ -123,15 +158,32 @@ const OrderAdmin = () => {
       ...getColumnSearchProps('address')
     },
     {
-      title: 'Paided',
+      title: 'Order Date',
+      dataIndex: 'createdAt',
+      sorter: (a, b) => a.createdAt.length - b.createdAt.length,
+      render: (text) => formatDate(text),
+      ...getColumnSearchProps('createdAt')
+    },
+    {
+      title: 'Paid',
       dataIndex: 'isPaid',
       sorter: (a, b) => a.isPaid.length - b.isPaid.length,
+      render: (text) => (
+        <span style={{ color: text === 'Đã thanh toán' ? 'blue' : 'gray' }}>
+          {text}
+        </span>
+      ),
       ...getColumnSearchProps('isPaid')
     },
     {
       title: 'Shipped',
       dataIndex: 'isDelivered',
       sorter: (a, b) => a.isDelivered.length - b.isDelivered.length,
+      render: (text) => (
+        <span style={{ color: text === 'Đã giao hàng' ? '#00FF00' : 'gray' }}>
+          {text}
+        </span>
+      ),
       ...getColumnSearchProps('isDelivered')
     },
     {
@@ -146,11 +198,27 @@ const OrderAdmin = () => {
       sorter: (a, b) => a.totalPrice.length - b.totalPrice.length,
       ...getColumnSearchProps('totalPrice')
     },
+    {
+      title: 'Actions',
+      dataIndex: 'actions',
+      render: (text, record) => (
+        <Space size="middle">
+          <Button style={{background : 'green', color: 'white'}} onClick={() => handleMarkAsDelivered(record._id)} disabled={record.isDelivered === 'TRUE'}>
+            Delivered
+          </Button>
+          <Button style={{background : 'blue', color: 'white'}} onClick={() => handleMarkAsPaid(record._id)} disabled={record.isPaid === 'TRUE'}>
+            Paid
+          </Button>
+        </Space>
+      ),
+    }
   ];
 
   const dataTable = orders?.data?.length && orders?.data?.map((order) => {
-    console.log('usewr', order)
-    return { ...order, key: order._id, userName: order?.shippingAddress?.fullName, phone: order?.shippingAddress?.phone, address: order?.shippingAddress?.address, paymentMethod: orderContant.payment[order?.paymentMethod],isPaid: order?.isPaid ? 'TRUE' :'FALSE',isDelivered: order?.isDelivered ? 'TRUE' : 'FALSE', totalPrice: convertPrice(order?.totalPrice)}
+    
+    return { ...order, key: order._id, userName: order?.shippingAddress?.fullName, phone: order?.shippingAddress?.phone, 
+      address: order?.shippingAddress?.address, paymentMethod: orderContant.payment[order?.paymentMethod],isPaid: order?.isPaid ? 'Đã thanh toán' :'Chưa thanh toán',
+      isDelivered: order?.isDelivered ? 'Đã giao hàng' : 'Đang giao hàng', totalPrice: convertPrice(order?.totalPrice)}
   })
 
   return (

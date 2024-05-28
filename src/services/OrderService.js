@@ -50,3 +50,21 @@ export const getAllOrder = async (access_token) => {
   })
   return res.data
 }
+
+export const markAsDelivered = async (id, access_token) => {
+  const res = await axiosJWT.put(`${process.env.REACT_APP_API_KEY}/order/mark-as-delivered/${id}`, {}, {
+    headers: {
+      token: `Bearer ${access_token}`,
+    }
+  })
+  return res.data
+}
+
+export const markAsPaid = async (id, access_token) => {
+  const res = await axiosJWT.put(`${process.env.REACT_APP_API_KEY}/order/mark-as-paid/${id}`, {}, {
+    headers: {
+      token: `Bearer ${access_token}`,
+    }
+  })
+  return res.data
+}

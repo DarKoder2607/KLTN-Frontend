@@ -34,7 +34,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "npm install --legacy-peer-deps && react-scripts build",
+    "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
@@ -56,5 +56,5 @@
       "last 1 safari version"
     ]
   },
-  "proxy": "https://tlcn-backend-9bho.onrender.com"
+  "proxy": "http://localhost:3001"
 }

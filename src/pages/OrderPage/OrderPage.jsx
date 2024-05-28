@@ -199,7 +199,7 @@ const OrderPage = () => {
     },
     {
       title: '10.000 VND',
-      description: 'Từ 2.000.000 VND đến dưới 50.00.000 VND',
+      description: 'Từ 2.000.000 VND đến dưới 5.000.000 VND',
     },
     {
       title: '2.000 VNĐ',
