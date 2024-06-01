@@ -3,7 +3,7 @@ import * as UserService from '../../services/UserService';
 import { success, error } from '../../components/Message/Message';
 import InputForm from '../../components/InputForm/InputForm';
 import { Image } from 'antd';
-import imagelogo from '../../assets/images/Shipper_CPS3.webp'
+import imagelogo from '../../assets/images/logo.png'
 import { useNavigate } from 'react-router-dom'
 import { WrapperContainerLeft, WrapperContainerRight, WrapperTextLight } from './Style';
 // import Loading from '../../components/LoadingComponent/Loading';
@@ -74,8 +74,8 @@ const ForgotPasswordPage = () => {
                     color: 'rgb(13, 92, 182)',
                   }}> 
               </HomeOutlined>
-              <Image  src={imagelogo} preview = {false} alt='image-logo' height="203px" width="203px" />
-              <h4>Mua sắm tại HDStore</h4>
+              <Image  src={imagelogo} preview = {false} alt='image-logo' height="300px" width="300px" />
+              <h2>Mua sắm tại DH Phonestore</h2>
             </WrapperContainerRight>
           </div>
         </div>

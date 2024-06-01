@@ -12,6 +12,7 @@ import {
     HomeOutlined
   } from '@ant-design/icons';
 import ButtonInputSearch from '../ButtonInputSearch/ButtonInputSearch';
+import imagelogo from '../../assets/images/logo.png'
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { resetUser } from '../../redux/slides/userSlide.js'
@@ -95,10 +96,17 @@ const HeaderComponent = ({isHiddenSearch = false, isHiddenCart =false}) => {
     }
 
     return (
-        <div style={{width: '100%', background: 'rgb(26,148,255)', display: 'flex', justifyContent:'center'}}>
+        <div style={{width: '100%', background: 'rgb(243, 156, 18)', display: 'flex', justifyContent:'center'}}>
             <WrapperHeader style={{justifyContent: isHiddenSearch && isHiddenCart ? 'space-between' : 'unset'}}>
                 <Col span={5}>
-                    <WrapperTextHeader style={{cursor: 'pointer'}} onClick={() => navigate('/')}><HomeOutlined/> DH PHONESTORE</WrapperTextHeader>
+                    <WrapperTextHeader style={{ 
+                        cursor: 'pointer', 
+                        display: 'flex', 
+                        alignItems: 'center' 
+                }}  onClick={() => navigate('/')}>
+                        <img src={imagelogo} alt="Logo" style={{ width: '70px', height: '70px' }} />
+                        <span>DH PHONESTORE</span>
+                    </WrapperTextHeader>
                 </Col>
                 {!isHiddenSearch &&(
                     <Col span={13}>

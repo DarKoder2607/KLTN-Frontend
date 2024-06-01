@@ -52,10 +52,26 @@ export const WrapperReportTest = styled.div`
 `
 
 export const WrapperPriceTest = styled.div`
-    color: rgb(255,66,78);
+    color: black;
     font-size: 16px;
     font-weight:500;
     
+`
+
+export const WrapperPriceTextProduct = styled.div`
+    span.origin-price{
+        font-size: 16px;
+        line-height: 40px;
+        font-weight: 500;
+    },
+    span.discount-price {
+        font-size: 16px;
+        line-height: 40px;
+       
+        font-weight: 500;
+        
+        color: red
+    }
 `
 
 export const WrapperDiscountTest = styled.span`

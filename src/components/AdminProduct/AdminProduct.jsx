@@ -42,6 +42,7 @@ const AdminProduct = () => {
     countInStock: '',
     newType: '',
     discount: '',
+    relatedImages: [],
   })
   const [stateProduct, setStateProduct] = useState(inittial())
   const [stateProductDetails, setStateProductDetails] = useState(inittial())
@@ -66,7 +67,8 @@ const AdminProduct = () => {
         image,
         type,
         countInStock,
-        discount } = data
+        discount,
+        relatedImages } = data
       const res = ProductService.createProduct({
         name,
         price,
@@ -83,7 +85,8 @@ const AdminProduct = () => {
         image,
         type,
         countInStock,
-        discount
+        discount,
+        relatedImages
       })
       return res
     }
@@ -96,7 +99,7 @@ const AdminProduct = () => {
       const res = ProductService.updateProduct(
         id,
         token,
-        { ...rests })
+        { ...rests , relatedImages: data.relatedImages})
       return res
     },
   )
@@ -150,7 +153,8 @@ const AdminProduct = () => {
         image: res?.data?.image,
         type: res?.data?.type,
         countInStock: res?.data?.countInStock,
-        discount: res?.data?.discount
+        discount: res?.data?.discount,
+        relatedImages: res?.data?.relatedImages
       })
     }
     setisPendingUpdate(false)
@@ -182,6 +186,7 @@ const AdminProduct = () => {
       }
     })
   }
+  
 
   const fetchAllTypeProduct = async () => {
     const res = await ProductService.getAllTypeProduct()
@@ -398,7 +403,10 @@ const AdminProduct = () => {
       rating: '',
       image: '',
       type: '',
-      countInStock: ''
+      countInStock: '',
+      discount: '',
+      relatedImages: [],
+
     })
     form.resetFields()
   };
@@ -444,6 +452,7 @@ const AdminProduct = () => {
       type: '',
       countInStock: '',
       discount: '',
+      relatedImages: [],
     })
     form.resetFields()
   };
@@ -465,7 +474,8 @@ const AdminProduct = () => {
       image: stateProduct.image,
       type: stateProduct.type === 'add_type' ? stateProduct.newType : stateProduct.type,
       countInStock: stateProduct.countInStock,
-      discount: stateProduct.discount
+      discount: stateProduct.discount,
+      relatedImages: stateProduct.relatedImages
     }
     mutation.mutate(params, {
       onSettled: () => {
@@ -509,6 +519,37 @@ const AdminProduct = () => {
       image: file.preview
     })
   }
+
+  const handleOnchangeRelatedImages = async ({ fileList }) => {
+    const relatedImages = await Promise.all(
+      fileList.map(async (file) => {
+        if (!file.url && !file.preview) {
+          file.preview = await getBase64(file.originFileObj);
+        }
+        return file.preview;
+      })
+    );
+    setStateProduct({
+      ...stateProduct,
+      relatedImages: relatedImages
+    });
+  };
+  
+  const handleOnchangeRelatedImagesDetails = async ({ fileList }) => {
+    const relatedImages = await Promise.all(
+      fileList.map(async (file) => {
+        if (!file.url && !file.preview) {
+          file.preview = await getBase64(file.originFileObj);
+        }
+        return file.preview;
+      })
+    );
+    setStateProductDetails({
+      ...stateProductDetails,
+      relatedImages: relatedImages
+    });
+  };
+
   const onUpdateProduct = () => {
     mutationUpdate.mutate({ id: rowSelected, token: user?.access_token, ...stateProductDetails }, {
       onSettled: () => {
@@ -692,6 +733,29 @@ const AdminProduct = () => {
                 )}
               </WrapperUploadFile>
             </Form.Item>
+
+            <Form.Item
+              label="Related Images"
+              name="relatedImages"
+              rules={[{ required: true, message: 'Please upload related images!' }]}
+            >
+              <WrapperUploadFile onChange={handleOnchangeRelatedImages} maxCount={6} multiple>
+                <Button>Select Files</Button>
+                {stateProduct?.relatedImages?.length > 0 && (
+                  stateProduct.relatedImages.map((img, index) => (
+                    <img key={index} src={img} style={{
+                      height: '60px',
+                      width: '60px',
+                      borderRadius: '50%',
+                      objectFit: 'cover',
+                      marginLeft: '10px'
+                    }} alt="related-img" />
+                  ))
+                )}
+              </WrapperUploadFile>
+            </Form.Item>
+
+
             <Form.Item wrapperCol={{ offset: 20, span: 16 }}>
               <Button type="primary" htmlType="submit">
                 Submit
@@ -837,6 +901,29 @@ const AdminProduct = () => {
                 )}
               </WrapperUploadFile>
             </Form.Item>
+
+            <Form.Item
+              label="Related Images"
+              name="relatedImages"
+              rules={[{ required: true, message: 'Please upload related images!' }]}
+            >
+              <WrapperUploadFile onChange={handleOnchangeRelatedImagesDetails} maxCount={6} multiple>
+                <Button>Select Files</Button>
+                {stateProductDetails?.relatedImages?.length > 0 && (
+                  stateProductDetails.relatedImages.map((img, index) => (
+                    <img key={index} src={img} style={{
+                      height: '60px',
+                      width: '60px',
+                      borderRadius: '50%',
+                      objectFit: 'cover',
+                      marginLeft: '10px'
+                    }} alt="related-img" />
+                  ))
+                )}
+              </WrapperUploadFile>
+            </Form.Item>
+
+
             <Form.Item wrapperCol={{ offset: 20, span: 16 }}>
               <Button type="primary" htmlType="submit">
                 Apply

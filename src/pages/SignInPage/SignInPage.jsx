@@ -3,7 +3,7 @@ import { WrapperContainerLeft, WrapperContainerRight, WrapperTextLight } from '.
 import InputForm from '../../components/InputForm/InputForm'
 import ButtonComponent from '../../components/ButtonComponent/ButtonComponent'
 import { Image } from 'antd'
-import imagelogo from '../../assets/images/Shipper_CPS3.webp'
+import imagelogo from '../../assets/images/logo.png'
 import { EyeFilled, EyeInvisibleFilled, HomeOutlined } from '@ant-design/icons'
 import { useLocation, useNavigate } from 'react-router-dom'
 import * as UserService from '../../services/UserService'
@@ -86,7 +86,7 @@ const SignInPage = () => {
         <WrapperContainerLeft>
         <h1 style={{color: 'red'}}>WELCOME TO DH PHONESTORE !</h1>
           <p style={{fontSize: "15px",display: 'flex',justifyContent : 'center', 
-                  alignItems: 'center', fontWeight : 'bold'}}>Log in USER </p>
+                  alignItems: 'center', fontWeight : 'bold'}}>SIGN IN </p>
           <InputForm  style={{marginBottom: '10px'}} placeholder="Nhập vào email..." value={email} onChange={handleOnchangeEmail}/>
           <div style={{position:'relative'}}>
             <span
@@ -121,7 +121,7 @@ const SignInPage = () => {
             </ButtonComponent>
           </Loading>
           <p><WrapperTextLight onClick={handleNavigateForgotPasswword}>Quên mật khẩu?</WrapperTextLight></p>
-          <p>Chưa có tài khoản? <WrapperTextLight onClick={handleNavigateSignup}> Tạo tài khoản</WrapperTextLight></p>
+          <p style={{fontSize: '15px'}}>Chưa có tài khoản? <WrapperTextLight onClick={handleNavigateSignup}> Tạo tài khoản</WrapperTextLight></p>
         </WrapperContainerLeft>
         <WrapperContainerRight>
           <HomeOutlined 
@@ -135,8 +135,8 @@ const SignInPage = () => {
               color: 'rgb(13, 92, 182)',
             }}> 
            </HomeOutlined>
-          <Image  src={imagelogo} preview = {false} alt='image-logo' height="203px" width="203px" />
-          <h4>Mua sắm tại HDStore</h4>
+          <Image  src={imagelogo} preview = {false} alt='image-logo' height="300px" width="300px" />
+          <h2>Mua sắm tại DH Phonestore</h2>
         </WrapperContainerRight>
       </div>
     </div>

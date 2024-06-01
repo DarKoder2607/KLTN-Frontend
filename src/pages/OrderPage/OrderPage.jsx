@@ -209,7 +209,8 @@ const OrderPage = () => {
   return (
     <div style={{background: '#f5f5fa', with: '100%', height: '100vh'}}>
       <div style={{height: '100%', width: '1270px', margin: '0 auto'}}>
-        <h3 style={{fontWeight: 'bold'}}>Giỏ hàng</h3>
+        <h3 style={{fontSize : '20px'}}><span style={{cursor: 'pointer', fontWeight: 'bold'}} 
+                    onClick={() => navigate('/')}>Trang chủ</span> \ Giỏ hàng </h3>
         <div style={{ display: 'flex', justifyContent: 'center'}}>
           <WrapperLeft>
             <h4>Phí giao hàng</h4>
@@ -276,20 +277,20 @@ const OrderPage = () => {
               </WrapperInfo>
               <WrapperInfo>
                 <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
-                  <span>Tạm tính</span>
+                  <span style={{fontSize: "13px"}}>Tạm tính</span>
                   <span style={{color: '#000', fontSize: '14px', fontWeight: 'bold'}}>{convertPrice(priceMemo)}</span>
                 </div>
                 <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
-                  <span>Giảm giá</span>
+                  <span style={{fontSize: "13px"}}>Giảm giá</span>
                   <span style={{color: '#000', fontSize: '14px', fontWeight: 'bold'}}>{convertPrice(priceDiscountMemo)}</span>
                 </div>
                 <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
-                  <span>Phí giao hàng</span>
+                  <span style={{fontSize: "13px"}}>Phí giao hàng</span>
                   <span style={{color: '#000', fontSize: '14px', fontWeight: 'bold'}}>{convertPrice(diliveryPriceMemo)}</span>
                 </div>
               </WrapperInfo>
               <WrapperTotal>
-                <span>Tổng tiền</span>
+                <span style={{fontSize: "13px"}}>Tổng tiền</span>
                 <span style={{display:'flex', flexDirection: 'column'}}>
                   <span style={{color: 'rgb(254, 56, 52)', fontSize: '24px', fontWeight: 'bold'}}>{convertPrice(totalPriceMemo)}</span>
                   <span style={{color: '#000', fontSize: '11px'}}>(Đã bao gồm VAT nếu có)</span>

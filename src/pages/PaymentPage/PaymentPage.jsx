@@ -249,7 +249,10 @@ const PaymentPage = () => {
     <div style={{background: '#f5f5fa', with: '100%', height: '100vh'}}>
       <Loading isPending={isPendingAddOrder}>
         <div style={{height: '100%', width: '1270px', margin: '0 auto'}}>
-          <h3>Thanh toán</h3>
+          <h3 style={{fontSize : '20px'}}><span style={{cursor: 'pointer', fontWeight: 'bold'}} 
+                      onClick={() => navigate('/')}>Trang chủ</span>
+                      <span style={{cursor: 'pointer', fontWeight: 'bold'}} 
+                      onClick={() => navigate('/order')}> \ Giỏ hàng</span> \ Thanh toán </h3>
           <div style={{ display: 'flex', justifyContent: 'center'}}>
             <WrapperLeft>
               <WrapperInfo>
@@ -275,27 +278,27 @@ const PaymentPage = () => {
               <div style={{width: '100%'}}>
                 <WrapperInfo>
                   <div>
-                    <span>Địa chỉ: </span>
-                    <span style={{fontWeight: 'bold'}}>{ `${user?.address} ${user?.city}`} </span>
+                    <span style={{ fontSize: "15px" , fontWeight: 'bold'}}>Địa chỉ: </span>
+                    <span style={{fontSize: "18px"}}>{ `${user?.address} ${user?.city}`} </span>
                     <span onClick={handleChangeAddress} style={{color: '#9255FD', cursor:'pointer'}}>Thay đổi</span>
                   </div>
                 </WrapperInfo>
                 <WrapperInfo>
                   <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
-                    <span>Tạm tính</span>
+                    <span style={{fontSize: "13px"}}>Tạm tính</span>
                     <span style={{color: '#000', fontSize: '14px', fontWeight: 'bold'}}>{convertPrice(priceMemo)}</span>
                   </div>
                   <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
-                    <span>Giảm giá</span>
+                    <span style={{fontSize: "13px"}}>Giảm giá</span>
                     <span style={{color: '#000', fontSize: '14px', fontWeight: 'bold'}}>{convertPrice(priceDiscountMemo)}</span>
                   </div>
                   <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
-                    <span>Phí giao hàng</span>
+                    <span style={{fontSize: "13px"}}>Phí giao hàng</span>
                     <span style={{color: '#000', fontSize: '14px', fontWeight: 'bold'}}>{convertPrice(diliveryPriceMemo)}</span>
                   </div>
                 </WrapperInfo>
                 <WrapperTotal>
-                  <span>Tổng tiền</span>
+                  <span style={{fontSize: "13px"}}>Tổng tiền</span>
                   <span style={{display:'flex', flexDirection: 'column'}}>
                     <span style={{color: 'rgb(254, 56, 52)', fontSize: '24px', fontWeight: 'bold'}}>{convertPrice(totalPriceMemo)}</span>
                     <span style={{color: '#000', fontSize: '11px'}}>(Đã bao gồm VAT nếu có)</span>
