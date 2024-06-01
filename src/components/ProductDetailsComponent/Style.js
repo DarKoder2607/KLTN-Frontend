@@ -44,7 +44,7 @@ export const WrapperPriceProduct = styled.div`
 `
 
 export const WrapperPriceTextProduct = styled.h1`
-    span.origin-priceprice{
+    span.origin-price{
         font-size: 32px;
         line-height: 40px;
         margin-right: 8px;

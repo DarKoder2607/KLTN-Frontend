@@ -2,10 +2,16 @@
     import TypeProduct from "../../components/TypeProduct/TypeProduct";
     import { WrapperButtonMore, WrapperProducts, WrapperTypeProduct } from "./Style";
     import SliderComponent from "../../components/SliderComponent/SliderComponent";
-    import slider1 from '../../assets/images/720-220-720x220-74.webp'
-    import slider2 from '../../assets/images/Redmi-3A-720-220-720x220-3.webp'
-    import slider3 from '../../assets/images/SW-Xiaomi-720-220-720x220-1.webp'
-    import slider4 from '../../assets/images/sac-AVA-720-220-720x220-1.webp'
+    import slider1 from '../../assets/images/banner0.gif'
+    import slider2 from '../../assets/images/banner1.png'
+    import slider3 from '../../assets/images/banner2.png'
+    import slider4 from '../../assets/images/banner3.png'
+    import slider5 from '../../assets/images/banner4.png'
+    import slider6 from '../../assets/images/banner5.png'
+    import slider7 from '../../assets/images/banner6.png'
+    import slider8 from '../../assets/images/banner7.png'
+    import slider9 from '../../assets/images/banner8.png'
+    import slider10 from '../../assets/images/banner9.png'
     import CardComponent from "../../components/CardComponent/CardComponent";
     import { keepPreviousData, useQuery } from "@tanstack/react-query";
     import * as ProductService from '../../services/ProductService'
@@ -70,7 +76,8 @@
                 </div>
                 <div className="body" style={{width: ' 100%', backgroundColor: '#efefef'}}>
                     <div id="contrainer" style={{width:'1270px', margin:'0 auto', height: '1000px'}}>
-                        <SliderComponent arrImages = {[slider1,slider2,slider3,slider4]}/>
+                        <SliderComponent arrImages = {[slider1, slider2, slider3, slider4, 
+                                    slider5, slider6, slider7, slider8, slider9, slider10]}/>
                         <WrapperProducts>
                             {products?.data?.map((product) =>{
                                 return (

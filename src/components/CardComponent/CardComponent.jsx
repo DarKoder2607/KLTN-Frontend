@@ -1,5 +1,5 @@
 import React from 'react'
-import { StyleNameProduct, WrapperCardStyle, WrapperDiscountTest, WrapperPriceTest, WrapperReportTest, WrapperStyleTextSell } from './Style'
+import { StyleNameProduct, WrapperCardStyle, WrapperDiscountTest, WrapperPriceTest, WrapperPriceTextProduct, WrapperReportTest, WrapperStyleTextSell } from './Style'
 import { StarFilled } from '@ant-design/icons'
 import logo from '../../assets/images/shirt-1491020410-3cc3d617c7b22cc6a862e9cefd96bd74.jpg'
 import { useNavigate } from 'react-router-dom'
@@ -51,7 +51,18 @@ const CardComponent = (props ) => {
             
           </WrapperReportTest>
           <WrapperPriceTest>
-            <span style={{marginRight: '8px'}}>{price?.toLocaleString()}VNĐ</span>  
+            {discount > 0 ? (
+                              <>
+                                  <WrapperPriceTextProduct >
+                                      <span style={{ textDecoration: 'line-through' , fontSize: '10px'}}  className='origin-price'>{price.toLocaleString()}VNĐ</span>
+                                      <span className='discount-price'> 
+                                          {(price - price*(discount/100)).toLocaleString()}VNĐ
+                                      </span>
+                                  </WrapperPriceTextProduct>
+                              </>
+                          ) : (
+                              <WrapperPriceTextProduct><span className='origin-price' style={{color: 'red'}}>{price.toLocaleString()}VNĐ </span></WrapperPriceTextProduct>
+                          )}  
        
           </WrapperPriceTest>
           <WrapperDiscountTest>{discount > 0 ?  '-'+discount + '%': "No discount"} </WrapperDiscountTest>

@@ -198,25 +198,13 @@ const ProductDetailsComponent = ({idProduct}) => {
             <Row style={{padding: '16px', background: '#fff', borderRadius: '4px'}}>
                 <Col span={10} style={{borderRight:'1px solid #e5e5e5', paddingRight: '8px'}}>
                     <Image src={productDetails?.image} alt="image product" preview="false"/>
-                    <Row style={{paddingTop: '10px', justifyContent: 'space-between' }}>
-                        <WrapperStyleColImage span={4}>
-                            <WrapperStyleImageSmall src = {imageProductSmall} alt="image product small" preview="false" /> 
-                        </WrapperStyleColImage>  
-                        <WrapperStyleColImage span={4}>
-                            <WrapperStyleImageSmall src = {imageProductSmall} alt="image product small" preview="false" /> 
-                        </WrapperStyleColImage>
-                        <WrapperStyleColImage span={4}>
-                            <WrapperStyleImageSmall src = {imageProductSmall} alt="image product small" preview="false" /> 
-                        </WrapperStyleColImage>
-                        <WrapperStyleColImage span={4}>
-                            <WrapperStyleImageSmall src = {imageProductSmall} alt="image product small" preview="false" /> 
-                        </WrapperStyleColImage>
-                        <WrapperStyleColImage span={4}>
-                            <WrapperStyleImageSmall src = {imageProductSmall} alt="image product small" preview="false" /> 
-                        </WrapperStyleColImage>
-                        <WrapperStyleColImage span={4}>
-                            <WrapperStyleImageSmall src = {imageProductSmall} alt="image product small" preview="false" /> 
-                        </WrapperStyleColImage>
+                    <div style={{marginTop: '10px', marginBottom: '1px'}}>Các hình ảnh chi tiết hơn về sản phẩm: </div>
+                    <Row style={{paddingTop: '10px', justifyContent: 'left' }}>
+                        {productDetails?.relatedImages.map((image, index) => (
+                            <WrapperStyleColImage key={index} span={4} >
+                                <WrapperStyleImageSmall src={image} alt={`Related Image ${index}`} preview="false"  /> 
+                            </WrapperStyleColImage>
+                        ))}
                     </Row>
 
                 </Col>
@@ -225,7 +213,7 @@ const ProductDetailsComponent = ({idProduct}) => {
                     <div>
                         <Rate allowHalf defaultValue={productDetails?.rating} value={productDetails?.rating} />
 
-                        <WrapperStyleTextSell> | Đã bán {productDetails?.selled} sản phẩm </WrapperStyleTextSell>
+                        <WrapperStyleTextSell> | Đã bán {productDetails?.selled || 0} sản phẩm </WrapperStyleTextSell>
                     </div>
                     <WrapperPriceProduct>
                         {productDetails?.discount > 0 ? (
@@ -300,6 +288,7 @@ const ProductDetailsComponent = ({idProduct}) => {
                             ></ButtonComponent>
                     </div>
                 </Col>
+                <div style={{marginTop: '40px', marginBottom: '5px', fontWeight: 'bold', fontSize: '20px' }}>Bình luận </div>
                 <CommentComponent 
                         dataHref={"https://developers.facebook.com/docs/plugins/comments#configurator"
                             
