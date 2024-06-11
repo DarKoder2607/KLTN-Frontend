@@ -58,7 +58,13 @@ const ProfilePage = () => {
     }
 
     const handleOnchangeEmail = (value) => {
-        setEmail(value)
+        const reg = /^\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$/
+        const isCheckEmail = reg.test(value)
+        if(isCheckEmail){
+            setEmail(value)
+        } else{
+            message.error('Định dạng mail không chính xác')
+        }
     }
     const handleOnchangeName = (value) => {
         setName(value)

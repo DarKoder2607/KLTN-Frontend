@@ -34,7 +34,7 @@ const OrderSucess = () => {
                   </WrapperValue>
                 </div>
               </WrapperInfo>
-              <WrapperItemOrderInfo>
+              <WrapperItemOrderInfo style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 {state.orders?.map((order) => {
                   return (
                     <WrapperItemOrder key={order?.name}>
@@ -47,12 +47,15 @@ const OrderSucess = () => {
                           whiteSpace:'nowrap'
                         }}>{order?.name}</div>
                       </div>
-                      <div style={{flex: 1, display: 'flex', alignItems: 'center',gap: '10px'}}>
-                        <span>
-                          <span style={{ fontSize: '13px', color: '#242424' }}>Giá tiền: {convertPrice(order?.price)}</span>
-                        </span>
+                      <div style={{flex: 1, display: 'flex', alignItems: 'center'}}>
                         <span>
                           <span style={{ fontSize: '13px', color: '#242424' }}>Số lượng: {order?.amount}</span>
+                        </span>
+                      </div>
+
+                      <div style={{flex: 1, alignItems: 'end'}}>
+                        <span>
+                          <span style={{ fontSize: '13px', color: '#242424' }}>Giá tiền: {convertPrice(order?.price)}</span>
                         </span>
                       </div>
                     </WrapperItemOrder>
