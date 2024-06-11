@@ -7,7 +7,7 @@ const ProductDetailsPage = () => {
   const navigate = useNavigate()
 
   return (
-    <div style={{ padding:'0 120px', background: '#efefef', height:'1000px'}}>
+    <div style={{ padding:'0 120px', background: '#efefef'}}>
       <div style={{fontSize : '20px'}}><span style={{cursor: 'pointer', fontWeight: 'bold'}} onClick={() => navigate('/')}>Trang chủ</span> \ Chi tiết sản phẩm </div>
       
         <ProductDetailsComponent idProduct ={id}/>

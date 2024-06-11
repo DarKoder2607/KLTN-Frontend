@@ -75,7 +75,7 @@
                     </WrapperTypeProduct>
                 </div>
                 <div className="body" style={{width: ' 100%', backgroundColor: '#efefef'}}>
-                    <div id="contrainer" style={{width:'1270px', margin:'0 auto', height: '1000px'}}>
+                    <div id="contrainer" style={{width:'1270px', margin:'0 auto' }}>
                         <SliderComponent arrImages = {[slider1, slider2, slider3, slider4, 
                                     slider5, slider6, slider7, slider8, slider9, slider10]}/>
                         <WrapperProducts>
@@ -89,7 +89,7 @@
                             })}
                             
                         </WrapperProducts>
-                        <div style={{width: '100%', justifyContent: 'center', display:'flex', marginTop: '10px'}}>
+                        <div style={{width: '100%', justifyContent: 'center', display:'flex', marginTop: '10px', marginBottom : '20px'}}>
                             <WrapperButtonMore textbutton={isPreviousData ? "Loading more" : "Xem thêm"} type="outline" styleButton={{
                                 border: '1px solid rgb(11,116,229)',
                                 color: `${products?.total === products?.data?.length ? '#ccc' : 'rgb(11,116,229)'}`,

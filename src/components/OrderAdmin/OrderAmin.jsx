@@ -195,7 +195,9 @@ const OrderAdmin = () => {
     {
       title: 'Total price',
       dataIndex: 'totalPrice',
-      sorter: (a, b) => a.totalPrice.length - b.totalPrice.length,
+      sorter: (a, b) => a.totalPrice - b.totalPrice,
+      render: (text) => convertPrice(text),
+
       ...getColumnSearchProps('totalPrice')
     },
     {
@@ -218,7 +220,7 @@ const OrderAdmin = () => {
     
     return { ...order, key: order._id, userName: order?.shippingAddress?.fullName, phone: order?.shippingAddress?.phone, 
       address: order?.shippingAddress?.address, paymentMethod: orderContant.payment[order?.paymentMethod],isPaid: order?.isPaid ? 'Đã thanh toán' :'Chưa thanh toán',
-      isDelivered: order?.isDelivered ? 'Đã giao hàng' : 'Đang giao hàng', totalPrice: convertPrice(order?.totalPrice)}
+      isDelivered: order?.isDelivered ? 'Đã giao hàng' : 'Đang giao hàng', totalPrice: order?.totalPrice}
   })
 
   return (

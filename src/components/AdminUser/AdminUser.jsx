@@ -1,5 +1,5 @@
-import { Button, Form, Space } from 'antd'
-import React from 'react'
+import { Button, Form, Space, message } from 'antd'
+import React, { useEffect, useRef, useState } from 'react'
 import { WrapperHeader, WrapperUploadFile } from './style'
 import TableComponent from '../TableComponent/TableComponent'
 import InputComponent from '../InputComponent/InputComponent'
@@ -7,14 +7,10 @@ import DrawerComponent from '../DrawerComponent/DrawerComponent'
 import Loading from '../LoadingComponent/Loading'
 import ModalComponent from '../ModalComponent/ModalComponent'
 import { getBase64 } from '../../utils'
-import { useEffect } from 'react'
-import * as message from '../../components/Message/Message'
-import { useState } from 'react'
 import { useSelector } from 'react-redux'
-import { useRef } from 'react'
 import { useMutationHooks } from '../../hooks/useMutationHook'
 import * as UserService from '../../services/UserService'
-import { useIsFetching, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useIsFetching, useQueryClient } from '@tanstack/react-query'
 import { DeleteOutlined, EditOutlined, SearchOutlined } from '@ant-design/icons'
 
 const AdminUser = () => {
@@ -22,6 +18,7 @@ const AdminUser = () => {
   const [isOpenDrawer, setIsOpenDrawer] = useState(false)
   const [isPendingUpdate, setIsLoadingUpdate] = useState(false)
   const [isModalOpenDelete, setIsModalOpenDelete] = useState(false)
+  const [isEmailValid, setIsEmailValid] = useState(true)
   const user = useSelector((state) => state?.user)
   const searchInput = useRef(null);
 
@@ -240,6 +237,8 @@ const AdminUser = () => {
           value: false,
         }
       ],
+      onFilter: (value, record) => record.isAdmin === value,
+      render: (isAdmin) => isAdmin ? 'TRUE' : 'FALSE'
     },
     {
       title: 'Phone',
@@ -254,12 +253,12 @@ const AdminUser = () => {
     },
   ];
   const dataTable = users?.data?.length > 0 && users?.data?.map((user) => {
-    return { ...user, key: user._id, isAdmin: user.isAdmin ? 'TRUE' : 'FALSE' }
+    return { ...user, key: user._id }
   })
 
   useEffect(() => {
     if (isSuccessDelected && dataDeleted?.status === 'OK') {
-      message.success()
+      message.success('Success')
       handleCancelDelete()
     } else if (isErrorDeleted) {
       message.error()
@@ -268,7 +267,7 @@ const AdminUser = () => {
 
   useEffect(() => {
     if (isSuccessDelectedMany && dataDeletedMany?.status === 'OK') {
-      message.success()
+      message.success('Success')
     } else if (isErrorDeletedMany) {
       message.error()
     }
@@ -282,12 +281,13 @@ const AdminUser = () => {
       phone: '',
       isAdmin: false,
     })
+    setIsEmailValid(true);
     form.resetFields()
   };
 
   useEffect(() => {
     if (isSuccessUpdated && dataUpdated?.status === 'OK') {
-      message.success()
+      message.success('Success')
       handleCloseDrawer()
     } else if (isErrorUpdated) {
       message.error()
@@ -307,9 +307,18 @@ const AdminUser = () => {
   }
 
   const handleOnchangeDetails = (e) => {
+    const { name, value } = e.target;
+    if (name === 'email') {
+      const reg = /^\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$/
+      const isCheckEmail = reg.test(value)
+      setIsEmailValid(isCheckEmail);
+      if (!isCheckEmail) {
+        message.error('Định dạng email không chính xác')
+      }
+    }
     setStateUserDetails({
       ...stateUserDetails,
-      [e.target.name]: e.target.value
+      [name]: value
     })
   }
 
@@ -324,11 +333,15 @@ const AdminUser = () => {
     })
   }
   const onUpdateUser = () => {
-    mutationUpdate.mutate({ id: rowSelected, token: user?.access_token, ...stateUserDetails }, {
-      onSettled: () => {
-        queryClient.invalidateQueries(['users'])
-      }
-    })
+    if (isEmailValid) {
+      mutationUpdate.mutate({ id: rowSelected, token: user?.access_token, ...stateUserDetails }, {
+        onSettled: () => {
+          queryClient.invalidateQueries(['users'])
+        }
+      })
+    } else {
+      message.error('Email không hợp lệ, vui lòng kiểm tra lại.');
+    }
   }
 
   return (
@@ -404,7 +417,7 @@ const AdminUser = () => {
               </WrapperUploadFile>
             </Form.Item>
             <Form.Item wrapperCol={{ offset: 20, span: 16 }}>
-              <Button type="primary" htmlType="submit">
+              <Button type="primary" htmlType="submit" disabled={!isEmailValid}>
                 Apply
               </Button>
             </Form.Item>
