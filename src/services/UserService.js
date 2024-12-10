@@ -7,6 +7,11 @@ export const loginUser = async (data) => {
     return res.data
 }
 
+export const loginGoogleUser = async (data) => {
+    const res = await axios.post(`${process.env.REACT_APP_API_KEY}/user/sign-in-google`,data)
+    return res.data
+}
+
 export const signupUser = async (data) => {
     const res = await axios.post(`${process.env.REACT_APP_API_KEY}/user/sign-up`,data)
     return res.data
@@ -92,3 +97,7 @@ export const resetPassword = async (data) => {
     return res.data;
 }
 
+export const chatbotChat = async (data) => {
+    const res = await axios.post(`${process.env.REACT_APP_API_KEY}/chat/chatbot/chat`,data)
+    return res.data
+}

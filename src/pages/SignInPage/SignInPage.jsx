@@ -13,6 +13,7 @@ import * as message from '../../components/Message/Message'
 import { jwtDecode } from "jwt-decode";
 import {useDispatch} from  'react-redux'
 import { updateUser } from '../../redux/slides/userSlide'
+import { GoogleLogin } from '@react-oauth/google'
 
 const SignInPage = () => {
   const [isShowPassword, setIsShowPasswword] = useState(false)
@@ -26,6 +27,11 @@ const SignInPage = () => {
   const mutation = useMutationHooks(
     data => UserService.loginUser(data)   
   )
+
+  const mutation_google = useMutationHooks(
+    data => UserService.loginGoogleUser(data)   
+  )
+
   const {data, isPending, isSuccess} = mutation
   console.log('mutation', mutation)
 
@@ -79,6 +85,46 @@ const SignInPage = () => {
     })
   }
 
+  const onGoogleLogin = async (response) => {
+    if (!response.credential) {
+        console.error("No credential received from Google.");
+        return;
+    }
+
+    const decodedGoogle = jwtDecode(response.credential);
+    console.log("decoded:  ", decodedGoogle);
+
+    mutation_google.mutate(
+      {
+          name: decodedGoogle.name,
+          email: decodedGoogle.email,
+          picture: decodedGoogle.picture,
+      },
+      {
+          onSuccess: async (data) => {
+              console.log("Google Login Response:", data);
+
+              if (data?.access_token) {
+                  // Lưu token vào localStorage
+                  localStorage.setItem("access_token", JSON.stringify(data.access_token));
+
+                  // Giải mã token để lấy user ID
+                  const decoded = jwtDecode(data.access_token);
+
+                  if (decoded?.id) {
+                      await handleGetDetailsUser(decoded.id, data.access_token);
+                      navigate("/");
+                      message.success("Đăng nhập thành công!");
+                  }
+              }
+          },
+          onError: (error) => {
+              console.error("Google Login Error:", error);
+          },
+      }
+    );
+  };
+
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent : 'center', background: 'rgba(0,0,0,0.53)', height: "100vh"}}>
@@ -122,6 +168,12 @@ const SignInPage = () => {
           </Loading>
           <p><WrapperTextLight onClick={handleNavigateForgotPasswword}>Quên mật khẩu?</WrapperTextLight></p>
           <p style={{fontSize: '15px'}}>Chưa có tài khoản? <WrapperTextLight onClick={handleNavigateSignup}> Tạo tài khoản</WrapperTextLight></p>
+        
+          <div style={{display:'flex', justifyContent: 'center', alignItems: 'center'}}>
+              <GoogleLogin  size="large"  
+                            onSuccess={onGoogleLogin} onError={()=> {console.log("Login google error")}}/>
+          </div>
+
         </WrapperContainerLeft>
         <WrapperContainerRight>
           <HomeOutlined 

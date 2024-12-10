@@ -67,41 +67,27 @@ const OrderAdmin = () => {
 
   const getColumnSearchProps = (dataIndex) => ({
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
-      <div
-        style={{
-          padding: 8,
-        }}
-        onKeyDown={(e) => e.stopPropagation()}
-      >
+      <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
         <InputComponent
-          // ref={searchInput}
           placeholder={`Search ${dataIndex}`}
           value={selectedKeys[0]}
           onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
-          // onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
-          style={{
-            marginBottom: 8,
-            display: 'block',
-          }}
+          style={{ marginBottom: 8, display: 'block' }}
         />
         <Space>
           <Button
             type="primary"
-            // onClick={() => handleSearch(selectedKeys, confirm, dataIndex)}
             icon={<SearchOutlined />}
             size="small"
-            style={{
-              width: 90,
-            }}
+            style={{ width: 90 }}
+            onClick={confirm}
           >
             Search
           </Button>
           <Button
-            // onClick={() => clearFilters && handleReset(clearFilters)}
             size="small"
-            style={{
-              width: 90,
-            }}
+            style={{ width: 90 }}
+            onClick={() => clearFilters && clearFilters()}
           >
             Reset
           </Button>
@@ -109,64 +95,47 @@ const OrderAdmin = () => {
       </div>
     ),
     filterIcon: (filtered) => (
-      <SearchOutlined
-        style={{
-          color: filtered ? '#1890ff' : undefined,
-        }}
-      />
+      <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
     ),
     onFilter: (value, record) =>
-      record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()),
-    onFilterDropdownOpenChange: (visible) => {
-      if (visible) {
-        // setTimeout(() => searchInput.current?.select(), 100);
-      }
-    },
-    // render: (text) =>
-    //   searchedColumn === dataIndex ? (
-    //     // <Highlighter
-    //     //   highlightStyle={{
-    //     //     backgroundColor: '#ffc069',
-    //     //     padding: 0,
-    //     //   }}
-    //     //   searchWords={[searchText]}
-    //     //   autoEscape
-    //     //   textToHighlight={text ? text.toString() : ''}
-    //     // />
-    //   ) : (
-    //     text
-    //   ),
+      record[dataIndex]?.toString().toLowerCase().includes(value.toLowerCase()),
   });
+  
 
   const columns = [
     {
       title: 'User name',
       dataIndex: 'userName',
       sorter: (a, b) => a.userName.length - b.userName.length,
-      ...getColumnSearchProps('userName')
+      ...getColumnSearchProps('userName'),
+      align: 'center',   
     },
     {
       title: 'Phone',
       dataIndex: 'phone',
       sorter: (a, b) => a.phone.length - b.phone.length,
-      ...getColumnSearchProps('phone')
+      ...getColumnSearchProps('phone'),
+      align: 'center',   
     },
     {
       title: 'Address',
       dataIndex: 'address',
       sorter: (a, b) => a.address.length - b.address.length,
-      ...getColumnSearchProps('address')
+      ...getColumnSearchProps('address'),
+      align: 'center',   
     },
     {
       title: 'Order Date',
       dataIndex: 'createdAt',
       sorter: (a, b) => a.createdAt.length - b.createdAt.length,
       render: (text) => formatDate(text),
-      ...getColumnSearchProps('createdAt')
+      ...getColumnSearchProps('createdAt'),
+      align: 'center',   
     },
     {
       title: 'Paid',
       dataIndex: 'isPaid',
+      align: 'center',   
       sorter: (a, b) => a.isPaid.length - b.isPaid.length,
       render: (text) => (
         <span style={{ color: text === 'Đã thanh toán' ? 'blue' : 'gray' }}>
@@ -178,9 +147,10 @@ const OrderAdmin = () => {
     {
       title: 'Shipped',
       dataIndex: 'isDelivered',
+      align: 'center',   
       sorter: (a, b) => a.isDelivered.length - b.isDelivered.length,
       render: (text) => (
-        <span style={{ color: text === 'Đã giao hàng' ? '#00FF00' : 'gray' }}>
+        <span style={{ color: text === 'Đã giao hàng' ? '#00d400' : 'gray' }}>
           {text}
         </span>
       ),
@@ -189,6 +159,7 @@ const OrderAdmin = () => {
     {
       title: 'Payment method',
       dataIndex: 'paymentMethod',
+      align: 'center',   
       sorter: (a, b) => a.paymentMethod.length - b.paymentMethod.length,
       ...getColumnSearchProps('paymentMethod')
     },
@@ -198,10 +169,12 @@ const OrderAdmin = () => {
       sorter: (a, b) => a.totalPrice - b.totalPrice,
       render: (text) => convertPrice(text),
 
-      ...getColumnSearchProps('totalPrice')
+      ...getColumnSearchProps('totalPrice'),
+      align: 'center',   
     },
     {
       title: 'Actions',
+      align: 'center',   
       dataIndex: 'actions',
       render: (text, record) => (
         <Space size="middle">
@@ -225,10 +198,12 @@ const OrderAdmin = () => {
 
   return (
     <div>
-      <WrapperHeader>Quản lý đơn hàng</WrapperHeader>
-      <div style={{height: 200, width:200}}>
-        <PieChartComponent data={orders?.data} />
-      </div>
+      <WrapperHeader>QUẢN LÝ ĐƠN HÀNG</WrapperHeader>
+      <div style={{ 
+        borderTop: '1px solid #000', 
+        margin: '0px 0', 
+        width: '20%' 
+        }} />
       <div style={{ marginTop: '20px' }}>
         <TableComponent  columns={columns} isPending={isPendingOrders} data={dataTable} />
       </div>

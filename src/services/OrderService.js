@@ -68,3 +68,12 @@ export const markAsPaid = async (id, access_token) => {
   })
   return res.data
 }
+
+export const getTotalOrderPriceByProduct = async (access_token) => {
+  const res = await axiosJWT.get(`${process.env.REACT_APP_API_KEY}/order/total-order-price-by-product`, {
+    headers: {
+      token: `Bearer ${access_token}`,
+    }
+  })
+  return res.data
+}

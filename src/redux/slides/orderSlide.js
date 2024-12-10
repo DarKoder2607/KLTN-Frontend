@@ -23,17 +23,21 @@ export const orderSlide = createSlice({
   initialState,
   reducers: {
     addOrderProduct: (state, action) => {
-      const {orderItem} = action.payload
-      const itemOrder = state?.orderItems?.find((item) => item?.product === orderItem.product)
-      if(itemOrder){
-        if(itemOrder.amount <= itemOrder.countInstock) {
-          itemOrder.amount += orderItem?.amount
-          state.isSucessOrder = true
-          state.isErrorOrder = false
+      const { orderItem } = action.payload;
+      const itemOrder = state.orderItems.find(item => item.product === orderItem.product);
+      
+      if (itemOrder) {
+        if (itemOrder.amount <= itemOrder.countInstock) {
+          itemOrder.amount += orderItem.amount;
+          state.isSucessOrder = true;
+          state.isErrorOrder = false;
         }
-      }else {
-        state.orderItems.push(orderItem)
+      } else {
+        state.orderItems.push(orderItem);
       }
+    
+      // Recalculate the total number of items in the cart
+      state.totalItems = state.orderItems.reduce((total, item) => total + item.amount, 0);
     },
     resetOrder: (state) => {
       state.isSucessOrder = false
@@ -66,23 +70,14 @@ export const orderSlide = createSlice({
       state.orderItemsSlected = itemOrderSeleted;
     },
     removeAllOrderProduct: (state, action) => {
-      const {listChecked} = action.payload
-      
-      const itemOrders = state?.orderItems?.filter((item) => !listChecked.includes(item.product))
-      const itemOrdersSelected = state?.orderItems?.filter((item) => !listChecked.includes(item.product))
-      state.orderItems = itemOrders
-      state.orderItemsSlected = itemOrdersSelected
+      const { listChecked } = action.payload;
 
+      state.orderItems = state.orderItems.filter((item) => !listChecked.includes(item.product));
+      state.orderItemsSlected = state.orderItemsSlected.filter((item) => !listChecked.includes(item.product));
     },
     selectedOrder: (state, action) => {
-      const {listChecked} = action.payload
-      const orderSelected = []
-      state.orderItems.forEach((order) => {
-        if(listChecked.includes(order.product)){
-          orderSelected.push(order)
-        };
-      });
-      state.orderItemsSlected = orderSelected
+      const { listChecked } = action.payload;
+      state.orderItemsSlected = listChecked;  
     },
     removeAllOrderLogout: (state, action) => {
       state.orderItems = []

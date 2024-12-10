@@ -1,64 +1,71 @@
-
 import styled from "styled-components";
-export const Box = styled.div`
-	padding: 5% 2.5%;
-	background: rgb(243, 156, 18);
-	// position: absolute;
-	bottom: 0;
-	width: 95%;
 
-	@media (max-width: 1000px) {
-		// padding: 70px 30px;
-	}
-`
+export const Box = styled.div`
+	padding: 40px 10px;
+	background: #f4f4f4;
+	bottom: 0;
+	width: 100%;
+	border-top: 1px solid #ddd;
+	background: rgb(243, 156, 18);
+	margin-top: auto; 
+`;
 
 export const FooterContainer = styled.div`
 	display: flex;
 	flex-direction: column;
-	justify-content: center;
-	
+	align-items: center;
+	width: 100%;
+	max-width: 1200px;
 	margin: 0 auto;
-	/* background: red; */
-`
+`;
 
 export const Column = styled.div`
 	display: flex;
 	flex-direction: column;
 	text-align: left;
-	margin-left: 60px;
-`
+	margin: 20px 40px;
+	flex: 1;
+`;
 
 export const Row = styled.div`
-	display: grid;
-	grid-template-columns: repeat(
-		auto-fill,
-		minmax(185px, 1fr)
-	);
-	grid-gap: 20px;
-
-	@media (max-width: 1000px) {
-		grid-template-columns: repeat(
-			auto-fill,
-			minmax(200px, 1fr)
-		);
-	}
-`
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+	width: 100%;
+`;
 
 export const FooterLinks = styled.a`
-	color: #fff;
-	margin-bottom: 20px;
-	font-size: 18px;
+	color: #333;
+	margin-bottom: 12px;
+	font-size: 16px;
 	text-decoration: none;
+	&:hover {
+		color: white;
+	}
+`;
+
+export const SocialIcons = styled.a`
+	color: #333;
+	font-size: 20px;
+	margin-right: 15px;
+	transition: color 0.3s;
 
 	&:hover {
-		color: green;
-		transition: 200ms ease-in;
+		color: #f39c12;
 	}
-`
+`;
 
-export const Headings = styled.p`
-	font-size: 24px;
-	color: black;
-	margin-bottom: 40px;
-	font-weight: bold;
-`
+export const Headings = styled.h3`
+	font-size: 20px;
+	color: #333;
+	margin-bottom: 15px;
+	font-weight: 600;
+`;
+
+export const FooterText = styled.p`
+	font-size: 14px;
+	color: #777;
+	margin-bottom: 10px;
+	text-align: left;
+`;
+

@@ -22,11 +22,35 @@ export const getAllProduct = async (search) => {
     return res.data
 }
 
+export const getProductByDeviceType = async (deviceType, limit, page) => {
+  if (deviceType) {
+    const res = await axios.get(
+      `${process.env.REACT_APP_API_KEY}/product/getAllByDeviceType?deviceType=${deviceType}&limit=${limit}&page=${page}`
+    );
+    return res.data;
+  }
+};
+
+export const filterProducts = async (filters, page, limit) => {
+  const query = new URLSearchParams({ ...filters, page, limit });
+  const res = await axios.get(
+    `${process.env.REACT_APP_API_KEY}/product/filter?${query.toString()}`
+  );
+  return res.data;
+};
+
 export const getProductType = async (type, page, limit) => {
     if (type) {
         const res = await axios.get(`${process.env.REACT_APP_API_KEY}/product/getAll?filter=type&filter=${type}&limit=${limit}&page=${page}`)
         return res.data
     }
+}
+
+export const getProductDeviceType = async (deviceType, page, limit) => {
+  if (deviceType) {
+      const res = await axios.get(`${process.env.REACT_APP_API_KEY}/product/getAll?filter=deviceType&filter=${deviceType}&limit=${limit}&page=${page}`)
+      return res.data
+  }
 }
 
 export const createProduct = async (data) => {
@@ -70,3 +94,84 @@ export const getAllTypeProduct = async () => {
     const res = await axios.get(`${process.env.REACT_APP_API_KEY}/product/get-all-type`)
     return res.data
 }
+export const getAllDeviceTypeProduct = async () => {
+  const res = await axios.get(`${process.env.REACT_APP_API_KEY}/product/get-all-device-type`)
+  return res.data
+}
+
+export const getTopSelledProducts = async (limit = 6) => {
+  try {
+    const res = await axios.get(`${process.env.REACT_APP_API_KEY}/product/top-selling?limit=${limit}`);
+    return res.data;
+  } catch (error) {
+    console.error('Error fetching top-selled products:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const getProductReviews = async (productId) => {
+    try {
+      const response = await axios.get(`${process.env.REACT_APP_API_KEY}/product/details/reviews/${productId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching reviews:', error);
+      throw error;
+    }
+  };
+  
+  export const addProductReview = async (productId, reviewData, access_token) => {
+    try {
+      const response = await axiosJWT.post(
+        `${process.env.REACT_APP_API_KEY}/product/details/review/${productId}`,
+        reviewData, 
+        {
+          headers: {
+            token: `Bearer ${access_token}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error adding review:', error);
+      // Check if the error is related to token expiration and handle accordingly
+      if (error.response?.data?.message === 'Invalid or expired token') {
+        // Refresh token logic or prompt for login
+      }
+      throw error;
+    }
+  };
+
+  export const hideProductReview = async (productId, reviewId, accessToken) => {
+    try {
+      const response = await axiosJWT.put(
+        `${process.env.REACT_APP_API_KEY}/product/details/review/hide/${productId}/${reviewId}`,
+        {},
+        {
+          headers: {
+            token: `Bearer ${accessToken}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error hiding review:", error.response?.data || error.message);
+      throw error;
+    }
+  };
+  
+  export const unhideProductReview = async (productId, reviewId, accessToken) => {
+    try {
+      const response = await axiosJWT.put(
+        `${process.env.REACT_APP_API_KEY}/product/details/review/unhide/${productId}/${reviewId}`,
+        {},
+        {
+          headers: {
+            token: `Bearer ${accessToken}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  };

@@ -19,12 +19,15 @@ import { resetUser } from '../../redux/slides/userSlide.js'
 import Loading from '../LoadingComponent/Loading.jsx';
 import { searchProduct } from '../../redux/slides/productSlide.js';
 import { removeAllOrderLogout} from '../../redux/slides/orderSlide.js';
+import { clearsCart, setCarts } from '../../redux/slides/cartSlice.js';
+import { getCart } from '../../services/CartService.js';
 const HeaderComponent = ({isHiddenSearch = false, isHiddenCart =false}) => {
 
     const navigate = useNavigate()
     const user =  useSelector((state) => state.user)
     const dispatch = useDispatch()
-    const order = useSelector((state) => state.order)
+    const cart = useSelector((state) => state.cart); 
+    const totalCartQuantity = cart?.cartItems?.reduce((total, item) => total + item.amount, 0);
     const [search, setSearch] = useState('')
     const [isOpenPopup, setIsOpenPopup] = useState(false)
     const [userName, setUserName] = useState('')
@@ -44,6 +47,20 @@ const HeaderComponent = ({isHiddenSearch = false, isHiddenCart =false}) => {
         setLoading(false)
         navigate('/')
     }
+
+    useEffect(() => {
+        if (user?.access_token) {
+          const fetchCart = async () => {
+            try {
+              const response = await getCart(user.access_token); 
+              dispatch(setCarts(response.cartItems));  
+            } catch (error) {
+              console.error('Lỗi khi lấy giỏ hàng:', error);
+            }
+          };
+          fetchCart();
+        }
+      }, [user?.access_token, dispatch]); 
 
     useEffect(() => {
         setLoading(true)
@@ -88,6 +105,7 @@ const HeaderComponent = ({isHiddenSearch = false, isHiddenCart =false}) => {
     const handleConfirmLogout = () => {
         handleLogout()
         setIsLogoutModalVisible(false)
+        dispatch(clearsCart())
         message.success("Đăng xuất thành công ! ")
     }
 
@@ -113,7 +131,6 @@ const HeaderComponent = ({isHiddenSearch = false, isHiddenCart =false}) => {
                     <ButtonInputSearch
                         bordered="false"
                         placeholder="Nhập vào tên thiết bị bạn muốn tìm kiếm..."
-                        textbutton="Tìm kiếm"
                         size="large"
                         onChange={onSearch}
                     />
@@ -154,7 +171,7 @@ const HeaderComponent = ({isHiddenSearch = false, isHiddenCart =false}) => {
                     </Loading>
                     {!isHiddenCart && (
                         <div onClick={() => navigate('/order')} style={{cursor : 'pointer'}}>
-                            <Badge count={order?.orderItems?.length} size='small'>
+                            <Badge count={totalCartQuantity} size='small'>
                                 <ShoppingCartOutlined style={{fontSize: '30px', color: '#fff'}} />
                             </Badge>
                             <WrapperTextHeaderSmall>Giỏ hàng</WrapperTextHeaderSmall>

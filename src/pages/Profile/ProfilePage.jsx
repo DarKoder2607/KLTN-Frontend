@@ -10,9 +10,10 @@ import { useMutationHooks } from '../../hooks/useMutationHook'
 import Loading from '../../components/LoadingComponent/Loading'
 import * as message from '../../components/Message/Message'
 import { updateUser } from '../../redux/slides/userSlide'
-import { Button, Upload } from 'antd'
+import { Button } from 'antd'
 import { UploadOutlined } from '@ant-design/icons'
-import { getBase64 } from '../../utils'
+
+import axios from 'axios';
 
 const ProfilePage = () => {
     const user = useSelector((state) => state.user)
@@ -21,7 +22,9 @@ const ProfilePage = () => {
     const [phone, setPhone] = useState('')
     const [address, setAddress] = useState('')
     const [city, setCity] = useState('')
+    const rewardPoints = useSelector((state) => state.user.rewardPoints)
     const [avatar, setAvatar] = useState('')
+   
     const mutation = useMutationHooks(
         (data) => {
             const { id, access_token, ...rests } = data
@@ -52,6 +55,12 @@ const ProfilePage = () => {
         }
     }, [isSuccess, isError])
 
+    useEffect(() => {
+        if (user?.id && user?.access_token) {
+            handleGetDetailsUser(user?.id, user?.access_token)
+        }
+    }, [user?.id, user?.access_token]) 
+
     const handleGetDetailsUser = async (id, token) => {
         const res = await UserService.getDetailsUser(id, token)
         dispatch(updateUser({ ...res?.data, access_token: token }))
@@ -79,20 +88,56 @@ const ProfilePage = () => {
         setCity(value)
     }
 
-    const handleOnchangeAvatar = async ({fileList}) => {
-        const file = fileList[0]
-        if (!file.url && !file.preview) {
-            file.preview = await getBase64(file.originFileObj );
+    // const handleOnchangeAvatar = async ({fileList}) => {
+    //     const file = fileList[0]
+    //     if (!file.url && !file.preview) {
+    //         file.preview = await getBase64(file.originFileObj );
+    //     }
+    //     setAvatar(file.preview)
+    // }
+
+    const uploadToCloudinary = async (file) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('upload_preset', 'gwbmydmw');   
+        formData.append('cloud_name', 'dleio5sat');  
+      
+        try {
+          const response = await axios.post(
+            'https://api.cloudinary.com/v1_1/dleio5sat/image/upload', 
+            formData,
+            {
+              headers: { 'Content-Type': 'multipart/form-data' }
+            }
+          );
+          return response.data.secure_url;  
+        } catch (error) {
+          console.error("Error uploading image to Cloudinary", error);
+          throw error;
         }
-        setAvatar(file.preview)
-    }
+      };
+
+      const handleOnchangeAvatar = async ({ fileList }) => {
+        const file = fileList[0];
+      
+        if (file.originFileObj) {
+          try {
+            // Tải ảnh lên Cloudinary và lấy URL
+            const imageUrl = await uploadToCloudinary(file.originFileObj);
+            setAvatar(imageUrl); // Lưu URL ảnh từ Cloudinary vào state
+          } catch (error) {
+            console.error("Failed to upload avatar image", error);
+          }
+        }
+      };
+      
 
     const handleUpdate = () => {
         mutation.mutate({ id: user?.id, email, name, phone, address, city, avatar, access_token: user?.access_token })
 
     }
     return (
-        <div style={{ width: '1270px', margin: '0 auto', height: '500px' }}>
+        <div style={{ width: '1270px', margin: '0 auto', height: '500px', minHeight: '80vh', paddingBottom: '0px' }}>
             <WrapperHeader>Thông tin người dùng</WrapperHeader>
             <Loading isPending={isPending}>
                 <WrapperContentProfile>
@@ -202,6 +247,18 @@ const ProfilePage = () => {
                             textbutton={'Cập nhật'}
                             styleTextButton={{ color: 'rgb(26, 148, 255)', fontSize: '15px', fontWeight: '700' }}
                         ></ButtonComponent>
+                    </WrapperInput>
+
+                    <WrapperInput>
+                    <WrapperLabel htmlFor="rewardPoints">Điểm thưởng</WrapperLabel>
+                    <div style={{
+                        fontSize: '18px',
+                        fontWeight: 'bold',
+                        color: '#4caf50',
+                        marginTop: '10px',
+                        }}>
+                        {rewardPoints} điểm
+                    </div>
                     </WrapperInput>
                 </WrapperContentProfile>
             </Loading>

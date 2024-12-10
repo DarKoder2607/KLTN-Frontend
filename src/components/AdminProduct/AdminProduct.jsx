@@ -15,6 +15,7 @@ import { useQuery } from '@tanstack/react-query'
 import DrawerComponent from '../DrawerComponent/DrawerComponent'
 import { useSelector } from 'react-redux'
 import ModalComponent from '../ModalComponent/ModalComponent'
+import axios from 'axios';
 
 const AdminProduct = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -24,85 +25,176 @@ const AdminProduct = () => {
   const [isModalOpenDelete, setIsModalOpenDelete] = useState(false)
   const user = useSelector((state) => state?.user) 
   const searchInput = useRef(null);
-  const inittial = () => ({
-    name: '',
-    price: '',
-    screen: '',
-    os: '',
-    camera: '',
-    cameraFront: '',
-    cpu: '',
-    ram: '',
-    rom: '',
-    microUSB: '',
-    battery: '',
-    rating: '',
-    image: '',
-    type: '',
-    countInStock: '',
-    newType: '',
-    discount: '',
-    relatedImages: [],
-  })
-  const [stateProduct, setStateProduct] = useState(inittial())
+  const inittial = (deviceType = null) => {
+    const baseFields = {
+      name: '',
+      price: '',
+      type: '',
+      countInStock: '',
+      newType: '',
+      discount: '',
+      relatedImages: [],
+      image: '',
+      rating: '',
+      deviceType: deviceType || '',
+    };
+  
+    const specsTemplate = {
+      phone: {
+        screen: '',
+        os: '',
+        camera: '',
+        cameraFront: '',
+        cpu: '',
+        ram: '',
+        rom: '',
+        microUSB: '',
+        battery: '',
+      },
+      watch: {
+        screen: '',
+        os: '',
+        battery: '',
+        bluetooth: '',
+        sensors: '',
+        size: '',
+        feature: '',
+        strap: '',
+        material: '',
+      },
+      laptop: {
+        screen: '',
+        os: '',
+        cpu: '',
+        ram: '',
+        rom: '',
+        battery: '',
+        ports: '',
+        chipCard: '',
+        sound: '',
+        design: '',
+        feature: '',
+      },
+      tablet: {
+        screen: '',
+        os: '',
+        camera: '',
+        cpu: '',
+        ram: '',
+        rom: '',
+        battery: '',
+        processorGraphics: '',
+        design: '',
+        ports: '',
+        feature: '',
+      },
+      headphone: {
+        bluetooth: '',
+        battery: '',
+        length: '',
+        noiseCancellation: false,
+        ports: '',
+        scope: '',
+        material: '',
+        design: '',
+        feature: '',
+      },
+      loudspeaker: {
+        bluetooth: '',
+        battery: '',
+        waterproof: false,
+        design: '',
+        connectControl: '',
+        audio: '',
+      },
+    };
+  
+    // Thêm specs dựa trên deviceType
+    return {
+      ...baseFields,
+      ...(deviceType ? specsTemplate[deviceType] : {}),
+    };
+  };
+  
+  const [stateProduct, setStateProduct] = useState(inittial());
+
   const [stateProductDetails, setStateProductDetails] = useState(inittial())
 
   const [form] = Form.useForm();
 
-  const mutation = useMutationHooks(
-    (data) => {
-      const { 
-        name,
-        price,
-        screen,
-        os,
-        camera,
-        cameraFront,
-        cpu,
-        ram,
-        rom,
-        microUSB,
-        battery,
-        rating,
-        image,
-        type,
-        countInStock,
-        discount,
-        relatedImages } = data
-      const res = ProductService.createProduct({
-        name,
-        price,
-        screen,
-        os,
-        camera,
-        cameraFront,
-        cpu,
-        ram,
-        rom,
-        microUSB,
-        battery,
-        rating,
-        image,
-        type,
-        countInStock,
-        discount,
-        relatedImages
-      })
-      return res
-    }
-  )
+  const mutation = useMutationHooks((data) => {
+    const {
+      name,
+      price,
+      type,
+      deviceType,
+      countInStock,
+      discount,
+      relatedImages,
+      image,
+      rating,
+      ...specs // Tách phần thông số kỹ thuật động
+    } = data;
+
+    // Xác định tên của trường specs dựa trên deviceType
+    const specsField = `${deviceType}Specs`;
+
+    // Chuẩn bị payload
+    const payload = {
+      name,
+      price,
+      type,
+      deviceType,
+      countInStock,
+      discount,
+      relatedImages,
+      image,
+      rating,
+      [specsField]: specs, // Gán thông số kỹ thuật vào đúng field
+    };
+
+    // Gọi API để tạo sản phẩm
+    return ProductService.createProduct(payload);
+  });
+
   const mutationUpdate = useMutationHooks(
     (data) => {
-      const { id,
-        token,
-        ...rests } = data
-      const res = ProductService.updateProduct(
+      const { id, token, 
+        name,
+        price,
+        type,
+        deviceType,
+        countInStock,
+        discount,
+        relatedImages,
+        image,
+        rating,
+        ...specs} = data;
+      
+      // Xác định tên trường specs dựa trên deviceType
+      const specsField = `${deviceType}Specs`;
+  
+      // Chuyển phần specs vào đúng trường trong payload
+      const payload = {
         id,
         token,
-        { ...rests , relatedImages: data.relatedImages})
-      return res
-    },
-  )
+        name,
+        price,
+        type,
+        deviceType,
+        countInStock,
+        discount,
+        image,
+        rating,
+        [specsField]: specs, // Gán thông số kỹ thuật vào đúng field dựa trên deviceType
+        relatedImages: data.relatedImages,
+      };
+      
+      const res = ProductService.updateProduct(id, token, payload);
+      return res;
+    }
+  );
+  
 
   const mutationDeleted = useMutationHooks(
     (data) => {
@@ -133,32 +225,47 @@ const AdminProduct = () => {
   }
 
   const fetchGetDetailsProduct = async (rowSelected) => {
-    const res = await ProductService.getDetailsProduct(rowSelected)
-    if (res?.data) {
-      setStateProductDetails({
-        name: res?.data?.name,
-        price: res?.data?.price,
-    
-        screen: res?.data?.screen,
-        os: res?.data?.os,
-        camera: res?.data?.camera,
-        cameraFront: res?.data?.cameraFront,
-        cpu: res?.data?.cpu,
-        ram: res?.data?.ram,
-        rom: res?.data?.rom,
-        microUSB: res?.data?.microUSB,
-        battery: res?.data?.battery,
-
-        rating: res?.data?.rating,
-        image: res?.data?.image,
-        type: res?.data?.type,
-        countInStock: res?.data?.countInStock,
-        discount: res?.data?.discount,
-        relatedImages: res?.data?.relatedImages
-      })
+    setisPendingUpdate(true);
+  
+    try {
+      const res = await ProductService.getDetailsProduct(rowSelected);
+  
+      if (res?.data) {
+        const {
+          name,
+          price,
+          type,
+          deviceType,
+          countInStock,
+          discount,
+          relatedImages,
+          image,
+          rating,
+          ...specs
+        } = res.data;
+  
+        // Lấy thông số kỹ thuật đúng loại thiết bị
+        const deviceSpecs = specs[`${deviceType}Specs`] || {};
+  
+        setStateProductDetails({
+          name,
+          price,
+          type,
+          deviceType,
+          countInStock,
+          discount,
+          relatedImages,
+          image,
+          rating,
+          ...deviceSpecs, // Gộp thông số kỹ thuật vào state
+        });
+      }
+    } catch (error) {
+      console.error("Failed to fetch product details:", error);
+    } finally {
+      setisPendingUpdate(false);
     }
-    setisPendingUpdate(false)
-  }
+  };
 
   useEffect(() => {
     if(!isModalOpen) {
@@ -351,6 +458,19 @@ const AdminProduct = () => {
       ...getColumnSearchProps('type')
     },
     {
+      title: 'Device Type',
+      dataIndex: 'deviceType',
+      filters: [
+        { text: 'Phone', value: 'phone' },
+        { text: 'Tablet', value: 'tablet' },
+        { text: 'Headphone', value: 'headphone' },
+        { text: 'Watch', value: 'watch' },
+        { text: 'Loudspeaker', value: 'loudspeaker' },
+        { text: 'Laptop', value: 'laptop' },
+      ],
+      onFilter: (value, record) => record.deviceType === value,
+    },
+    {
       title: 'Action',
       dataIndex: 'action',
       render: renderAction
@@ -388,9 +508,19 @@ const AdminProduct = () => {
 
   const handleCloseDrawer = () => {
     setIsOpenDrawer(false);
+  
+    // Reset stateProductDetails về giá trị mặc định
     setStateProductDetails({
       name: '',
       price: '',
+      deviceType: '',
+      type: '',
+      countInStock: '',
+      discount: '',
+      rating: '',
+      image: '',
+      relatedImages: [],
+      // Reset tất cả specs
       screen: '',
       os: '',
       camera: '',
@@ -400,15 +530,27 @@ const AdminProduct = () => {
       rom: '',
       microUSB: '',
       battery: '',
-      rating: '',
-      image: '',
-      type: '',
-      countInStock: '',
-      discount: '',
-      relatedImages: [],
-
-    })
-    form.resetFields()
+      bluetooth: '',
+      ports: '',
+      design: '',
+      sensors: '',
+      feature: '',
+      material: '',
+      size: '',
+      waterproof: '',
+      noiseCancellation: '',
+      strap: '',
+      chipCard:'',
+      sound:'',
+      connectControl:'',
+      audio:'',
+      scope:'',
+      processorGraphics: '',  
+      length: ''
+    });
+  
+    // Reset các field trong form
+    form.resetFields();
   };
 
   useEffect(() => {
@@ -433,56 +575,163 @@ const AdminProduct = () => {
     })
   }
 
-  const handleCancel = () => {
-    setIsModalOpen(false);
-    setStateProduct({
-      name: '',
-      price: '',
-      screen: '',
-      os: '',
-      camera: '',
-      cameraFront: '',
-      cpu: '',
-      ram: '',
-      rom: '',
-      microUSB: '',
-      battery: '',
-      rating: '',
-      image: '',
-      type: '',
-      countInStock: '',
-      discount: '',
-      relatedImages: [],
-    })
-    form.resetFields()
-  };
+const handleCancel = () => {
+  setIsModalOpen(false);
 
-  const onFinish = () => {
+  // Reset stateProduct về giá trị mặc định
+  setStateProduct({
+    name: '',
+    price: '',
+    deviceType: '',
+    type: '',
+    countInStock: '',
+    discount: '',
+    rating: '',
+    image: '',
+    relatedImages: [],
+    // Reset tất cả thông số kỹ thuật
+    screen: '',
+    os: '',
+    camera: '',
+    cameraFront: '',
+    cpu: '',
+    ram: '',
+    rom: '',
+    microUSB: '',
+    battery: '',
+    bluetooth: '',
+    ports: '',
+    design: '',
+    sensors: '',
+    feature: '',
+    material: '',
+    size: '',
+    waterproof: '',
+    noiseCancellation: '',
+    strap: '',
+    chipCard: '',
+    sound: '',
+    connectControl: '',
+    audio: '',
+    scope: '',
+    processorGraphics: '',  
+    length: ''
+  });
+
+  // Reset các field trong form
+  form.resetFields();
+};
+
+const onFinish = () => {
+    // Khởi tạo params chung
     const params = {
       name: stateProduct.name,
       price: stateProduct.price,
-      screen: stateProduct.screen,
-      os: stateProduct.os,
-      camera: stateProduct.camera,
-      cameraFront: stateProduct.cameraFront,
-      cpu: stateProduct.cpu,
-      ram: stateProduct.ram,
-      rom: stateProduct.rom,
-      microUSB: stateProduct.microUSB,
-      battery: stateProduct.battery,
-      rating: stateProduct.rating,
       image: stateProduct.image,
       type: stateProduct.type === 'add_type' ? stateProduct.newType : stateProduct.type,
       countInStock: stateProduct.countInStock,
       discount: stateProduct.discount,
-      relatedImages: stateProduct.relatedImages
+      relatedImages: stateProduct.relatedImages,
+      rating: stateProduct.rating,
+      deviceType: stateProduct.deviceType,
+    
+    };
+
+    console.log("params before mutation:", params);
+
+    // Thêm thông số kỹ thuật theo loại thiết bị
+ // Dynamically append specs based on deviceType
+    switch (stateProduct.deviceType) {
+      case 'phone':
+        params.screen = stateProduct.screen;
+        params.os = stateProduct.os;
+        params.camera = stateProduct.camera;
+        params.cameraFront = stateProduct.cameraFront;
+        params.cpu = stateProduct.cpu;
+        params.ram = stateProduct.ram;
+        params.rom = stateProduct.rom;
+        params.microUSB = stateProduct.microUSB;
+        params.battery = stateProduct.battery;
+        break;
+
+      case 'watch':
+        params.screen = stateProduct.screen;
+        params.os = stateProduct.os;
+        params.battery = stateProduct.battery;
+        params.bluetooth = stateProduct.bluetooth;
+        params.sensors = stateProduct.sensors;
+        params.size = stateProduct.size;
+        params.feature = stateProduct.feature;
+        params.strap = stateProduct.strap;
+        params.material = stateProduct.material;
+        break;
+
+      case 'laptop':
+        params.screen = stateProduct.screen;
+        params.os = stateProduct.os;
+        params.cpu = stateProduct.cpu;
+        params.ram = stateProduct.ram;
+        params.rom = stateProduct.rom;
+        params.battery = stateProduct.battery;
+        params.ports = stateProduct.ports;
+        params.chipCard = stateProduct.chipCard;
+        params.sound = stateProduct.sound;
+        params.design = stateProduct.design;
+        params.feature = stateProduct.feature;
+        break;
+
+      case 'tablet':
+        params.screen = stateProduct.screen;
+        params.os = stateProduct.os;
+        params.camera = stateProduct.camera;
+        params.cpu = stateProduct.cpu;
+        params.ram = stateProduct.ram;
+        params.rom = stateProduct.rom;
+        params.battery = stateProduct.battery;
+        params.processorGraphics = stateProduct.processorGraphics;
+        params.design = stateProduct.design;
+        params.ports = stateProduct.ports;
+        params.feature = stateProduct.feature;
+        break;
+
+      case 'headphone':
+        params.bluetooth = stateProduct.bluetooth;
+        params.battery = stateProduct.battery;
+        params.length = stateProduct.length;
+        params.noiseCancellation = stateProduct.noiseCancellation;
+        params.ports = stateProduct.ports;
+        params.scope = stateProduct.scope;
+        params.material = stateProduct.material;
+        params.design = stateProduct.design;
+        params.feature = stateProduct.feature;
+        break;
+
+      case 'loudspeaker':
+        params.bluetooth = stateProduct.bluetooth;
+        params.battery = stateProduct.battery;
+        params.waterproof = stateProduct.waterproof;
+        params.design = stateProduct.design;
+        params.connectControl = stateProduct.connectControl;
+        params.audio = stateProduct.audio;
+        break;
+        
+      default:
+        console.warn('Unsupported deviceType');
+        break;
     }
+
+   
+
+    // Gọi mutate với params
     mutation.mutate(params, {
       onSettled: () => {
-        queryProduct.refetch()
-      }
-    })
-  }
+        queryProduct.refetch();
+      },
+    });
+
+    
+
+  };
 
   const handleOnchange = (e) => {
     setStateProduct({
@@ -496,59 +745,158 @@ const AdminProduct = () => {
       ...stateProductDetails,
       [e.target.name]: e.target.value
     })
+    console.log("Updating with fields:", stateProductDetails);
   }
+
+  // const handleOnchangeAvatar = async ({ fileList }) => {
+  //   const file = fileList[0]
+  //   if (!file.url && !file.preview) {
+  //     file.preview = await getBase64(file.originFileObj);
+  //   }
+  //   setStateProduct({
+  //     ...stateProduct,
+  //     image: file.preview
+  //   })
+  // }
+
+  // const handleOnchangeAvatarDetails = async ({ fileList }) => {
+  //   const file = fileList[0]
+  //   if (!file.url && !file.preview) {
+  //     file.preview = await getBase64(file.originFileObj);
+  //   }
+  //   setStateProductDetails({
+  //     ...stateProductDetails,
+  //     image: file.preview
+  //   })
+  // }
+
+  // const handleOnchangeRelatedImages = async ({ fileList }) => {
+  //   const relatedImages = await Promise.all(
+  //     fileList.map(async (file) => {
+  //       if (!file.url && !file.preview) {
+  //         file.preview = await getBase64(file.originFileObj);
+  //       }
+  //       return file.preview;
+  //     })
+  //   );
+  //   setStateProduct({
+  //     ...stateProduct,
+  //     relatedImages: relatedImages
+  //   });
+  // };
+  
+  // const handleOnchangeRelatedImagesDetails = async ({ fileList }) => {
+  //   const relatedImages = await Promise.all(
+  //     fileList.map(async (file) => {
+  //       if (!file.url && !file.preview) {
+  //         file.preview = await getBase64(file.originFileObj);
+  //       }
+  //       return file.preview;
+  //     })
+  //   );
+  //   setStateProductDetails({
+  //     ...stateProductDetails,
+  //     relatedImages: relatedImages
+  //   });
+  // };
+
+  const uploadToCloudinary = async (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', 'gwbmydmw');   
+    formData.append('cloud_name', 'dleio5sat');  
+  
+    try {
+      const response = await axios.post(
+        'https://api.cloudinary.com/v1_1/dleio5sat/image/upload', 
+        formData,
+        {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        }
+      );
+      return response.data.secure_url;  
+    } catch (error) {
+      console.error("Error uploading image to Cloudinary", error);
+      throw error;
+    }
+  };
 
   const handleOnchangeAvatar = async ({ fileList }) => {
-    const file = fileList[0]
-    if (!file.url && !file.preview) {
-      file.preview = await getBase64(file.originFileObj);
+    const file = fileList[0];
+    if (file.originFileObj) {
+      try {
+       
+        const imageUrl = await uploadToCloudinary(file.originFileObj);
+        setStateProduct({
+          ...stateProduct,
+          image: imageUrl  
+        });
+      } catch (error) {
+        console.error("Failed to upload image", error);
+      }
     }
-    setStateProduct({
-      ...stateProduct,
-      image: file.preview
-    })
-  }
-
+  };
+  
   const handleOnchangeAvatarDetails = async ({ fileList }) => {
-    const file = fileList[0]
-    if (!file.url && !file.preview) {
-      file.preview = await getBase64(file.originFileObj);
+    const file = fileList[0];
+    if (file.originFileObj) {
+      try {
+        
+        const imageUrl = await uploadToCloudinary(file.originFileObj);
+        setStateProductDetails({
+          ...stateProductDetails,
+          image: imageUrl  
+        });
+      } catch (error) {
+        console.error("Failed to upload image", error);
+      }
     }
-    setStateProductDetails({
-      ...stateProductDetails,
-      image: file.preview
-    })
-  }
-
+  };
+  
   const handleOnchangeRelatedImages = async ({ fileList }) => {
     const relatedImages = await Promise.all(
       fileList.map(async (file) => {
-        if (!file.url && !file.preview) {
-          file.preview = await getBase64(file.originFileObj);
+        if (file.originFileObj) {
+          try {
+    
+            const imageUrl = await uploadToCloudinary(file.originFileObj);
+            return imageUrl;
+          } catch (error) {
+            console.error("Failed to upload related image", error);
+            return null;
+          }
         }
-        return file.preview;
+        return null;
       })
     );
     setStateProduct({
       ...stateProduct,
-      relatedImages: relatedImages
+      relatedImages: relatedImages.filter(url => url !== null) 
     });
   };
   
   const handleOnchangeRelatedImagesDetails = async ({ fileList }) => {
     const relatedImages = await Promise.all(
       fileList.map(async (file) => {
-        if (!file.url && !file.preview) {
-          file.preview = await getBase64(file.originFileObj);
+        if (file.originFileObj) {
+          try {
+            
+            const imageUrl = await uploadToCloudinary(file.originFileObj);
+            return imageUrl;
+          } catch (error) {
+            console.error("Failed to upload related image", error);
+            return null;
+          }
         }
-        return file.preview;
+        return null;
       })
     );
     setStateProductDetails({
       ...stateProductDetails,
-      relatedImages: relatedImages
+      relatedImages: relatedImages.filter(url => url !== null)  
     });
   };
+  
 
   const onUpdateProduct = () => {
     mutationUpdate.mutate({ id: rowSelected, token: user?.access_token, ...stateProductDetails }, {
@@ -565,9 +913,82 @@ const AdminProduct = () => {
       })
   }
 
+  const renderSpecsForm = (deviceType) => {
+    const specsFields = {
+      phone: ['screen', 'os', 'camera', 'cameraFront', 'cpu', 'ram', 'rom', 'microUSB', 'battery'],
+      watch: ['screen', 'os', 'battery', 'bluetooth', 'sensors', 'size', 'feature', 'strap', 'material'],
+      laptop: ['screen', 'os', 'cpu', 'ram', 'rom', 'battery', 'ports', 'chipCard', 'sound', 'design', 'feature'],
+      tablet: ['screen', 'os', 'camera', 'cpu', 'ram', 'rom', 'battery', 'processorGraphics', 'design', 'ports', 'feature'],
+      headphone: ['bluetooth', 'battery', 'length', 'noiseCancellation', 'ports', 'scope', 'material', 'design', 'feature'],
+      loudspeaker: ['bluetooth', 'battery', 'waterproof', 'design', 'connectControl', 'audio'],
+    };
+  
+    const fields = specsFields[deviceType] || [];
+    
+    return fields.map((field) => (
+      <Form.Item
+        key={field}
+        label={field.charAt(0).toUpperCase() + field.slice(1)}
+        name={field}
+        rules={[{ required: true, message: `Please input your ${field}!` }]}
+      >
+        <InputComponent value={stateProduct[field]} onChange={handleOnchange} name={field} />
+      </Form.Item>
+    ));
+  };
+
+  const renderSpecsFormUpdate = (deviceType) => {
+    const specsFields = {
+      phone: ['screen', 'os', 'camera', 'cameraFront', 'cpu', 'ram', 'rom', 'microUSB', 'battery'],
+      watch: ['screen', 'os', 'battery', 'bluetooth', 'sensors', 'size', 'feature', 'strap', 'material'],
+      laptop: ['screen', 'os', 'cpu', 'ram', 'rom', 'battery', 'ports', 'chipCard', 'sound', 'design', 'feature'],
+      tablet: ['screen', 'os', 'camera', 'cpu', 'ram', 'rom', 'battery', 'processorGraphics', 'design', 'ports', 'feature'],
+      headphone: ['bluetooth', 'battery', 'length', 'noiseCancellation', 'ports', 'scope', 'material', 'design', 'feature'],
+      loudspeaker: ['bluetooth', 'battery', 'waterproof', 'design', 'connectControl', 'audio'],
+    };
+  
+    const fields = specsFields[deviceType] || [];
+  
+    return fields.map((field) => (
+      <Form.Item
+        key={field}
+        label={field.charAt(0).toUpperCase() + field.slice(1)}
+        name={field}
+        rules={[{ required: true, message: `Please input your ${field}!` }]}
+      >
+        <InputComponent
+          value={stateProductDetails[field]}
+          onChange={handleOnchangeDetails}
+          name={field}
+        />
+      </Form.Item>
+    ));
+  };
+  
+
+  const handleChangeDeviceType = (value) => {
+    setStateProduct((prev) => ({
+      ...prev,
+      deviceType: value,
+    }));
+  };
+
+
+  const handleOnchangeDetailsDeviceType = (value) => {
+    setStateProductDetails((prev) => ({
+      ...prev,
+      deviceType: value,
+    }));
+  };
+  
   return (
     <div>
-      <WrapperHeader>Quản lý sản phẩm</WrapperHeader>
+      <WrapperHeader>QUẢN LÝ SẢN PHẨM</WrapperHeader>
+      <div style={{ 
+        borderTop: '1px solid #000', 
+        margin: '0px 0', 
+        width: '20%' 
+        }} />
       <div style={{ marginTop: '10px' }}>
         <Button style={{ height: '150px', width: '150px', borderRadius: '6px', borderStyle: 'dashed' }} onClick={() => setIsModalOpen(true)}><PlusOutlined style={{ fontSize: '60px' }} /></Button>
       </div>
@@ -598,6 +1019,29 @@ const AdminProduct = () => {
             >
               <InputComponent value={stateProduct['name']} onChange={handleOnchange} name="name" />
             </Form.Item>
+
+            <Form.Item
+              label="Device Type"
+              name="deviceType"
+              rules={[{ required: true, message: 'Please select the device type!' }]}
+            >
+              <Select
+                name="deviceType"
+                value={stateProduct.deviceType}
+                onChange={handleChangeDeviceType}
+                options={[
+                  { value: 'phone', label: 'Phone' },
+                  { value: 'watch', label: 'Watch' },
+                  { value: 'laptop', label: 'Laptop' },
+                  { value: 'tablet', label: 'Tablet' },
+                  { value: 'headphone', label: 'Headphone' },
+                  { value: 'loudspeaker', label: 'Loudspeaker' },
+                ]}
+              />
+            </Form.Item>
+
+            {/* Render dynamic form fields based on deviceType */}
+            {stateProduct.deviceType && renderSpecsForm(stateProduct.deviceType)}
 
             <Form.Item
               label="Type"
@@ -635,78 +1079,6 @@ const AdminProduct = () => {
               rules={[{ required: true, message: 'Please input your count price!' }]}
             >
               <InputComponent value={stateProduct.price} onChange={handleOnchange} name="price" />
-            </Form.Item>
-            <Form.Item
-              label="Screen"
-              name="screen"
-              rules={[{ required: true, message: 'Please input your count screen!' }]}
-            >
-              <InputComponent value={stateProduct.screen} onChange={handleOnchange} name="screen" />
-            </Form.Item>
-            <Form.Item
-              label="Os"
-              name="os"
-              rules={[{ required: true, message: 'Please input your count OS!' }]}
-            >
-              <InputComponent value={stateProduct.os} onChange={handleOnchange} name="os" />
-            </Form.Item>
-            <Form.Item
-              label="Camera"
-              name="camera"
-              rules={[{ required: true, message: 'Please input your count camera!' }]}
-            >
-              <InputComponent value={stateProduct.camera} onChange={handleOnchange} name="camera" />
-            </Form.Item>
-            <Form.Item
-              label="CameraFront"
-              name="cameraFront"
-              rules={[{ required: true, message: 'Please input your count cameraFront!' }]}
-            >
-              <InputComponent value={stateProduct.cameraFront} onChange={handleOnchange} name="cameraFront" />
-            </Form.Item>
-            <Form.Item
-              label="Cpu"
-              name="cpu"
-              rules={[{ required: true, message: 'Please input your count CPU!' }]}
-            >
-              <InputComponent value={stateProduct.cpu} onChange={handleOnchange} name="cpu" />
-            </Form.Item>
-            <Form.Item
-              label="Ram"
-              name="ram"
-              rules={[{ required: true, message: 'Please input your count RAM!' }]}
-            >
-              <InputComponent value={stateProduct.ram} onChange={handleOnchange} name="ram" />
-            </Form.Item>
-            <Form.Item
-              label="Rom"
-              name="rom"
-              rules={[{ required: true, message: 'Please input your count ROM!' }]}
-            >
-              <InputComponent value={stateProduct.rom} onChange={handleOnchange} name="rom" />
-            </Form.Item>
-            <Form.Item
-              label="MicroUSB"
-              name="microUSB"
-              rules={[{ required: true, message: 'Please input your count MicroUSB!' }]}
-            >
-              <InputComponent value={stateProduct.microUSB} onChange={handleOnchange} name="microUSB" />
-            </Form.Item>
-            <Form.Item
-              label="Battery"
-              name="battery"
-              rules={[{ required: true, message: 'Please input your count Battery!' }]}
-            >
-              <InputComponent value={stateProduct.battery} onChange={handleOnchange} name="battery" />
-            </Form.Item>
-
-
-            <Form.Item
-              label="Rating"
-              name="rating"
-              rules={[{ required: true, message: 'Please input your count rating!' }]}
-            >
-              <InputComponent value={stateProduct.rating} onChange={handleOnchange} name="rating" />
             </Form.Item>
             <Form.Item
               label="Discount"
@@ -806,76 +1178,34 @@ const AdminProduct = () => {
             </Form.Item>
 
             <Form.Item
-              label="Screen"
-              name="screen"
-              rules={[{ required: true, message: 'Please input your count screen!' }]}
+              label="Device Type"
+              name="deviceType"
+              rules={[{ required: true, message: 'Please select the device type!' }]}
             >
-              <InputComponent value={stateProductDetails.screen} onChange={handleOnchangeDetails} name="screen" />
-            </Form.Item>
-            <Form.Item
-              label="Os"
-              name="os"
-              rules={[{ required: true, message: 'Please input your count OS!' }]}
-            >
-              <InputComponent value={stateProductDetails.os} onChange={handleOnchangeDetails} name="os" />
-            </Form.Item>
-            <Form.Item
-              label="Camera"
-              name="camera"
-              rules={[{ required: true, message: 'Please input your count camera!' }]}
-            >
-              <InputComponent value={stateProductDetails.camera} onChange={handleOnchangeDetails} name="camera" />
-            </Form.Item>
-            <Form.Item
-              label="CameraFront"
-              name="cameraFront"
-              rules={[{ required: true, message: 'Please input your count cameraFront!' }]}
-            >
-              <InputComponent value={stateProductDetails.cameraFront} onChange={handleOnchangeDetails} name="cameraFront" />
-            </Form.Item>
-            <Form.Item
-              label="Cpu"
-              name="cpu"
-              rules={[{ required: true, message: 'Please input your count CPU!' }]}
-            >
-              <InputComponent value={stateProductDetails.cpu} onChange={handleOnchangeDetails} name="cpu" />
-            </Form.Item>
-            <Form.Item
-              label="Ram"
-              name="ram"
-              rules={[{ required: true, message: 'Please input your count RAM!' }]}
-            >
-              <InputComponent value={stateProductDetails.ram} onChange={handleOnchangeDetails} name="ram" />
-            </Form.Item>
-            <Form.Item
-              label="Rom"
-              name="rom"
-              rules={[{ required: true, message: 'Please input your count ROM!' }]}
-            >
-              <InputComponent value={stateProductDetails.rom} onChange={handleOnchangeDetails} name="rom" />
-            </Form.Item>
-            <Form.Item
-              label="MicroUSB"
-              name="microUSB"
-              rules={[{ required: true, message: 'Please input your count MicroUSB!' }]}
-            >
-              <InputComponent value={stateProductDetails.microUSB} onChange={handleOnchangeDetails} name="microUSB" />
-            </Form.Item>
-            <Form.Item
-              label="Battery"
-              name="battery"
-              rules={[{ required: true, message: 'Please input your count battery!' }]}
-            >
-              <InputComponent value={stateProductDetails.battery} onChange={handleOnchangeDetails} name="battery" />
+              <Select
+                name="deviceType"
+                value={stateProductDetails.deviceType}
+                onChange={handleOnchangeDetailsDeviceType}
+                options={[
+                  { value: 'phone', label: 'Phone' },
+                  { value: 'watch', label: 'Watch' },
+                  { value: 'laptop', label: 'Laptop' },
+                  { value: 'tablet', label: 'Tablet' },
+                  { value: 'headphone', label: 'Headphone' },
+                  { value: 'loudspeaker', label: 'Loudspeaker' },
+                ]}
+              />
             </Form.Item>
 
-            <Form.Item
+            {stateProductDetails.deviceType && renderSpecsFormUpdate(stateProductDetails.deviceType)}
+
+            {/* <Form.Item
               label="Rating"
               name="rating"
               rules={[{ required: true, message: 'Please input your count rating!' }]}
             >
               <InputComponent value={stateProductDetails.rating} onChange={handleOnchangeDetails} name="rating" />
-            </Form.Item>
+            </Form.Item> */}
             <Form.Item
               label="Discount"
               name="discount"

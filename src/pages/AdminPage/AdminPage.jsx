@@ -1,11 +1,12 @@
 import { Menu } from 'antd'
 import React, { useEffect, useState } from 'react'
 import { getItem } from '../../utils';
-import { UserOutlined, AppstoreOutlined, ShoppingCartOutlined } from '@ant-design/icons'
+import { UserOutlined, AppstoreOutlined, ShoppingCartOutlined, PieChartOutlined } from '@ant-design/icons'
 import HeaderComponent from '../../components/HeaderComponent/HeaderComponent';
 import AdminUser from '../../components/AdminUser/AdminUser';
 import AdminProduct from '../../components/AdminProduct/AdminProduct';
 import OrderAdmin from '../../components/OrderAdmin/OrderAmin';
+import StatisticsTable from '../../components/OrderAdmin/StatisticsTable';
 import * as OrderService from '../../services/OrderService'
 import * as ProductService from '../../services/ProductService'
 import * as UserService from '../../services/UserService'
@@ -23,6 +24,7 @@ const AdminPage = () => {
     getItem('Người dùng', 'users', <UserOutlined />),
     getItem('Sản phẩm', 'products', <AppstoreOutlined />),
     getItem('Đơn hàng', 'orders', <ShoppingCartOutlined />),
+    getItem('Thống kê', 'stats', <PieChartOutlined />),
     
   ];
 
@@ -51,6 +53,8 @@ const AdminPage = () => {
       {queryKey: ['orders'], queryFn: getAllOrder, staleTime: 1000 * 60},
     ]
   })
+
+  const isLoading = queries.some(query => query.isLoading);
   const memoCount = useMemo(() => {
     const result = {}
     try {
@@ -84,6 +88,10 @@ const AdminPage = () => {
         return (
           <OrderAdmin />
         )
+      case 'stats':
+        return (
+          <StatisticsTable />
+        )
       default:
         return <></>
     }
@@ -102,13 +110,13 @@ const AdminPage = () => {
           style={{
             width: 256,
             boxShadow: '1px 1px 2px #ccc',
-            height: '100vh'
+            
           }}
           items={items}
           onClick={handleOnCLick}
         />
         <div style={{ flex: 1, padding: '15px 0 15px 15px' }}>
-          <Loading isPending={memoCount && Object.keys(memoCount) &&  Object.keys(memoCount).length !== 3}>
+          <Loading isPending={isLoading}>
             {!keySelected && (
               <CustomizedContent data={memoCount} colors={COLORS} setKeySelected={setKeySelected} />
             )}

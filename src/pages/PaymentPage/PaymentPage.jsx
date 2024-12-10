@@ -15,9 +15,10 @@ import Loading from '../../components/LoadingComponent/Loading';
 import * as message from '../../components/Message/Message'
 import { updateUser } from '../../redux/slides/userSlide';
 import { useNavigate } from 'react-router-dom';
-import { removeAllOrderProduct } from '../../redux/slides/orderSlide';
 import { PayPalButton } from 'react-paypal-button-v2'; 
 import * as PaymentService from '../../services/PaymentService'
+import { removesFromCart, setCarts } from '../../redux/slides/cartSlice';
+import { getCart } from '../../services/CartService';
 
 const PaymentPage = () => {
   const order = useSelector((state) => state.order)
@@ -27,7 +28,7 @@ const PaymentPage = () => {
   const [payment, setPayment] = useState('later_money')
   const navigate = useNavigate()
   const [sdkReady , setSdkReady] = useState(false)
-
+  const [rewardPointsUsed, setRewardPointsUsed] = useState(1000);
   const [isOpenModalUpdateInfo, setIsOpenModalUpdateInfo] = useState(false)
   const [stateUserDetails, setStateUserDetails] = useState({
     name: '',
@@ -70,17 +71,17 @@ const PaymentPage = () => {
     if (!order || !order.orderItemsSlected) return 0;
   
     const totalPrice = order.orderItemsSlected.reduce((total, cur) => {
-      return total + (cur.price * cur.amount); // Tổng giá của tất cả sản phẩm
+      return total + (cur.price * cur.amount);  
     }, 0);
   
     const discountedPrice = order.orderItemsSlected.reduce((total, cur) => {
-      const discountPercentage = cur.discount || 0; // Phần trăm giảm giá của sản phẩm, mặc định là 0 nếu không có giảm giá
-      const priceBeforeDiscount = cur.price * cur.amount; // Tổng giá trước khi giảm giá cho sản phẩm này
-      const discountAmount = (priceBeforeDiscount * discountPercentage) / 100; // Số tiền được giảm giá cho sản phẩm này
-      return total + (priceBeforeDiscount - discountAmount); // Tổng giá sau khi giảm giá cho sản phẩm này
+      const discountPercentage = cur.discount || 0;  
+      const priceBeforeDiscount = cur.price * cur.amount;  
+      const discountAmount = (priceBeforeDiscount * discountPercentage) / 100;  
+      return total + (priceBeforeDiscount - discountAmount);  
     }, 0);
   
-    return totalPrice - discountedPrice; // Trả về tổng số tiền được giảm giá
+    return totalPrice - discountedPrice;
   }, [order]);
   const diliveryPriceMemo = useMemo(() => {
     if(priceMemo > 2000000 && priceMemo < 5000000){
@@ -96,28 +97,38 @@ const PaymentPage = () => {
     return Number(priceMemo) - Number(priceDiscountMemo) + Number(diliveryPriceMemo)
   },[priceMemo,priceDiscountMemo, diliveryPriceMemo])
 
+  const handleUseRewardPoints = (value) => {
+    const maxUsablePoints = Math.min(user.rewardPoints, Math.floor(totalPriceMemo / 3)); // 1.000 điểm = 3.000 VND
+    setRewardPointsUsed(Math.min(value, maxUsablePoints));
+  };
+
+  const totalDiscount = rewardPointsUsed * 3; // 1 điểm = 3 VND
+
+  const totalPriceAfterDiscount = totalPriceMemo - totalDiscount;
+
   const handleAddOrder = () => {
     if(user?.access_token && order?.orderItemsSlected && user?.name
       && user?.address && user?.phone && user?.city && priceMemo && user?.id) {
-        // eslint-disable-next-line no-unused-expressions
-        mutationAddOrder.mutate(
-          { 
-            token: user?.access_token, 
-            orderItems: order?.orderItemsSlected, 
-            fullName: user?.name,
-            address:user?.address, 
-            phone:user?.phone,
-            city: user?.city,
-            paymentMethod: payment,
-            itemsPrice: priceMemo,
-            shippingPrice: diliveryPriceMemo,
-            totalPrice: totalPriceMemo,
-            user: user?.id,
-            email: user?.email
-          }
-        )
-      }
-  }
+      mutationAddOrder.mutate(
+        { 
+          token: user?.access_token, 
+          orderItems: order?.orderItemsSlected, 
+          fullName: user?.name,
+          address:user?.address, 
+          phone:user?.phone,
+          city: user?.city,
+          paymentMethod: payment,
+          itemsPrice: priceMemo,
+          shippingPrice: diliveryPriceMemo,
+          totalPrice: totalPriceAfterDiscount,
+          user: user?.id,
+          email: user?.email,
+          rewardPointsUsed,
+        }
+      );
+    }
+  };
+  
   
   const mutationUpdate = useMutationHooks(
     (data) => {
@@ -151,20 +162,39 @@ const PaymentPage = () => {
       order?.orderItemsSlected?.forEach(element => {
         arrayOrdered.push(element.product)
       });
-      dispatch(removeAllOrderProduct({listChecked: arrayOrdered}))
-      message.success('Đặt hàng thành công')
+      order?.orderItemsSlected?.forEach((element) => {
+        dispatch(removesFromCart({ product: element.product }));  
+      });
+
+      if (user?.access_token) {
+        getCart(user.access_token).then((res) => {
+          dispatch(setCarts(res.cartItems));
+        }).catch((err) => {
+          message.error('Không thể cập nhật giỏ hàng');
+        });
+      }
+
+      const rewardPointsEarned = Math.floor(totalPriceMemo / 1000); 
+      if (payment === 'paypal') {
+        message.success(`Đặt hàng thành công. Bạn nhận được ${rewardPointsEarned} điểm thưởng.`);
+      } else {
+        message.success('Đặt hàng thành công')
+      }
+     
       navigate('/orderSuccess', {
         state: {
           delivery,
           payment,
           orders: order?.orderItemsSlected,
-          totalPriceMemo: totalPriceMemo
+          totalPriceMemo: totalPriceAfterDiscount
         }
       })
     } else if (isError) {
       message.error()
     }
-  }, [isSuccess,isError])
+  }, [isSuccess,isError, order, dispatch])
+
+  console.log('rewardPoints', user.rewardPoints)
 
   const handleCancleUpdate = () => {
     setStateUserDetails({
@@ -189,11 +219,12 @@ const PaymentPage = () => {
         paymentMethod: payment,
         itemsPrice: priceMemo,
         shippingPrice: diliveryPriceMemo,
-        totalPrice: totalPriceMemo,
+        totalPrice: totalPriceAfterDiscount,
         user: user?.id,
         isPaid :true,
         paidAt: details.update_time, 
-        email: user?.email
+        email: user?.email,
+        rewardPointsUsed,
       }
     )
   }
@@ -244,6 +275,7 @@ const PaymentPage = () => {
       setSdkReady(true)
     }
   }, [])
+  console.log('order', order)
 
   return (
     <div style={{background: '#f5f5fa', with: '100%', height: '100vh'}}>
@@ -290,25 +322,43 @@ const PaymentPage = () => {
                   </div>
                   <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
                     <span style={{fontSize: "13px"}}>Giảm giá</span>
-                    <span style={{color: '#000', fontSize: '14px', fontWeight: 'bold'}}>{convertPrice(priceDiscountMemo)}</span>
+                    <span style={{color: '#000', fontSize: '14px', fontWeight: 'bold'}}> - {convertPrice(priceDiscountMemo)}</span>
                   </div>
                   <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
                     <span style={{fontSize: "13px"}}>Phí giao hàng</span>
-                    <span style={{color: '#000', fontSize: '14px', fontWeight: 'bold'}}>{convertPrice(diliveryPriceMemo)}</span>
+                    <span style={{color: '#000', fontSize: '14px', fontWeight: 'bold'}}>+ {convertPrice(diliveryPriceMemo)}</span>
+                  </div>
+                  <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
+                    <span style={{fontSize: "13px"}}>Quy đổi điểm thưởng</span>
+                    <span style={{color: '#000', fontSize: '14px', fontWeight: 'bold'}}>- {convertPrice(totalDiscount)}</span>
                   </div>
                 </WrapperInfo>
                 <WrapperTotal>
                   <span style={{fontSize: "13px"}}>Tổng tiền</span>
                   <span style={{display:'flex', flexDirection: 'column'}}>
-                    <span style={{color: 'rgb(254, 56, 52)', fontSize: '24px', fontWeight: 'bold'}}>{convertPrice(totalPriceMemo)}</span>
+                    <span style={{color: 'rgb(254, 56, 52)', fontSize: '24px', fontWeight: 'bold'}}>{convertPrice(totalPriceAfterDiscount)}</span>
                     <span style={{color: '#000', fontSize: '11px'}}>(Đã bao gồm VAT nếu có)</span>
                   </span>
                 </WrapperTotal>
+                <p style={{fontSize: "15px", fontWeight: 'bold', display: 'flex'}}>Điểm thưởng của bạn hiện tại: 
+                    <div style={{color: 'green', fontSize: "15px", margin: '0 5px'}}>
+                      {user?.rewardPoints}
+                    </div>
+                     điểm</p>
+                <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                  <input style={ { height: '20px', marginRight: '10px'}} 
+                      type="number" 
+                      value={rewardPointsUsed} 
+                      onChange={(e) => handleUseRewardPoints(Number(e.target.value))} 
+                      placeholder="Nhập số điểm bạn muốn sử dụng" 
+                  />
+                  <p style={{fontSize: "13px"}}> 1.000 điểm = 3.000 VND</p>
+                </div>
               </div>
               {payment === 'paypal' && sdkReady ? (
                 <div style={{width: '320px'}}>
                   <PayPalButton
-                    amount={Math.round(totalPriceMemo / 30000)}
+                    amount={Math.round(totalPriceAfterDiscount / 30000)}
                     // shippingPreference="NO_SHIPPING" // default is "GET_FROM_FILE"
                     onSuccess={onSuccessPaypal}
                     onError={() => {
