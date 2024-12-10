@@ -29,6 +29,11 @@ export const WrapperStyleHeaderDilivery = styled.div`
 export const WrapperContainer = styled.div`
   width: 100%;
   background-color: #f5f5fa;
+  min-height: 100vh;   
+  padding-bottom: 100px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; 
 `
 
 export const WrapperLeft = styled.div`

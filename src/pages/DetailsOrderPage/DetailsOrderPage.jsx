@@ -46,6 +46,11 @@ const DetailsOrderPage = () => {
     }
   }, [priceMemo]);
 
+   const rewardPointsUsed = data?.rewardPointsUsed || 0;  
+   const rewardPointsValue = rewardPointsUsed * 3;  
+ 
+   const totalAfterRewards = priceMemo + shippingFee - rewardPointsValue;
+
   return (
    <Loading isPending={isPending}>
      <div style={{width: '100%', height: '100vh', background: '#f5f5fa'}}>
@@ -138,9 +143,15 @@ const DetailsOrderPage = () => {
             </WrapperContentProductBill>
           </WrapperAllPrice>
           <WrapperAllPrice>
+              <WrapperContentProductBill>
+                <WrapperItemLabel style={{ fontSize : '15px', fontWeight : 'bold'}}>Điểm tích lũy sử dụng</WrapperItemLabel>
+                <WrapperItem style={{ fontSize : '20px'}}>{convertPrice(rewardPointsValue)}</WrapperItem>
+              </WrapperContentProductBill>
+            </WrapperAllPrice>
+          <WrapperAllPrice>
             <WrapperContentProductBill>
               <WrapperItemLabel style={{ fontSize : '15px', fontWeight : 'bold'}}>Tổng cộng</WrapperItemLabel>
-              <WrapperItem style={{ fontSize : '20px'}}>{convertPrice(priceMemo + shippingFee )}</WrapperItem>
+              <WrapperItem style={{ fontSize : '20px'}}>{convertPrice(totalAfterRewards )}</WrapperItem>
             </WrapperContentProductBill>
           </WrapperAllPrice>
          

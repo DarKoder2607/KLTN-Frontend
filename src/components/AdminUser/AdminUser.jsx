@@ -12,6 +12,7 @@ import { useMutationHooks } from '../../hooks/useMutationHook'
 import * as UserService from '../../services/UserService'
 import { useIsFetching, useQueryClient } from '@tanstack/react-query'
 import { DeleteOutlined, EditOutlined, SearchOutlined } from '@ant-design/icons'
+import axios from 'axios';
 
 const AdminUser = () => {
   const [rowSelected, setRowSelected] = useState('')
@@ -322,16 +323,58 @@ const AdminUser = () => {
     })
   }
 
-  const handleOnchangeAvatarDetails = async ({ fileList }) => {
-    const file = fileList[0]
-    if (!file.url && !file.preview) {
-      file.preview = await getBase64(file.originFileObj);
+  // const handleOnchangeAvatarDetails = async ({ fileList }) => {
+  //   const file = fileList[0]
+  //   if (!file.url && !file.preview) {
+  //     file.preview = await getBase64(file.originFileObj);
+  //   }
+  //   setStateUserDetails({
+  //     ...stateUserDetails,
+  //     avatar: file.preview
+  //   })
+  // }
+
+  const uploadToCloudinary = async (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', 'gwbmydmw');   
+    formData.append('cloud_name', 'dleio5sat');  
+  
+    try {
+      const response = await axios.post(
+        'https://api.cloudinary.com/v1_1/dleio5sat/image/upload', 
+        formData,
+        {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        }
+      );
+      return response.data.secure_url;  
+    } catch (error) {
+      console.error("Error uploading image to Cloudinary", error);
+      throw error;
     }
-    setStateUserDetails({
-      ...stateUserDetails,
-      avatar: file.preview
-    })
-  }
+  };
+
+  
+
+  const handleOnchangeAvatarDetails = async ({ fileList }) => {
+    const file = fileList[0];
+    
+    if (file.originFileObj) {
+      try {
+        
+        const imageUrl = await uploadToCloudinary(file.originFileObj);
+        setStateUserDetails({
+          ...stateUserDetails,
+          avatar: imageUrl  
+        });
+      } catch (error) {
+        console.error("Failed to upload avatar image", error);
+      }
+    }
+  };
+  
+
   const onUpdateUser = () => {
     if (isEmailValid) {
       mutationUpdate.mutate({ id: rowSelected, token: user?.access_token, ...stateUserDetails }, {
@@ -346,7 +389,12 @@ const AdminUser = () => {
 
   return (
     <div>
-      <WrapperHeader>Quản lý người dùng</WrapperHeader>
+      <WrapperHeader>QUẢN LÝ NGƯỜI DÙNG</WrapperHeader>
+      <div style={{ 
+        borderTop: '1px solid #000', 
+        margin: '0px 0', 
+        width: '20%' 
+        }} />
       <div style={{ marginTop: '20px' }}>
         <TableComponent handleDelteMany={handleDelteManyUsers} columns={columns} isPending={isFetchingUser} data={dataTable} onRow={(record, rowIndex) => {
           return {

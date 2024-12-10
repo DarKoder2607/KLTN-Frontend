@@ -1,4 +1,4 @@
-import { UserOutlined, AppstoreOutlined, ShoppingCartOutlined } from '@ant-design/icons'
+import { UserOutlined, AppstoreOutlined, ShoppingCartOutlined, PieChartOutlined } from '@ant-design/icons'
 
 const CustomizedContent = (props) => {
   const {data, colors, setKeySelected } = props
@@ -25,6 +25,7 @@ const CustomizedContent = (props) => {
               {item === 'users' && <UserOutlined />}
               {item === 'products' && <AppstoreOutlined />}
               {item === 'orders' && <ShoppingCartOutlined />}
+              {item === 'stats' && <PieChartOutlined />}
             </span>
             <span style={{color: '#fff',fontSize: 30, fontWeight: 'bold', textTransform: 'uppercase',}}>{item}</span>
             <span style={{color: '#fff',fontSize: 20, fontWeight: 'bold', textTransform: 'uppercase'}}>{data[item]}</span>

@@ -26,9 +26,10 @@ export const StyleNameProduct = styled.div`
     
     &:hover {
         white-space: normal; 
+        font-size: 15px;
         overflow: visible; 
         text-overflow: unset; 
-        background-color: rgb(26,148,255); 
+        background-color: rgb(243, 156, 18); 
         z-index: 1; 
         position: absolute; 
         top: 80%;

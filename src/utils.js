@@ -79,25 +79,26 @@ export const initFacebookSDK = () => {
     })(document, "script", "facebook-jssdk");
   };
 
-  export const convertDataChart = (data, type) => {
+  export const convertDataChart = (data, type, mapping = {}) => {
     try {
-        const object = {}
-        Array.isArray(data) && data.forEach((opt) => {
-            if(!object[opt[type]]) {
-                object[opt[type]] = 1
-            } else {
-                object[opt[type]]+=1
-                console.log('c;getBase64', object[opt[type]], typeof(object[opt[type]]))
-            }
-        })
-        const results = Array.isArray(Object.keys(object)) && Object.keys(object).map((item) => {
-            return {
-                name: orderContant.payment[item],
-                value: object[item]
-            }
-        })
-        return results
-    }catch(e) {
-        return []
+      const object = {};
+      Array.isArray(data) &&
+        data.forEach((item) => {
+          const key = mapping[item[type]] || item[type]; // Sử dụng mapping nếu cần đổi tên
+          if (!object[key]) {
+            object[key] = 1;
+          } else {
+            object[key] += 1;
+          }
+        });
+      const results = Object.keys(object).map((key) => ({
+        name: key,
+        value: object[key],
+      }));
+      return results;
+    } catch (e) {
+      console.error("Error in convertDataChart:", e);
+      return [];
     }
-  }
+  };
+

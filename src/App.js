@@ -8,6 +8,8 @@ import * as UserService from './services/UserService'
 import { useDispatch, useSelector } from 'react-redux'
 import { updateUser } from './redux/slides/userSlide'
 import Loading from './components/LoadingComponent/Loading'
+import Chatbot from './components/Chatbot/Chatbot'
+import ScrollToTop from './components/ScrollToTop/ScrollToTop'
 
 
 function App() {
@@ -66,6 +68,7 @@ function App() {
     <div>
       <Loading isPending={isPending}>
         <Router>
+          <ScrollToTop/>
           <Routes>
             {routes.map((route) => {
               const Page = route.page
@@ -80,6 +83,7 @@ function App() {
               )
             })}
           </Routes>
+          <Chatbot/>
         </Router>
       </Loading>
     </div>

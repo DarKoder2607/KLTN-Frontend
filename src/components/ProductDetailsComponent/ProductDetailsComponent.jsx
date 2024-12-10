@@ -1,9 +1,7 @@
-import { Col, Image, Rate, Row, Form, Modal, Table } from 'antd'
+import { Col, Image, Rate, Row, Form, Modal, Table ,  Input,  } from 'antd'
 import React, { useEffect, useState } from 'react'
-import imageProduct from '../../assets/images/test.webp'
-import imageProductSmall from '../../assets/images/test1.webp'
 import { WrapperAddressProduct,  WrapperCounInStockProduct,  WrapperInputNumber, WrapperPriceProduct, WrapperPriceTextProduct, WrapperQualityProduct, WrapperStyleColImage, WrapperStyleImageSmall, WrapperStyleNameProduct, WrapperStyleTextCounInStock, WrapperStyleTextSell } from './Style'
-import { MinusOutlined, PlusOutlined, StarFilled } from '@ant-design/icons'
+import { MinusOutlined, PlusOutlined, } from '@ant-design/icons'
 import ButtonComponent from '../ButtonComponent/ButtonComponent'
 import * as ProductService from '../../services/ProductService'
 import { useQuery } from '@tanstack/react-query'
@@ -13,16 +11,19 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { addOrderProduct, resetOrder } from '../../redux/slides/orderSlide'
 import * as message from '../Message/Message'
 import LikeButtonComponent from '../LikeButtonComponent/LikeButtonComponent'
-import CommentComponent from '../CommentComponent/CommentComponent'
 import { initFacebookSDK } from '../../utils'
 import ModalComponent from '../ModalComponent/ModalComponent'
 import { useMutationHooks } from '../../hooks/useMutationHook'
 import InputComponent from '../InputComponent/InputComponent'
 import * as  UserService from '../../services/UserService'
 import { updateUser } from '../../redux/slides/userSlide';
+import ReviewsSection from '../ReviewsSection/ReviewsSection'; 
+import { addToCart } from '../../services/CartService'
+import { addingToCart } from '../../redux/slides/cartSlice'
 
+const { TextArea } = Input;
 
-const ProductDetailsComponent = ({idProduct}) => {
+const ProductDetailsComponent = ({idProduct, userId }) => {
     const [numProduct, setNumProduct] = useState(1)
     const navigate = useNavigate()
     const location = useLocation()
@@ -35,7 +36,7 @@ const ProductDetailsComponent = ({idProduct}) => {
     const [stateUserDetails, setStateUserDetails] = useState({address: ''})
     const [isSpecsVisible, setIsSpecsVisible] = useState(false); 
     const [form] = Form.useForm();
-
+    
     useEffect(() => {
         form.setFieldsValue(stateUserDetails)
       }, [form, stateUserDetails])
@@ -104,6 +105,29 @@ const ProductDetailsComponent = ({idProduct}) => {
         enabled : !!idProduct
     }) 
     console.log('productDetails', productDetails)
+
+    const handleAddToCart = async () => {
+        if (!user?.id) {
+          message.warning('Vui lòng đăng nhập để có thế mua hàng');
+          navigate('/sign-in', { state: location.pathname });
+          return;
+        }
+      
+        try {
+          const res = await addToCart(productDetails._id, numProduct, user?.access_token);
+          message.success('Đã thêm vào giỏ hàng thành công');
+          dispatch(addingToCart({
+            product: productDetails._id,
+            name: productDetails.name,
+            image: productDetails.image,
+            amount: numProduct,
+            price: productDetails.price,
+            discount: productDetails.discount
+          }));
+        } catch (error) {
+          message.error(error.response?.data?.message || 'Không thể thêm vào giỏ hàng !!!');
+        }
+      };
 
     const handleAllOrderProduct= () =>{
         if( !user?.id){
@@ -175,23 +199,107 @@ const ProductDetailsComponent = ({idProduct}) => {
         setIsSpecsVisible(!isSpecsVisible);
     }
 
-    const specsData = [
-        { key: '1', name: 'Màn hình:', value: productDetails?.screen },
-        { key: '2', name: 'Hệ điều hành:', value: productDetails?.os },
-        { key: '3', name: 'Camera:', value: productDetails?.camera },
-        { key: '4', name: 'Camera trước:', value: productDetails?.cameraFront },
-        { key: '5', name: 'CPU:', value: productDetails?.cpu },
-        { key: '6', name: 'RAM:', value: productDetails?.ram },
-        { key: '7', name: 'ROM:', value: productDetails?.rom },
-        { key: '8', name: 'MicroUSB:', value: productDetails?.microUSB },
-        { key: '9', name: 'Pin:', value: productDetails?.battery },
-    ]
+    const specsData = () => {
+        let specs = [];
+        
+        // Kiểm tra deviceType và chọn thông số phù hợp
+        switch (productDetails?.deviceType) {
+          case 'phone':
+            specs = [
+              { key: '1', name: 'Màn hình:', value: productDetails?.phoneSpecs.screen },
+              { key: '2', name: 'Hệ điều hành:', value: productDetails?.phoneSpecs.os },
+              { key: '3', name: 'Camera:', value: productDetails?.phoneSpecs.camera },
+              { key: '4', name: 'Camera trước:', value: productDetails?.phoneSpecs.cameraFront },
+              { key: '5', name: 'CPU:', value: productDetails?.phoneSpecs.cpu },
+              { key: '6', name: 'RAM:', value: productDetails?.phoneSpecs.ram },
+              { key: '7', name: 'ROM:', value: productDetails?.phoneSpecs.rom },
+              { key: '8', name: 'MicroUSB:', value: productDetails?.phoneSpecs.microUSB },
+              { key: '9', name: 'Pin:', value: productDetails?.phoneSpecs.battery },
+            ];
+            break;
+      
+          case 'watch':
+            specs = [
+              { key: '1', name: 'Màn hình:', value: productDetails?.watchSpecs.screen },
+              { key: '2', name: 'Hệ điều hành:', value: productDetails?.watchSpecs.os },
+              { key: '3', name: 'Pin:', value: productDetails?.watchSpecs.battery },
+              { key: '4', name: 'Bluetooth:', value: productDetails?.watchSpecs.bluetooth },
+              { key: '5', name: 'Cảm biến:', value: productDetails?.watchSpecs.sensors },
+              { key: '6', name: 'Kích thước:', value: productDetails?.watchSpecs.size },
+              { key: '7', name: 'Chức năng:', value: productDetails?.watchSpecs.feature },
+              { key: '8', name: 'Chất liệu:', value: productDetails?.watchSpecs.material },
+              { key: '9', name: 'Dây đeo:', value: productDetails?.watchSpecs.strap}
+            ];
+            break;
+      
+          case 'laptop':
+            specs = [
+              { key: '1', name: 'Màn hình:', value: productDetails?.laptopSpecs.screen },
+              { key: '2', name: 'Hệ điều hành:', value: productDetails?.laptopSpecs.os },
+              { key: '3', name: 'CPU:', value: productDetails?.laptopSpecs.cpu },
+              { key: '4', name: 'RAM:', value: productDetails?.laptopSpecs.ram },
+              { key: '5', name: 'ROM:', value: productDetails?.laptopSpecs.rom },
+              { key: '6', name: 'Pin:', value: productDetails?.laptopSpecs.battery },
+              { key: '7', name: 'Cổng kết nối:', value: productDetails?.laptopSpecs.ports },
+              { key: '8', name: 'Thẻ chip:', value: productDetails?.laptopSpecs.chipCard },
+              { key: '9', name: 'Âm thanh:', value: productDetails?.laptopSpecs.sound },
+              { key: '10', name: 'Thiết kế:', value: productDetails?.laptopSpecs.design },
+              { key: '11', name: 'Chức năng:', value: productDetails?.laptopSpecs.feature },
+            ];
+            break;
+      
+          case 'tablet':
+            specs = [
+              { key: '1', name: 'Màn hình:', value: productDetails?.tabletSpecs.screen },
+              { key: '2', name: 'Hệ điều hành:', value: productDetails?.tabletSpecs.os },
+              { key: '3', name: 'Camera:', value: productDetails?.tabletSpecs.camera },
 
-    const columns = [
-        { title: 'Thông số', dataIndex: 'name', key: 'name' },
-        { title: 'Chi tiết', dataIndex: 'value', key: 'value' },
-    ]
-  
+              { key: '5', name: 'CPU:', value: productDetails?.tabletSpecs.cpu },
+              { key: '6', name: 'RAM:', value: productDetails?.tabletSpecs.ram },
+              { key: '7', name: 'ROM:', value: productDetails?.tabletSpecs.rom },
+              { key: '8', name: 'Pin:', value: productDetails?.tabletSpecs.battery },
+              { key: '9', name: 'Xử lý đồ họa:', value: productDetails?.tabletSpecs.processorGraphics },
+              { key: '10', name: 'Thiết kế:', value: productDetails?.tabletSpecs.design },
+              { key: '11', name: 'Cổng kết nối:', value: productDetails?.tabletSpecs.ports },
+              { key: '12', name: 'Chức năng:', value: productDetails?.tabletSpecs.feature },
+            ];
+            break;
+      
+          case 'headphone':
+            specs = [
+              { key: '1', name: 'Bluetooth:', value: productDetails?.headphoneSpecs.bluetooth },
+              { key: '2', name: 'Pin:', value: productDetails?.headphoneSpecs.battery },
+              { key: '3', name: 'Chiều dài:', value: productDetails?.headphoneSpecs.length },
+              { key: '4', name: 'Chống ồn:', value: productDetails?.headphoneSpecs.noiseCancellation },
+              { key: '5', name: 'Cổng kết nối:', value: productDetails?.headphoneSpecs.ports },
+              { key: '6', name: 'Phạm vi:', value: productDetails?.headphoneSpecs.scope },
+              { key: '7', name: 'Chất liệu:', value: productDetails?.headphoneSpecs.material },
+              { key: '8', name: 'Thiết kế:', value: productDetails?.headphoneSpecs.design },
+              { key: '9', name: 'Chức năng:', value: productDetails?.headphoneSpecs.feature },
+            ];
+            break;
+      
+          case 'loudspeaker':
+            specs = [
+              { key: '1', name: 'Bluetooth:', value: productDetails?.loudspeakerSpecs.bluetooth },
+              { key: '2', name: 'Pin:', value: productDetails?.loudspeakerSpecs.battery },
+              { key: '3', name: 'Chống nước:', value: productDetails?.loudspeakerSpecs.waterproof },
+              { key: '4', name: 'Thiết kế:', value: productDetails?.loudspeakerSpecs.design },
+              { key: '5', name: 'Điều khiển kết nối:', value: productDetails?.loudspeakerSpecs.connectControl },
+              { key: '6', name: 'Âm thanh:', value: productDetails?.loudspeakerSpecs.audio },
+            ];
+            break;
+      
+          default:
+            specs = [];
+            break;
+        }
+     
+        return specs;
+        
+      };
+      
+
   return (
     <div>
         <Loading isPending={isPending}>
@@ -265,13 +373,13 @@ const ProductDetailsComponent = ({idProduct}) => {
                                 size={20} 
                                 // variant = "borderless"
                                 styleButton={{background: 'rgb(255,57,69)', height: '48px', width: '220px', border: 'none', borderRadius: '4px'}} 
-                                onClick={handleAllOrderProduct}
+                                onClick={handleAddToCart}
                                 textbutton={'Thêm vào giỏ hàng'}
                                 styleTextButton={{color: '#fff', fontSize: '15px', fontWeight:' 700'}}
                             > 
                             </ButtonComponent>
 
-                            {errorLimitOrder && <div style={{color: 'red'}}>San pham het hang</div>}
+                            {errorLimitOrder && <div style={{color: 'red'}}>Sản phẩm đã hết hàng</div>}
                         </div>
                             <ButtonComponent
                                 size={40}
@@ -288,13 +396,12 @@ const ProductDetailsComponent = ({idProduct}) => {
                             ></ButtonComponent>
                     </div>
                 </Col>
-                <div style={{marginTop: '40px', marginBottom: '5px', fontWeight: 'bold', fontSize: '20px' }}>Bình luận </div>
-                <CommentComponent 
-                        dataHref={"https://developers.facebook.com/docs/plugins/comments#configurator"
-                            
-                        } 
-                        width="1270" 
-                />
+                <div style={{ marginTop: "40px" }}>
+                   
+                    <ReviewsSection productId={idProduct} userId={userId} />
+                    
+                </div>
+            
             </Row>
         </Loading>
 
@@ -305,9 +412,13 @@ const ProductDetailsComponent = ({idProduct}) => {
             footer={null}
         >
             <Table
-                columns={columns}
-                dataSource={specsData}
-                pagination={false}
+                    dataSource={specsData()}
+                    columns={[
+                        { title: 'Tên', dataIndex: 'name' },
+                        { title: 'Thông số', dataIndex: 'value' },
+                    ]}
+                    pagination={false}
+                    rowKey="key"
             />
         </Modal>
 

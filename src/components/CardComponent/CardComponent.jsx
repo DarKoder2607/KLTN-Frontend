@@ -45,7 +45,7 @@ const CardComponent = (props ) => {
           <StyleNameProduct>{name}</StyleNameProduct>
           <WrapperReportTest>
             <span style={{ marginRight:'4px'}}>
-              <span>{rating}</span> <StarFilled style={{fontSize: '12px', color: 'yellow'}}/> 
+              <span>{(rating || 0).toFixed(1)}</span> <StarFilled style={{fontSize: '12px', color: 'yellow'}}/> 
             </span>
             <WrapperStyleTextSell> | Đã bán {selled || 0} sản phẩm</WrapperStyleTextSell>
             
@@ -53,15 +53,15 @@ const CardComponent = (props ) => {
           <WrapperPriceTest>
             {discount > 0 ? (
                               <>
-                                  <WrapperPriceTextProduct >
-                                      <span style={{ textDecoration: 'line-through' , fontSize: '10px'}}  className='origin-price'>{price.toLocaleString()}VNĐ</span>
+                                  <WrapperPriceTextProduct style={{textAlign: "center"}} >
+                                      <span style={{ textDecoration: 'line-through' , fontSize: '10px'}}  className='origin-price'>{price.toLocaleString()} </span>
                                       <span className='discount-price'> 
                                           {(price - price*(discount/100)).toLocaleString()}VNĐ
                                       </span>
                                   </WrapperPriceTextProduct>
                               </>
                           ) : (
-                              <WrapperPriceTextProduct><span className='origin-price' style={{color: 'red'}}>{price.toLocaleString()}VNĐ </span></WrapperPriceTextProduct>
+                              <WrapperPriceTextProduct style={{textAlign: "center"}}><span className='origin-price' style={{color: 'red'}}>{price.toLocaleString()}VNĐ </span></WrapperPriceTextProduct>
                           )}  
        
           </WrapperPriceTest>

@@ -18,11 +18,15 @@ import * as message from '../../components/Message/Message'
 import { updateUser } from '../../redux/slides/userSlide';
 import { useNavigate } from 'react-router-dom';
 import StepComponent from '../../components/StepConponent/StepComponent';
+import { getCart, clearCart, removeFromCart, updateQuantity } from '../../services/CartService';
+import { createOrder } from '../../services/OrderService';
+import { clearsCart, removesFromCart, setCarts, updatesCartItem } from '../../redux/slides/cartSlice';
 
 const OrderPage = () => {
   const order = useSelector((state) => state.order)
   const user = useSelector((state) => state.user)
-
+  const [cart, setCart] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
   const [listChecked, setListChecked] = useState([])
   const [isOpenModalUpdateInfo, setIsOpenModalUpdateInfo] = useState(false)
   const [stateUserDetails, setStateUserDetails] = useState({
@@ -33,49 +37,112 @@ const OrderPage = () => {
   })
   const navigate = useNavigate()
   const [form] = Form.useForm();
-
   const dispatch = useDispatch()
-  const onChange = (e) => {
-    if(listChecked.includes(e.target.value)){
-      const newListChecked = listChecked.filter((item) => item !== e.target.value)
-      setListChecked(newListChecked)
-    }else {
-      setListChecked([...listChecked, e.target.value])
-    }
-  };
 
-  const handleChangeCount = (type, idProduct, limited) => {
-    if(type === 'increase') {
-      if(!limited) {
-        dispatch(increaseAmount({idProduct}))
-      }
-    }else {
-      if(!limited) {
-        dispatch(decreaseAmount({idProduct}))
-      }
-    }
-  }
-
-  const handleDeleteOrder = (idProduct) => {
-    dispatch(removeOrderProduct({idProduct}))
-    message.success('Đã xóa sản phẩm khỏi giỏ hàng !')
-  }
-
-  const handleOnchangeCheckAll = (e) => {
-    if(e.target.checked) {
-      const newListChecked = []
-      order?.orderItems?.forEach((item) => {
-        newListChecked.push(item?.product)
-      })
-      setListChecked(newListChecked)
-    }else {
-      setListChecked([])
-    }
-  }
 
   useEffect(() => {
-    dispatch(selectedOrder({listChecked}))
-  },[listChecked])
+    const fetchCart = async () => {
+      setIsLoading(true);
+      try {
+        const response = await getCart(user.access_token);
+        setCart(response.cartItems);
+        dispatch(setCarts(response.cartItems));
+      } catch (error) {
+        message.error('Lỗi khi tải giỏ hàng');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+  
+    if (user?.access_token) {
+      fetchCart();
+    }
+  }, [user]);
+
+  const handleChangeCount = async (action, productId) => {
+    // Find the item in the cart
+    const item = cart.find(item => item.product._id === productId);
+    
+    if (!item) return;
+  
+    let newQuantity = item.amount;
+  
+    // Increase or decrease amount based on the action
+    if (action === 'increase') {
+      newQuantity += 1;
+    } else if (action === 'decrease' && newQuantity > 1) {
+      newQuantity -= 1;
+    }
+    
+  
+    try {
+      // Update the amount in the backend
+      const response = await updateQuantity(productId, newQuantity, user.access_token);
+      
+      // Update the local state with the new amount
+      setCart(response.cartItems);  // Assuming `cartItems` is the updated cart from the backend
+      dispatch(updatesCartItem({
+        product: productId,
+        amount: newQuantity
+      }));
+
+      dispatch(setCarts(response.cartItems));
+      message.success('Cập nhật số lượng thành công!');
+    } catch (error) {
+      message.error('Cập nhật số lượng thất bại!');
+    }
+  };
+  
+  
+
+  const handleDeleteOrder = async (productId) => {
+    
+    setCart((prevCart) => prevCart.filter(item => item.product._id !== productId));
+  
+    try {
+      dispatch(removesFromCart({ product: productId }));
+      const response = await removeFromCart(productId, user.access_token);
+      setCart(response.cartItems);  
+      dispatch(setCarts(response.cartItems));
+      message.success('Đã xóa sản phẩm khỏi giỏ hàng!');
+    } catch (error) {
+      message.error('Xóa sản phẩm thất bại!');
+    }
+  };
+  
+
+  const handleClearCart = async () => {
+    try {
+      const response = await clearCart(user.access_token);
+      dispatch(clearsCart());
+      setCart([]);
+      message.success('Đã xóa toàn bộ giỏ hàng!');
+    } catch (error) {
+      message.error('Xóa toàn   bộ giỏ hàng thất bại!');
+    }
+  };
+  
+
+  const onChange = (productId) => {
+    setListChecked((prev) => {
+      const isChecked = prev.includes(productId);
+      if (isChecked) {
+        return prev.filter(id => id !== productId); // Bỏ chọn sản phẩm
+      } else {
+        return [...prev, productId]; // Thêm sản phẩm vào danh sách đã chọn
+      }
+    });
+  };
+
+  // Hàm xử lý khi chọn tất cả các sản phẩm
+  const handleOnchangeCheckAll = (e) => {
+    if (e.target.checked) {
+      const allProductIds = cart.map(item => item.product._id);
+      setListChecked(allProductIds);
+    } else {
+      setListChecked([]);
+    }
+  };
 
   useEffect(() => {
     form.setFieldsValue(stateUserDetails)
@@ -97,58 +164,57 @@ const OrderPage = () => {
   }
 
   const priceMemo = useMemo(() => {
-    const result = order?.orderItemsSlected?.reduce((total, cur) => {
-      return total + ((cur.price * cur.amount))
-    },0)
-    return result
-  },[order])
+    return cart.reduce((total, item) => {
+      if (listChecked.includes(item.product._id)) {
+        return total + item.price * item.amount;
+      }
+      return total;
+    }, 0);
+  }, [cart, listChecked]);
 
   const priceDiscountMemo = useMemo(() => {
-    if (!order || !order.orderItemsSlected) return 0;
-  
-    const totalPrice = order.orderItemsSlected.reduce((total, cur) => {
-      return total + (cur.price * cur.amount); // Tổng giá của tất cả sản phẩm
+    return cart.reduce((total, item) => {
+      if (listChecked.includes(item.product._id)) {
+        const discountAmount = (item.price * item.discount) / 100;
+        return total + discountAmount * item.amount;
+      }
+      return total;
     }, 0);
-  
-    const discountedPrice = order.orderItemsSlected.reduce((total, cur) => {
-      const discountPercentage = cur.discount || 0; // Phần trăm giảm giá của sản phẩm, mặc định là 0 nếu không có giảm giá
-      const priceBeforeDiscount = cur.price * cur.amount; // Tổng giá trước khi giảm giá cho sản phẩm này
-      const discountAmount = (priceBeforeDiscount * discountPercentage) / 100; // Số tiền được giảm giá cho sản phẩm này
-      return total + (priceBeforeDiscount - discountAmount); // Tổng giá sau khi giảm giá cho sản phẩm này
-    }, 0);
-  
-    return totalPrice - discountedPrice; // Trả về tổng số tiền được giảm giá
-  }, [order]);
+  }, [cart, listChecked]);
 
-  const diliveryPriceMemo = useMemo(() => {
-    if(priceMemo >= 2000000 && priceMemo < 5000000){
-      return 10000
-    }else if(priceMemo >= 5000000 || order?.orderItemsSlected?.length === 0) {
-      return 2000
+  const deliveryPriceMemo = useMemo(() => {
+    if (priceMemo >= 2000000 && priceMemo < 5000000) {
+      return 10000;
+    } else if (priceMemo >= 5000000) {
+      return 2000;
     } else {
-      return 20000
+      return 20000;
     }
-  },[priceMemo])
+  }, [priceMemo]);
 
   const totalPriceMemo = useMemo(() => {
-    return Number(priceMemo) - Number(priceDiscountMemo) + Number(diliveryPriceMemo)
-  },[priceMemo,priceDiscountMemo, diliveryPriceMemo])
+    return priceMemo - priceDiscountMemo + deliveryPriceMemo;
+  }, [priceMemo, priceDiscountMemo, deliveryPriceMemo]);
 
-  const handleRemoveAllOrder = () => {
-    if(listChecked?.length > 1){
-      dispatch(removeAllOrderProduct({listChecked}))
-    }
-  }
 
+ 
   const handleAddCard = () => {
-    if(!order?.orderItemsSlected?.length) {
-      message.error('Vui lòng chọn sản phẩm')
-    }else if(!user?.phone || !user.address || !user.name || !user.city) {
-      setIsOpenModalUpdateInfo(true)
-    }else {
-      navigate('/payment')
-    } 
-  }
+    if (!user?.phone || !user.address || !user.name || !user.city) {
+      setIsOpenModalUpdateInfo(true);
+    } else {
+      // Filter cart items based on the checked list
+      const selectedItems = cart.filter(item => listChecked.includes(item.product._id));
+      if (selectedItems.length === 0) {
+        message.error('Vui lòng chọn sản phẩm');
+      } else {
+        // Dispatch action selectedOrder với các sản phẩm đã chọn
+        dispatch(selectedOrder({ listChecked: selectedItems }));
+        navigate('/payment');
+      }
+  
+    }
+  };
+  
 
   const mutationUpdate = useMutationHooks(
     (data) => {
@@ -207,7 +273,7 @@ const OrderPage = () => {
     },
   ]
   return (
-    <div style={{background: '#f5f5fa', with: '100%', height: '100vh'}}>
+    <div style={{background: '#f5f5fa', width: '100%', minHeight: '100vh', paddingBottom: '200px'}}>
       <div style={{height: '100%', width: '1270px', margin: '0 auto'}}>
         <h3 style={{fontSize : '20px'}}><span style={{cursor: 'pointer', fontWeight: 'bold'}} 
                     onClick={() => navigate('/')}>Trang chủ</span> \ Giỏ hàng </h3>
@@ -215,51 +281,62 @@ const OrderPage = () => {
           <WrapperLeft>
             <h4>Phí giao hàng</h4>
             <WrapperStyleHeaderDilivery>
-              <StepComponent items={itemsDelivery} current={diliveryPriceMemo === 10000 
-                ? 2 : diliveryPriceMemo === 20000 ? 1 
-                : order.orderItemsSlected.length === 0 ? 0:  3}/>
+              <StepComponent items={itemsDelivery} current={deliveryPriceMemo === 10000 
+                ? 2 : deliveryPriceMemo === 20000 ? 1 
+                : cart.length === 0 ? 0:  3}/>
             </WrapperStyleHeaderDilivery>
             <WrapperStyleHeader>
                 <span style={{display: 'inline-block', width: '390px'}}>
-                  <CustomCheckbox onChange={handleOnchangeCheckAll} checked={listChecked?.length === order?.orderItems?.length}></CustomCheckbox>
-                  <span> Tất cả ({order?.orderItems?.length} sản phẩm)</span>
+                  <CustomCheckbox onChange={handleOnchangeCheckAll} checked={listChecked.length === cart.length}></CustomCheckbox>
+                  <span> Tất cả ({cart.length} sản phẩm)</span>
                 </span>
                 <div style={{flex:1,display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
-                  <span>Đơn giá</span>
+                  <span>Đơn giá gốc</span>
+                  <span>Khuyến mãi</span>
                   <span>Số lượng</span>
                   <span>Thành tiền</span>
-                  <DeleteOutlined style={{cursor: 'pointer'}} onClick={handleRemoveAllOrder}/>
+                  <DeleteOutlined style={{cursor: 'pointer'}} onClick={handleClearCart}/>
                 </div>
             </WrapperStyleHeader>
             <WrapperListOrder>
-              {order?.orderItems?.map((order) => {
+              {cart.map((item) =>{
                 return (
-                  <WrapperItemOrder key={order?.product}>
+                  <WrapperItemOrder key={item.product._id}>
                 <div style={{width: '390px', display: 'flex', alignItems: 'center', gap: 4}}> 
-                  <CustomCheckbox onChange={onChange} value={order?.product} checked={listChecked.includes(order?.product)}></CustomCheckbox>
-                  <img src={order?.image} style={{width: '77px', height: '79px', objectFit: 'cover'}}/>
+                  <CustomCheckbox  onChange={() => onChange(item.product._id)} 
+                    checked={listChecked.includes(item.product._id)} ></CustomCheckbox>
+                  <img src={item.product.image} style={{width: '77px', height: '79px', objectFit: 'cover'}}/>
                   <div style={{
                     width: 260,
                     overflow: 'hidden',
                     textOverflow:'ellipsis',
                     whiteSpace:'nowrap'
-                  }}>{order?.name}</div>
+                  }}>{item.product.name}</div>
                 </div>
                 <div style={{flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
                   <span>
-                    <span style={{ fontSize: '13px', color: '#242424' }}>{convertPrice(order?.price)}</span>
+                    <span style={{ fontSize: '13px', color: '#242424' }}>{convertPrice(item.price)}</span>
+                  </span>
+                  <span>
+                    <span style={{ fontSize: '13px', color: '#242424' }}>{item.discount} %</span>
                   </span>
                   <WrapperCountOrder>
-                    <button style={{ border: 'none', background: 'transparent', cursor: 'pointer' }} onClick={() => handleChangeCount('decrease',order?.product, order?.amount === 1)}>
-                        <MinusOutlined style={{ color: '#000', fontSize: '10px' }} />
-                    </button>
-                    <WrapperInputNumber defaultValue={order?.amount} value={order?.amount} size="small" min={1} max={order?.countInstock} />
-                    <button style={{ border: 'none', background: 'transparent', cursor: 'pointer' }} onClick={() => handleChangeCount('increase',order?.product ,order?.amount === order.countInstock, order?.amount === 1)}>
-                        <PlusOutlined style={{ color: '#000', fontSize: '10px' }}/>
-                    </button>
+                  <button
+                    style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}
+                    onClick={() => handleChangeCount('decrease', item.product._id)}
+                  >
+                    <MinusOutlined style={{ color: '#000', fontSize: '10px' }} />
+                  </button>
+                  <WrapperInputNumber defaultValue={item.amount} value={item.amount} size="small" min={1} max={item.product.countInStock} />
+                  <button
+                    style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}
+                    onClick={() => handleChangeCount('increase', item.product._id)}
+                  >
+                    <PlusOutlined style={{ color: '#000', fontSize: '10px' }} />
+                  </button>
                   </WrapperCountOrder>
-                  <span style={{color: 'rgb(255, 66, 78)', fontSize: '13px', fontWeight: 500}}>{convertPrice(order?.price * order?.amount)}</span>
-                  <DeleteOutlined style={{cursor: 'pointer'}} onClick={() => handleDeleteOrder(order?.product)}/>
+                  <span style={{color: 'rgb(255, 66, 78)', fontSize: '13px', fontWeight: 500}}>{convertPrice(item.price*item.amount - item.price*item.amount*item.discount/100)}</span>
+                  <DeleteOutlined style={{cursor: 'pointer'}} onClick={() => handleDeleteOrder(item?.product._id)}/>
                 </div>
               </WrapperItemOrder>
                 )
@@ -277,16 +354,16 @@ const OrderPage = () => {
               </WrapperInfo>
               <WrapperInfo>
                 <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
-                  <span style={{fontSize: "13px"}}>Tạm tính</span>
+                  <span style={{fontSize: "13px"}}>Tổng giá chưa khuyến mãi </span>
                   <span style={{color: '#000', fontSize: '14px', fontWeight: 'bold'}}>{convertPrice(priceMemo)}</span>
                 </div>
                 <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
-                  <span style={{fontSize: "13px"}}>Giảm giá</span>
-                  <span style={{color: '#000', fontSize: '14px', fontWeight: 'bold'}}>{convertPrice(priceDiscountMemo)}</span>
+                  <span style={{fontSize: "13px"}}>Tổng khuyến mãi</span>
+                  <span style={{color: '#000', fontSize: '14px', fontWeight: 'bold'}}> - {convertPrice(priceDiscountMemo)}</span>
                 </div>
                 <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
                   <span style={{fontSize: "13px"}}>Phí giao hàng</span>
-                  <span style={{color: '#000', fontSize: '14px', fontWeight: 'bold'}}>{convertPrice(diliveryPriceMemo)}</span>
+                  <span style={{color: '#000', fontSize: '14px', fontWeight: 'bold'}}> + {convertPrice(deliveryPriceMemo)}</span>
                 </div>
               </WrapperInfo>
               <WrapperTotal>

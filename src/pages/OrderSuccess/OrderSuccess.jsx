@@ -1,7 +1,6 @@
 import React from 'react'
-import { Lable, WrapperInfo, WrapperContainer, WrapperValue, WrapperCountOrder, WrapperItemOrder, WrapperItemOrderInfo } from './style';
+import { Lable, WrapperInfo, WrapperContainer, WrapperValue, WrapperItemOrder, WrapperItemOrderInfo } from './style';
 import Loading from '../../components/LoadingComponent/Loading';
-import { useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 import { orderContant } from '../../contant';
 import { convertPrice } from '../../utils';
