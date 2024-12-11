@@ -1,5 +1,5 @@
 import React, { Fragment, useEffect, useState } from 'react'
-import {BrowserRouter as Router, Routes, Route} from 'react-router-dom'
+import {BrowserRouter as Router, Routes, Route, useLocation} from 'react-router-dom'
 import { routes } from './routes'
 import DefaultComponent from './components/DefaultComponent/DefaultComponent'
 import { isJsonString } from './utils'
@@ -64,6 +64,11 @@ function App() {
     
   }
 
+  const ShowChatbot = () => {
+    const location = useLocation();
+    return location.pathname === '/' ? <Chatbot /> : null;
+  };
+
   return (
     <div>
       <Loading isPending={isPending}>
@@ -83,7 +88,7 @@ function App() {
               )
             })}
           </Routes>
-          <Chatbot/>
+          <ShowChatbot/>
         </Router>
       </Loading>
     </div>

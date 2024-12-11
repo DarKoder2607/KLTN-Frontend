@@ -1163,6 +1163,13 @@ const onFinish = () => {
               <InputComponent value={stateProductDetails['type']} onChange={handleOnchangeDetails} name="type" />
             </Form.Item>
             <Form.Item
+              label="Rating"
+              name="rating"
+              rules={[{ required: true, message: 'Please input your count rating!' }]}
+            >
+              <InputComponent value={stateProductDetails.rating} onChange={handleOnchangeDetails} name="rating" />
+            </Form.Item>
+            <Form.Item
               label="Count inStock"
               name="countInStock"
               rules={[{ required: true, message: 'Please input your count inStock!' }]}
@@ -1199,13 +1206,7 @@ const onFinish = () => {
 
             {stateProductDetails.deviceType && renderSpecsFormUpdate(stateProductDetails.deviceType)}
 
-            {/* <Form.Item
-              label="Rating"
-              name="rating"
-              rules={[{ required: true, message: 'Please input your count rating!' }]}
-            >
-              <InputComponent value={stateProductDetails.rating} onChange={handleOnchangeDetails} name="rating" />
-            </Form.Item> */}
+            
             <Form.Item
               label="Discount"
               name="discount"
