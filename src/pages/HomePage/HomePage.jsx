@@ -25,8 +25,10 @@
         const searchProduct = useSelector((state) => state?.product?.search)
         const searchDebounce = useDebounce(searchProduct, 1000)
         const [limit, setLimit] = useState(6)
+        const [page, setPage] = useState(0);
         const [pending, setPending] = useState(false)
         const [typeProducts, setTypeProducts] = useState([])
+        
 
         const fetchTopSelledProducts = async () => {
             const res = await ProductService.getTopSelledProducts(6);  
@@ -108,12 +110,12 @@
                 [deviceType]: prev[deviceType] + 6
             }));
         };
-
+        
         const fetchProductAll = async (context) => {
             const limit = context?.queryKey && context?.queryKey[1]
-            const search = context?.queryKey && context?.queryKey[2]
-            const  res = await ProductService.getAllProduct(search, limit)
-
+            const page = context?.queryKey && context?.queryKey[2]
+            const search = context?.queryKey && context?.queryKey[3]
+            const res = await ProductService.getAllProduct(search, limit, page) // thêm page vào hàm gọi API
             return res
         }
 
@@ -131,12 +133,12 @@
         };
 
         const {isPending, data: products, isPreviousData} = useQuery({
-            queryKey: ['products' , limit, searchDebounce],
+            queryKey: ['products', limit, page, searchDebounce],  
             queryFn: fetchProductAll,
+            keepPreviousData: true,  
             retry: 3, 
             retryDelay: 1000,
-            placeholderData : keepPreviousData
-        }) 
+        })
 
         useEffect(() => {
             fetchAllTypeProduct()
@@ -173,7 +175,7 @@
                                 width: '50%' 
                                 }} />
                             <WrapperProducts style={{ backgroundColor: '#2980B9', padding: '20px', borderRadius: '8px'} } >
-                                {products?.data?.map((product) =>{
+                                {products?.data && products?.data.map((product, index) =>{
                                     return (
                                         <CardComponent key={product._id} countInStock = {product.countInStock} 
                                                         decription={product.decription} image={product.image} name={product.name}

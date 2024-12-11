@@ -37,7 +37,7 @@ const TypeProductPage = () => {
   });
 
   const [filters, setFilters] = useState({
-    type: null,
+    type: 'all',
     deviceType: state, // Bắt đầu với deviceType hiện tại
     minPrice: 0,
     maxPrice: 100000000,
@@ -97,7 +97,7 @@ const TypeProductPage = () => {
     setPanigate({ ...panigate, page: current - 1, limit: pageSize });
   };
 
-  console.log(filters.type);
+  console.log( 'filters.type',filters.type);
 
   return (
     <Loading isPending={loading}>
