@@ -2,8 +2,9 @@ import styled from "styled-components"
 
 export const WrapperHeaderUser = styled.div`
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
+  flex-wrap: wrap;
 `
 
 export const WrapperInfoUser = styled.div`
@@ -65,22 +66,24 @@ export const WrapperContentProductBill = styled.div`
   padding: 10px;
 `
 export const WrapperStyleContent = styled.div`
-  display:flex;
+  display: flex;
   flex-direction: column;
   gap: 10px;
   margin-top: 20px;
 `
 
 export const WrapperProduct = styled.div`
-  display:flex;
-  align-items:flex-start;
+  display: flex;
+  align-items: flex-start;
   margin-top: 10px;
+  justify-content: space-between;
 `
+
 
 export const WrapperNameProduct = styled.div`
   display:flex;
   align-items: flex-start;
-  width: 670px;
+  width: 360px;
 `
 
 export const WrapperItem = styled.div`
@@ -91,14 +94,13 @@ export const WrapperItem = styled.div`
   }
 `
 export const WrapperItemLabel = styled.div`
-  width: 190px;
   &:last-child {
     font-weight: bold;
   }
 `
-
 export const WrapperAllPrice = styled.div`
   display: flex;
   flex-direction: column;
-  align-items: flex-end
+  align-items: flex-end;
+  margin-top: 10px;
 `

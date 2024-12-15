@@ -7,10 +7,17 @@ export const WrapperCardStyle = styled(Card)`
         width: 200px;
     },
     position: relative;
-    background-color: ${props => props.disabled ? '#ccc' : '#fff'} ;
-    cursor : ${props => props.disabled ? 'not-allowed' : 'pointer'}
+    background-color: ${props => props.disabled ? '#ccc' : '#fff'};
+    cursor : ${props => props.disabled ? 'not-allowed' : 'pointer'};
+    transition: transform 0.3s ease, box-shadow 0.3s ease;  
     
-`
+    &:hover {
+        transform: translateY(-10px) scale(1.05);  
+        box-shadow: 0px 10px 15px rgba(0, 0, 0, 0.2);  
+        
+    }
+`;
+
 
 export const StyleNameProduct = styled.div`
     font-weight: 400;
@@ -32,7 +39,7 @@ export const StyleNameProduct = styled.div`
         background-color: rgb(243, 156, 18); 
         z-index: 1; 
         position: absolute; 
-        top: 80%;
+        top: 80%;   
         color: rgb(255, 255, 255); 
         left: 50%; 
         transform: translate(-50%, -50%); 
@@ -85,6 +92,30 @@ export const WrapperDiscountTest = styled.span`
     padding: 4px;
     background-color: rgba(255, 66, 78, 0.1);
     border-radius: 4px;
+`
+export const WrapperAddToCart = styled.span`
+    color: rgb(255, 66, 78);
+    font-weight: 500;
+    position: absolute;
+    bottom: 0;
+    left: 6px;
+    font-size: 20px;
+
+     &:hover {
+        color: blue;
+       
+    }
+
+    .add-to-cart-text {
+        display: none;   
+    }
+
+    &:hover .add-to-cart-text {
+        display: inline-block;   
+        font-size: 14px;
+        color: blue;
+    }
+
 `
 
 export const WrapperStyleTextSell = styled.span`

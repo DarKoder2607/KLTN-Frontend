@@ -64,7 +64,7 @@ export const Headings = styled.h3`
 
 export const FooterText = styled.p`
 	font-size: 14px;
-	color: #777;
+	color: #333;
 	margin-bottom: 10px;
 	text-align: left;
 `;

@@ -104,3 +104,48 @@ export const WrapperInputNumber= styled(InputNumber)`
     };
     
 `
+const flashingBackground2 = `
+  @keyframes flashingBackground2 {
+    0% {
+      background-color: red;
+    }
+    50% {
+      background-color: rgb(13,92,182);
+    }
+    100% {
+      background-color: red;
+    }
+  }
+`;
+export const WrapperProducts2 = styled.div`
+    ${flashingBackground2}  
+    padding: 20px;
+    border-radius: 8px;
+    animation: flashingBackground2 2s infinite; 
+    display: flex;
+    gap: 40px;
+    margin-top: 20px;
+    flex-wrap: wrap
+`
+
+export const BlinkTitle = styled.h2`
+    font-size: 20px;
+    font-weight: bold;
+    margin: 5px 0;
+    animation: blink 2s infinite;
+
+    @keyframes blink {
+        0% {
+            opacity: 1;
+            color: #ff5733;  
+        }
+        50% {
+            opacity: 0.5;
+            color: green;  
+        }
+        100% {
+            opacity: 1;
+            color: red;  
+        }
+    }
+`;

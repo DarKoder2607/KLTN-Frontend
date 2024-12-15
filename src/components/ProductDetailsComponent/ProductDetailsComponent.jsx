@@ -1,16 +1,15 @@
-import { Col, Image, Rate, Row, Form, Modal, Table ,  Input,  } from 'antd'
+import { Col,  Rate, Row, Form, Modal, Table ,  Input,  } from 'antd'
 import React, { useEffect, useState } from 'react'
-import { WrapperAddressProduct,  WrapperCounInStockProduct,  WrapperInputNumber, WrapperPriceProduct, WrapperPriceTextProduct, WrapperQualityProduct, WrapperStyleColImage, WrapperStyleImageSmall, WrapperStyleNameProduct, WrapperStyleTextCounInStock, WrapperStyleTextSell } from './Style'
-import { MinusOutlined, PlusOutlined, } from '@ant-design/icons'
+import { BlinkTitle, WrapperAddressProduct,  WrapperCounInStockProduct,  WrapperInputNumber, WrapperPriceProduct, WrapperPriceTextProduct, WrapperProducts2, WrapperQualityProduct, WrapperStyleColImage, WrapperStyleImageSmall, WrapperStyleNameProduct, WrapperStyleTextCounInStock, WrapperStyleTextSell } from './Style'
+import { CloseOutlined, LeftOutlined, MinusOutlined, PlusOutlined, RightOutlined, RightSquareOutlined, } from '@ant-design/icons'
 import ButtonComponent from '../ButtonComponent/ButtonComponent'
 import * as ProductService from '../../services/ProductService'
 import { useQuery } from '@tanstack/react-query'
 import Loading from '../LoadingComponent/Loading'
 import { useDispatch, useSelector } from 'react-redux'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { addOrderProduct, resetOrder } from '../../redux/slides/orderSlide'
-import * as message from '../Message/Message'
-import LikeButtonComponent from '../LikeButtonComponent/LikeButtonComponent'
+import {  resetOrder } from '../../redux/slides/orderSlide'
+import * as message from '../Message/Message' 
 import { initFacebookSDK } from '../../utils'
 import ModalComponent from '../ModalComponent/ModalComponent'
 import { useMutationHooks } from '../../hooks/useMutationHook'
@@ -20,6 +19,7 @@ import { updateUser } from '../../redux/slides/userSlide';
 import ReviewsSection from '../ReviewsSection/ReviewsSection'; 
 import { addToCart } from '../../services/CartService'
 import { addingToCart } from '../../redux/slides/cartSlice'
+import CardComponent from '../CardComponent/CardComponent'
 
 const { TextArea } = Input;
 
@@ -60,7 +60,7 @@ const ProductDetailsComponent = ({idProduct, userId }) => {
     const fetchGetDetailsProduct = async (context) => {
         const id = context?.queryKey && context?.queryKey[1]
         if(id){
-            const res = await ProductService.getDetailsProduct(id)
+            const res = await ProductService.getRecommedProduct(id)
             return res.data
         }
     }
@@ -99,12 +99,15 @@ const ProductDetailsComponent = ({idProduct, userId }) => {
         }
     }
 
-    const {isPending, data: productDetails} = useQuery({
+    const {isPending, data: productDetailsData} = useQuery({
         queryKey: ['product-details', idProduct],
         queryFn: fetchGetDetailsProduct,
         enabled : !!idProduct
     }) 
-    console.log('productDetails', productDetails)
+    
+    const productDetails = productDetailsData?.product;
+    const relatedProducts = productDetailsData?.relatedProducts;
+
 
     const handleAddToCart = async () => {
         if (!user?.id) {
@@ -129,30 +132,30 @@ const ProductDetailsComponent = ({idProduct, userId }) => {
         }
       };
 
-    const handleAllOrderProduct= () =>{
-        if( !user?.id){
-            message.warning('Vui lòng đăng nhập để có thế mua hàng')
-            navigate ('/sign-in', {state: location?.pathname})
-        } else {
-            const orderRedux = order?.orderItems?.find((item) => item.product === productDetails?._id)
-            if((orderRedux?.amount + numProduct) <= orderRedux?.countInstock || 
-            (!orderRedux && productDetails?.countInStock > 0)) {
-                dispatch(addOrderProduct({
-                    orderItem: {
-                        name: productDetails?.name,
-                        amount: numProduct,
-                        image: productDetails?.image,
-                        price: productDetails?.price,
-                        product: productDetails?._id,
-                        discount: productDetails?.discount,
-                        countInstock: productDetails?.countInStock
-                    }
-                }))
-            } else {
-                setErrorLimitOrder(true)
-            }
-        }
-    }
+    // const handleAllOrderProduct= () =>{
+    //     if( !user?.id){
+    //         message.warning('Vui lòng đăng nhập để có thế mua hàng')
+    //         navigate ('/sign-in', {state: location?.pathname})
+    //     } else {
+    //         const orderRedux = order?.orderItems?.find((item) => item.product === productDetails?._id)
+    //         if((orderRedux?.amount + numProduct) <= orderRedux?.countInstock || 
+    //         (!orderRedux && productDetails?.countInStock > 0)) {
+    //             dispatch(addOrderProduct({
+    //                 orderItem: {
+    //                     name: productDetails?.name,
+    //                     amount: numProduct,
+    //                     image: productDetails?.image,
+    //                     price: productDetails?.price,
+    //                     product: productDetails?._id,
+    //                     discount: productDetails?.discount,
+    //                     countInstock: productDetails?.countInStock
+    //                 }
+    //             }))
+    //         } else {
+    //             setErrorLimitOrder(true)
+    //         }
+    //     }
+    // }
 
     const mutationUpdate = useMutationHooks(
         (data) => {
@@ -265,17 +268,17 @@ const ProductDetailsComponent = ({idProduct, userId }) => {
             ];
             break;
       
-          case 'headphone':
+          case 'audio':
             specs = [
-              { key: '1', name: 'Bluetooth:', value: productDetails?.headphoneSpecs.bluetooth },
-              { key: '2', name: 'Pin:', value: productDetails?.headphoneSpecs.battery },
-              { key: '3', name: 'Chiều dài:', value: productDetails?.headphoneSpecs.length },
-              { key: '4', name: 'Chống ồn:', value: productDetails?.headphoneSpecs.noiseCancellation },
-              { key: '5', name: 'Cổng kết nối:', value: productDetails?.headphoneSpecs.ports },
-              { key: '6', name: 'Phạm vi:', value: productDetails?.headphoneSpecs.scope },
-              { key: '7', name: 'Chất liệu:', value: productDetails?.headphoneSpecs.material },
-              { key: '8', name: 'Thiết kế:', value: productDetails?.headphoneSpecs.design },
-              { key: '9', name: 'Chức năng:', value: productDetails?.headphoneSpecs.feature },
+              { key: '1', name: 'Bluetooth:', value: productDetails?.audioSpecs.bluetooth },
+              { key: '2', name: 'Pin:', value: productDetails?.audioSpecs.battery },
+              { key: '3', name: 'Chiều dài:', value: productDetails?.audioSpecs.length },
+              { key: '4', name: 'Chống ồn:', value: productDetails?.audioSpecs.noiseCancellation },
+              { key: '5', name: 'Cổng kết nối:', value: productDetails?.audioSpecs.ports },
+              { key: '6', name: 'Phạm vi:', value: productDetails?.audioSpecs.scope },
+              { key: '7', name: 'Chất liệu:', value: productDetails?.audioSpecs.material },
+              { key: '8', name: 'Thiết kế:', value: productDetails?.audioSpecs.design },
+              { key: '9', name: 'Chức năng:', value: productDetails?.audioSpecs.feature },
             ];
             break;
       
@@ -299,23 +302,279 @@ const ProductDetailsComponent = ({idProduct, userId }) => {
         
       };
       
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
+    const [currentStartIndex, setCurrentStartIndex] = useState(0);
+    const [isModalVisible, setIsModalVisible] = useState(false);  
+    const allImages = [productDetails?.image, ...(productDetails?.relatedImages || [])];
+    const imagesToShow = 6;
+
+    const handlePrevImage = () => {
+        setCurrentImageIndex((prevIndex) => 
+            prevIndex === 0 ? allImages.length - 1 : prevIndex - 1
+        );
+    };
+
+    const handleNextImage = () => {
+        setCurrentImageIndex((prevIndex) => 
+            prevIndex === allImages.length - 1 ? 0 : prevIndex + 1
+        );
+    };
+
+    const handleClickThumbnail = (index) => {
+        setCurrentImageIndex(index);
+    };
+
+    const handleNextThumbnail = () => {
+        if (currentStartIndex + imagesToShow < allImages.length) {
+            setCurrentStartIndex(currentStartIndex + 1);
+        }
+    };
+
+    const handlePrevThumbnail = () => {
+        if (currentStartIndex > 0) {
+            setCurrentStartIndex(currentStartIndex - 1);
+        }
+    };
+
+    const openImageModal = (index) => {
+        setCurrentImageIndex(index);
+        setIsModalVisible(true);
+    };
+ 
+    const closeImageModal = () => {
+        setIsModalVisible(false);
+    };
+
+    const thumbnails = allImages.slice(currentStartIndex, currentStartIndex + imagesToShow);
 
   return (
     <div>
         <Loading isPending={isPending}>
             <Row style={{padding: '16px', background: '#fff', borderRadius: '4px'}}>
-                <Col span={10} style={{borderRight:'1px solid #e5e5e5', paddingRight: '8px'}}>
-                    <Image src={productDetails?.image} alt="image product" preview="false"/>
-                    <div style={{marginTop: '10px', marginBottom: '1px'}}>Các hình ảnh chi tiết hơn về sản phẩm: </div>
-                    <Row style={{paddingTop: '10px', justifyContent: 'left' }}>
-                        {productDetails?.relatedImages.map((image, index) => (
-                            <WrapperStyleColImage key={index} span={4} >
-                                <WrapperStyleImageSmall src={image} alt={`Related Image ${index}`} preview="false"  /> 
+            <Col span={10} style={{ borderRight: '1px solid #e5e5e5', paddingRight: '8px', position: 'relative' }}>
+                <div style={{ position: 'relative' }}>
+                    <img 
+                        src={allImages[currentImageIndex]} 
+                        alt="Main product image" 
+                        style={{ height: '500px',  cursor: 'pointer', width: '510px', borderRadius: '8px', objectFit: 'contain',  objectPosition: 'center' }} 
+                        onClick={() => openImageModal(currentImageIndex)}
+                    />
+ 
+                    <button 
+                        onClick={handlePrevImage} 
+                        style={{ 
+                            position: 'absolute', 
+                            top: '50%', 
+                            left: '5px', 
+                            transform: 'translateY(-50%)', 
+                            background: 'rgba(0,0,0,0.5)', 
+                            border: 'none', 
+                            color: '#fff', 
+                            borderRadius: '50%', 
+                            width: '32px', 
+                            height: '32px', 
+                            cursor: 'pointer',
+                            display: 'flex', 
+                            justifyContent: 'center', 
+                            alignItems: 'center' 
+                        }}
+                    >
+                        <LeftOutlined />
+                    </button>
+
+                    <button 
+                        onClick={handleNextImage} 
+                        style={{ 
+                            position: 'absolute', 
+                            top: '50%', 
+                            right: '5px', 
+                            transform: 'translateY(-50%)', 
+                            background: 'rgba(0,0,0,0.5)', 
+                            border: 'none', 
+                            color: '#fff', 
+                            borderRadius: '50%', 
+                            width: '32px', 
+                            height: '32px', 
+                            cursor: 'pointer',
+                            display: 'flex', 
+                            justifyContent: 'center', 
+                            alignItems: 'center' 
+                        }}
+                    >
+                        <RightOutlined />
+                    </button>
+                </div>
+ 
+                <div style={{ marginTop: '10px', marginBottom: '1px' }}>
+                    Các hình ảnh chi tiết hơn về sản phẩm:
+                </div>
+ 
+                <div style={{ position: 'relative' }}>
+                
+                    {currentStartIndex > 0 && (
+                        <button 
+                            onClick={handlePrevThumbnail} 
+                            style={{ 
+                                position: 'absolute',   
+                                top: '55%', 
+                                right: '1px',  
+                                transform: 'translateY(-50%)',  
+                                background: 'rgba(0,0,0,0.5)', 
+                                border: 'none', 
+                                color: '#fff', 
+                                cursor: 'pointer', 
+                                padding: '5px 10px',
+                                borderRadius: '50%',
+                                zIndex: 2 
+                            }}
+                        >
+                            <LeftOutlined />
+                        </button>
+                    )}
+
+                    {currentStartIndex + imagesToShow < allImages.length && (
+                        <button 
+                            onClick={handleNextThumbnail} 
+                            style={{ 
+                                position: 'absolute',  
+                                top: '55%', 
+                                right: '1px',  
+                                transform: 'translateY(-50%)', 
+                                background: 'rgba(0,0,0,0.5)', 
+                                border: 'none', 
+                                color: '#fff', 
+                                cursor: 'pointer', 
+                                padding: '5px 10px',
+                                borderRadius: '50%',
+                                zIndex: 2  
+                            }}
+                        >
+                            <RightOutlined />
+                        </button>
+                    )}
+ 
+                    <Row style={{ paddingTop: '10px', justifyContent: 'left' }}>
+                        {thumbnails.map((image, index) => (
+                            <WrapperStyleColImage key={index} span={4}>
+                                <WrapperStyleImageSmall 
+                                    src={image} 
+                                    alt={`Related Image ${index}`} 
+                                    preview="false" 
+                                    style={{ 
+                                        height: '80px', 
+                                        width: '85px',  
+                                        borderRadius: '8px',  
+                                        objectFit: 'contain',  
+                                        objectPosition: 'center',  
+                                        border: currentImageIndex === (currentStartIndex + index) ? '2px solid #1890ff' : 'none', 
+                                        cursor: 'pointer' 
+                                      }}
+                                    onClick={() => handleClickThumbnail(currentStartIndex + index)} 
+                                />
                             </WrapperStyleColImage>
                         ))}
                     </Row>
+                </div>
+            </Col>
 
-                </Col>
+            <Modal 
+                   open={isModalVisible} 
+                   footer={null} 
+                   onCancel={closeImageModal} 
+                   centered 
+                   closable={false} 
+                   bodyStyle={{ 
+                       padding: 0, 
+                       textAlign: 'center', 
+                       height: '90vh', 
+                       display: 'flex', 
+                       justifyContent: 'center', 
+                       alignItems: 'center' 
+                   }} 
+                   width="80vw" 
+            >
+                <div style={{ position: 'relative' }}>
+                    <img 
+                        src={allImages[currentImageIndex]} 
+                        alt="Enlarged product image" 
+                        style={{ 
+                            width: '100%', 
+                            height: '100%', 
+                            maxHeight: '90vh', 
+                            maxWidth: '90vw', 
+                            objectFit: 'contain' 
+                        }} 
+                    />
+
+                </div>
+
+                <button 
+                        onClick={handlePrevImage} 
+                        style={{ 
+                            position: 'absolute', 
+                            top: '50%', 
+                            left: '5px', 
+                            transform: 'translateY(-50%)', 
+                            background: 'rgba(0,0,0,0.5)', 
+                            border: 'none', 
+                            color: '#fff', 
+                            borderRadius: '50%', 
+                            width: '40px', 
+                            height: '40px', 
+                            cursor: 'pointer', 
+                            display: 'flex', 
+                            justifyContent: 'center', 
+                            alignItems: 'center' 
+                        }}
+                    >
+                        <LeftOutlined />
+                    </button>
+
+                    <button 
+                        onClick={handleNextImage} 
+                        style={{ 
+                            position: 'absolute', 
+                            top: '50%', 
+                            right: '5px', 
+                            transform: 'translateY(-50%)', 
+                            background: 'rgba(0,0,0,0.5)', 
+                            border: 'none', 
+                            color: '#fff', 
+                            borderRadius: '50%', 
+                            width: '40px', 
+                            height: '40px', 
+                            cursor: 'pointer', 
+                            display: 'flex', 
+                            justifyContent: 'center', 
+                            alignItems: 'center' 
+                        }}
+                    >
+                        <RightOutlined />
+                    </button>
+
+                    <button 
+                        onClick={closeImageModal} 
+                        style={{ 
+                            position: 'absolute', 
+                            top: '10px', 
+                            right: '10px', 
+                            background: 'rgba(0,0,0,0.7)', 
+                            border: 'none', 
+                            color: '#fff', 
+                            borderRadius: '50%', 
+                            width: '32px', 
+                            height: '32px', 
+                            cursor: 'pointer', 
+                            display: 'flex', 
+                            justifyContent: 'center', 
+                            alignItems: 'center' 
+                        }}
+                    >
+                        <CloseOutlined />
+                    </button>
+
+            </Modal>
+
                 <Col span={14} style={{paddingLeft: '10px'}}>
                     <WrapperStyleNameProduct>{productDetails?.name}</WrapperStyleNameProduct>
                     <div>
@@ -324,33 +583,46 @@ const ProductDetailsComponent = ({idProduct, userId }) => {
                         <WrapperStyleTextSell> | Đã bán {productDetails?.selled || 0} sản phẩm </WrapperStyleTextSell>
                     </div>
                     <WrapperPriceProduct>
-                        {productDetails?.discount > 0 ? (
-                            <>
-                                <WrapperPriceTextProduct >
-                                    <span style={{ textDecoration: 'line-through' , fontSize: '20px'}}  className='origin-price'>{productDetails?.price.toLocaleString()} VNĐ  </span>
-                                    <span style={{ fontSize:'15px', color: 'red'} }>  -{productDetails?.discount}%</span>
-                                    <span className='discount-price'> 
-                                        {(productDetails?.price - productDetails?.price*(productDetails?.discount/100)).toLocaleString()} VNĐ
-                                    </span>
-                                </WrapperPriceTextProduct>
-                            </>
-                        ) : (
-                            <WrapperPriceTextProduct><span className='origin-price'>{productDetails?.price.toLocaleString()} VNĐ </span></WrapperPriceTextProduct>
+                        {productDetails?.discount > 0 ? ( 
+                            <WrapperPriceTextProduct>
+                                <span style={{ textDecoration: 'line-through', fontSize: '20px' }} className='origin-price'>
+                                    {productDetails?.price.toLocaleString()} VNĐ
+                                </span>
+                                <span style={{ fontSize: '15px', color: 'red' }}>
+                                    -{productDetails?.discount}%
+                                </span>
+                                <span className='discount-price'>
+                                    {(productDetails?.price - productDetails?.price * (productDetails?.discount / 100)).toLocaleString()} VNĐ
+                                </span>
+                            </WrapperPriceTextProduct>
+                        ) : productDetails?.discount === 0 && productDetails?.price < productDetails?.originPrice ? ( 
+                            <WrapperPriceTextProduct>
+                                <span style={{ textDecoration: 'line-through', fontSize: '20px' }} className='origin-price'>
+                                    {productDetails?.originPrice.toLocaleString()} VNĐ
+                                </span>
+                                <span style={{ fontSize: '15px', color: 'red' }}>
+                                    -{(productDetails?.originPrice - productDetails?.price).toLocaleString()}
+                                </span>
+                                <span className='discount-price'>
+                                    {productDetails?.price.toLocaleString()} VNĐ
+                                </span>
+                            </WrapperPriceTextProduct>
+                        ) : ( 
+                            <WrapperPriceTextProduct>
+                                <span className='origin-price'>
+                                    {productDetails?.price.toLocaleString()} VNĐ
+                                </span>
+                            </WrapperPriceTextProduct>
                         )}
                     </WrapperPriceProduct>
 
-
+                    {user?.id &&(
                     <WrapperAddressProduct>
                         <span> Giao đến </span>
                         <span className='address'>{user?.address}</span>  - 
                         <span onClick={handleChangeAddress} className='change-address'> Đổi địa chỉ </span>
                     </WrapperAddressProduct>
-                    <LikeButtonComponent
-                        dataHref={ process.env.REACT_APP_IS_LOCAL 
-                                    ? "https://developers.facebook.com/docs/plugins/" 
-                                    : window.location.href
-                                } 
-                    />
+                    )}
                     <div style={{margin: '10px 0 20px',padding: '10px 0', borderTop: '1px solid #e5e5e5', borderBottom: ' 1px solid #e5e5e5'}}>
                         <WrapperCounInStockProduct>
                             <WrapperStyleTextCounInStock>Thiết bị còn sẵn {productDetails?.countInStock} sản phẩm trong kho hàng</WrapperStyleTextCounInStock>
@@ -395,7 +667,39 @@ const ProductDetailsComponent = ({idProduct, userId }) => {
                                 onClick={toggleSpecsTable}
                             ></ButtonComponent>
                     </div>
+   
                 </Col>
+
+                <Col span={24} style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
+                    <div style={{
+                        backgroundColor: '#ffc04d', 
+                        padding: '10px', 
+                        borderRadius: '8px', 
+                        width: '100%', 
+                    }}>
+                        <BlinkTitle>SẢN PHẨM BẠN CÓ THỂ QUAN TÂM</BlinkTitle>
+                
+                        <WrapperProducts2 style={{  display: 'flex', justifyContent: 'center', textAlign:'center',backgroundColor: '#fff', padding: '20px', borderRadius: '8px' }}>
+                            {relatedProducts?.map((product) => (
+                                <CardComponent
+                                    key={product._id}
+                                    countInStock={product.countInStock}
+                                    decription={product.decription}
+                                    image={product.image}
+                                    name={product.name}
+                                    price={product.price}
+                                    rating={product.rating}
+                                    type={product.type}
+                                    deviceType={product.deviceType}
+                                    selled={product.selled}
+                                    discount={product.discount}
+                                    id={product._id}
+                                />
+                            ))}
+                        </WrapperProducts2>
+                    </div>
+                </Col>
+
                 <div style={{ marginTop: "40px" }}>
                    
                     <ReviewsSection productId={idProduct} userId={userId} />

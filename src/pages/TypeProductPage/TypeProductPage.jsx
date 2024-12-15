@@ -1,15 +1,16 @@
-import React, { Fragment, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import NavBarComponent from "../../components/NavbarComponent/NavbarComponent";
 import CardComponent from "../../components/CardComponent/CardComponent";
 import { Col, Pagination, Row } from "antd";
-import { WrapperNavbar, WrapperProducts } from "./Style";
-import { useLocation } from "react-router-dom";
+import { WrapperProducts } from "./Style";
+import { useLocation, useNavigate } from "react-router-dom";
 import * as ProductService from "../../services/ProductService";
 import Loading from "../../components/LoadingComponent/Loading";
 import { useSelector } from "react-redux";
 import { useDebounce } from "../../hooks/useDebounce";
 import styled from "styled-components";
-import { Input, Slider, Radio, Button } from "antd";
+import { Input, Slider } from "antd";
+import useHover from "../../hooks/useHover";
 
 const PageContainer = styled.div`
   width: 100%;
@@ -20,7 +21,6 @@ const PageContainer = styled.div`
 const ContentWrapper = styled.div`
   width: 1270px;
   margin: 0 auto;
-  padding: 20px 0;
 `;
 
 const TypeProductPage = () => {
@@ -38,7 +38,7 @@ const TypeProductPage = () => {
 
   const [filters, setFilters] = useState({
     type: 'all',
-    deviceType: state, // Bắt đầu với deviceType hiện tại
+    deviceType: state,  
     minPrice: 0,
     maxPrice: 100000000,
     minRating: 0,
@@ -65,10 +65,14 @@ const TypeProductPage = () => {
     setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
-  const onChangePagination = (current, pageSize) => {
-    setPanigate({ ...panigate, page: current - 1, limit: pageSize });
-  
-  };
+  useEffect(() => {
+    if (state) {
+        setFilters((prev) => ({ 
+            ...prev, 
+            deviceType: state 
+        }));
+    }
+}, [state]);
 
 
   const fetchProductType = async (deviceType, page, limit) => {
@@ -97,12 +101,26 @@ const TypeProductPage = () => {
     setPanigate({ ...panigate, page: current - 1, limit: pageSize });
   };
 
-  console.log( 'filters.type',filters.type);
+
+  const navigate = useNavigate()
+  const { isHovered , handleMouseEnter, handleMouseLeave  } = useHover()
+          
+         
 
   return (
     <Loading isPending={loading}>
       <PageContainer>
-        <ContentWrapper>
+        <ContentWrapper >
+        <span style={{fontSize : '15px'}}>
+              <span style={{
+                  cursor: 'pointer', 
+                  color: isHovered ? '#ea8500' : '#000' 
+                  }} 
+                  onMouseEnter={handleMouseEnter} 
+                  onMouseLeave={handleMouseLeave}  
+                  onClick={() => navigate('/')}>Trang chủ</span> <span>\</span>
+                      <span style={{fontWeight: 'bold', color: 'blue'}}> Phân loại hiết bị </span>
+              </span>
           <Row gutter={16}>
             {/* Sidebar: Filter */}
             <Col span={4}>
@@ -154,13 +172,7 @@ const TypeProductPage = () => {
                   />
                 </div>
 
-                {/* <Button
-                  type="primary"
-                  style={{ marginTop: "20px", width: "100%" }}
-                  onClick={fetchProducts}
-                >
-                  Áp dụng bộ lọc
-                </Button> */}
+          
               </div>
             </Col>
 
@@ -195,7 +207,7 @@ const TypeProductPage = () => {
               <Pagination
                 defaultCurrent={panigate.page + 1}
                 total={panigate.total * panigate.limit}
-                onChange={onChangePagination}
+                onChange={onChange}
                 style={{ textAlign: "center", marginTop: "10px" }}
               />
             </Col>

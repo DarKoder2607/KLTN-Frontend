@@ -1,7 +1,7 @@
 import { Menu } from 'antd'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { getItem } from '../../utils';
-import { UserOutlined, AppstoreOutlined, ShoppingCartOutlined, PieChartOutlined } from '@ant-design/icons'
+import { UserOutlined, AppstoreOutlined, ShoppingCartOutlined, PieChartOutlined, GiftOutlined } from '@ant-design/icons'
 import HeaderComponent from '../../components/HeaderComponent/HeaderComponent';
 import AdminUser from '../../components/AdminUser/AdminUser';
 import AdminProduct from '../../components/AdminProduct/AdminProduct';
@@ -16,6 +16,8 @@ import { useSelector } from 'react-redux';
 import { useQueries } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import Loading from '../../components/LoadingComponent/Loading';
+import AdminEvent from '../../components/AdminEvent/AdminEvent';
+import * as EventService from '../../services/EventService';
 
 const AdminPage = () => {
   const user = useSelector((state) => state?.user)
@@ -25,6 +27,7 @@ const AdminPage = () => {
     getItem('Sản phẩm', 'products', <AppstoreOutlined />),
     getItem('Đơn hàng', 'orders', <ShoppingCartOutlined />),
     getItem('Thống kê', 'stats', <PieChartOutlined />),
+    getItem('Sự kiện', 'events', <GiftOutlined />),
     
   ];
 
@@ -36,14 +39,20 @@ const AdminPage = () => {
 
   const getAllProducts = async () => {
     const res = await ProductService.getAllProduct()
-    console.log('res1', res)
+ 
     return {data: res?.data, key: 'products'}
   }
 
   const getAllUsers = async () => {
     const res = await UserService.getAllUser(user?.access_token)
-    console.log('res', res)
+   
     return {data: res?.data, key: 'users'}
+  }
+
+  const getAllEvents = async () => {
+    const res = await EventService.getAllEvents()
+   
+    return {data: res?.data, key: 'events'}
   }
 
   const queries = useQueries({
@@ -51,6 +60,7 @@ const AdminPage = () => {
       {queryKey: ['products'], queryFn: getAllProducts, staleTime: 1000 * 60},
       {queryKey: ['users'], queryFn: getAllUsers, staleTime: 1000 * 60},
       {queryKey: ['orders'], queryFn: getAllOrder, staleTime: 1000 * 60},
+      {queryKey: ['events'], queryFn: getAllEvents, staleTime: 1000 * 60},
     ]
   })
 
@@ -72,6 +82,7 @@ const AdminPage = () => {
    users: ['#e66465', '#9198e5'],
    products: ['#a8c0ff', '#3f2b96'],
    orders: ['#11998e', '#38ef7d'],
+   events: ['orange', 'red'],
   };
 
   const renderPage = (key) => {
@@ -92,6 +103,10 @@ const AdminPage = () => {
         return (
           <StatisticsTable />
         )
+      case 'events':
+        return (
+          <AdminEvent />
+        )
       default:
         return <></>
     }
@@ -103,7 +118,7 @@ const AdminPage = () => {
   console.log('memoCount', memoCount)
   return (
     <>
-      <HeaderComponent isHiddenSearch isHiddenCart />
+      <HeaderComponent isHiddenSearch isHiddenCart isHiddenNotification/>
       <div style={{ display: 'flex',overflowX: 'hidden' }}>
         <Menu
           mode="inline"

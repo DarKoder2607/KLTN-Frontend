@@ -17,7 +17,7 @@ const TypeProduct = ({ name }) => {
         return <FaMobileAlt style={{ marginRight: '8px' }} />
       case 'tablet':
         return <FaTabletAlt style={{ marginRight: '8px' }} />
-      case 'headphone':
+      case 'audio':
         return <FaHeadphonesAlt style={{ marginRight: '8px' }} />
       case 'watch':
         return <MdWatch style={{ marginRight: '8px' }} />
@@ -31,7 +31,7 @@ const TypeProduct = ({ name }) => {
     laptop: 'Máy tính xách tay',
     phone: 'Điện thoại di động',
     tablet: 'Máy tính bảng',
-    headphone: 'Tai nghe',
+    audio: 'Tai nghe',
     watch: 'Đồng hồ đeo tay',
     loudspeaker : 'Loa điện tử'
     // Add more mappings as needed

@@ -15,26 +15,23 @@ const Chatbot = () => {
 
   const chatBodyRef = useRef();
   const inputRef = useRef();
-
-  // Gửi tin nhắn đến API và nhận phản hồi từ chatbot
+ 
   const generateBotResponse = async (history) => {
     const updateHistory = (text, isError = false) => {
       setChatHistory((prev) => [...prev.filter((msg) => msg.text !== "Thinking....."),{ role: "model", text, isError },]);
       
     };
 
-    try {
-      // Lấy phản hồi từ API
+    try { 
       const response = await chatbotChat({ message: history.at(-1).text });
       setTimeout(() => {
-        updateHistory(response.data.text); // Sử dụng phản hồi từ API
+        updateHistory(response.data.text);  
       }, 600); 
     } catch (error) {
       updateHistory(error.message || "Something went wrong!", true);
     }
   };
-
-  // Xử lý cuộn tự động khi có tin nhắn mới
+ 
   useEffect(() => {
     if (chatBodyRef.current) {
       chatBodyRef.current.scrollTo({
@@ -43,28 +40,24 @@ const Chatbot = () => {
       });
     }
   }, [chatHistory]);
-
-  // Xử lý gửi tin nhắn
+ 
   const handleFormSubmit = (e) => {
     e.preventDefault();
     const userMessage = inputRef.current.value.trim();
     if (!userMessage) return;
 
     inputRef.current.value = "";
-
-    // Cập nhật lịch sử với tin nhắn của người dùng
+ 
     setChatHistory((history) => [
       ...history,
       { role: "user", text: userMessage },
     ]);
-
-    // Thêm placeholder để chờ phản hồi từ bot
+ 
     setChatHistory((history) => [
       ...history,
       { role: "model", text: "Thinking....." },
     ]);
-
-    // Gửi tin nhắn của người dùng tới API
+ 
     generateBotResponse([...chatHistory, { role: "user", text: userMessage }]);
   };
 
@@ -81,8 +74,7 @@ const Chatbot = () => {
           <CommentOutlined style={{ fontSize: "35px" }} />
         )}
       </ChatToggler>
-      <ChatPopup showChatbot={showChatbot}>
-        {/* Chat header */}
+      <ChatPopup showChatbot={showChatbot}> 
         <ChatHeader>
           <HeaderInfo>
             <img src={imagelogo} alt="Logo" style={{ width: '70px', height: '70px' }} />
@@ -94,8 +86,7 @@ const Chatbot = () => {
             onClick={() => setShowChatbot((prev) => !prev)}
           />
         </ChatHeader>
-
-        {/* Chat body */}
+ 
         <ChatBody ref={chatBodyRef}>
           {chatHistory.map((chat, index) =>
             !chat.hideInChat ? (
@@ -119,8 +110,7 @@ const Chatbot = () => {
             ) : null
           )}
         </ChatBody>
-
-        {/* Chat footer */}
+ 
         <ChatFooter>
           <ChatForm action="#" onSubmit={handleFormSubmit}>
             <ChatInput ref={inputRef} type="text" placeholder="Message..." required />

@@ -6,7 +6,7 @@ import { DeleteOutlined, MinusOutlined, PlusOutlined} from '@ant-design/icons'
 import { WrapperInputNumber } from '../../components/ProductDetailsComponent/Style';
 import ButtonComponent from '../../components/ButtonComponent/ButtonComponent';
 import { useDispatch, useSelector } from 'react-redux';
-import { decreaseAmount, increaseAmount, removeAllOrderProduct, removeOrderProduct, selectedOrder } from '../../redux/slides/orderSlide';
+import { selectedOrder } from '../../redux/slides/orderSlide';
 import { convertPrice } from '../../utils';
 import { useMemo } from 'react';
 import ModalComponent from '../../components/ModalComponent/ModalComponent';
@@ -20,7 +20,8 @@ import { useNavigate } from 'react-router-dom';
 import StepComponent from '../../components/StepConponent/StepComponent';
 import { getCart, clearCart, removeFromCart, updateQuantity } from '../../services/CartService';
 import { createOrder } from '../../services/OrderService';
-import { clearsCart, removesFromCart, setCarts, updatesCartItem } from '../../redux/slides/cartSlice';
+import { clearsCart, decreaseAmount, increaseAmount, removesFromCart, setCarts, updatesCartItem } from '../../redux/slides/cartSlice';
+import useHover from '../../hooks/useHover';
 
 const OrderPage = () => {
   const order = useSelector((state) => state.order)
@@ -29,6 +30,7 @@ const OrderPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [listChecked, setListChecked] = useState([])
   const [isOpenModalUpdateInfo, setIsOpenModalUpdateInfo] = useState(false)
+  const { isHovered, handleMouseEnter, handleMouseLeave } = useHover()
   const [stateUserDetails, setStateUserDetails] = useState({
     name: '',
     phone: '',
@@ -38,7 +40,7 @@ const OrderPage = () => {
   const navigate = useNavigate()
   const [form] = Form.useForm();
   const dispatch = useDispatch()
-
+  
 
   useEffect(() => {
     const fetchCart = async () => {
@@ -60,27 +62,31 @@ const OrderPage = () => {
   }, [user]);
 
   const handleChangeCount = async (action, productId) => {
-    // Find the item in the cart
+     
     const item = cart.find(item => item.product._id === productId);
     
     if (!item) return;
   
     let newQuantity = item.amount;
-  
-    // Increase or decrease amount based on the action
+    const maxStock = item.product.countInStock;
+   
     if (action === 'increase') {
+      if (newQuantity >= maxStock) {
+        message.warning(`Số lượng sản phẩm đã đạt giới hạn (${maxStock})!`);
+        return;  
+      }
       newQuantity += 1;
+      dispatch(increaseAmount({ idProduct: productId, maxStock })); 
     } else if (action === 'decrease' && newQuantity > 1) {
       newQuantity -= 1;
+      dispatch(decreaseAmount({ idProduct: productId }))
     }
     
   
-    try {
-      // Update the amount in the backend
+    try { 
       const response = await updateQuantity(productId, newQuantity, user.access_token);
-      
-      // Update the local state with the new amount
-      setCart(response.cartItems);  // Assuming `cartItems` is the updated cart from the backend
+   
+      setCart(response.cartItems);   
       dispatch(updatesCartItem({
         product: productId,
         amount: newQuantity
@@ -118,7 +124,7 @@ const OrderPage = () => {
       setCart([]);
       message.success('Đã xóa toàn bộ giỏ hàng!');
     } catch (error) {
-      message.error('Xóa toàn   bộ giỏ hàng thất bại!');
+      message.error('Xóa toàn bộ giỏ hàng thất bại!');
     }
   };
   
@@ -127,9 +133,9 @@ const OrderPage = () => {
     setListChecked((prev) => {
       const isChecked = prev.includes(productId);
       if (isChecked) {
-        return prev.filter(id => id !== productId); // Bỏ chọn sản phẩm
+        return prev.filter(id => id !== productId);  
       } else {
-        return [...prev, productId]; // Thêm sản phẩm vào danh sách đã chọn
+        return [...prev, productId]; 
       }
     });
   };
@@ -187,9 +193,9 @@ const OrderPage = () => {
       return 10000;
     } else if (priceMemo >= 5000000) {
       return 2000;
-    } else {
+    } else if (priceMemo > 0 &&priceMemo < 2000000){
       return 20000;
-    }
+    } else return 0;
   }, [priceMemo]);
 
   const totalPriceMemo = useMemo(() => {
@@ -275,11 +281,19 @@ const OrderPage = () => {
   return (
     <div style={{background: '#f5f5fa', width: '100%', minHeight: '100vh', paddingBottom: '200px'}}>
       <div style={{height: '100%', width: '1270px', margin: '0 auto'}}>
-        <h3 style={{fontSize : '20px'}}><span style={{cursor: 'pointer', fontWeight: 'bold'}} 
-                    onClick={() => navigate('/')}>Trang chủ</span> \ Giỏ hàng </h3>
+        <span style={{fontSize : '15px'}}>
+          <span style={{
+            cursor: 'pointer', 
+            color: isHovered ? '#ea8500' : '#000' 
+          }} 
+          onMouseEnter={handleMouseEnter} 
+          onMouseLeave={handleMouseLeave}  
+                onClick={() => navigate('/')}>Trang chủ</span> <span>\</span>
+                <span style={{fontWeight: 'bold', color: 'blue'}}> Giỏ hàng </span>
+                    </span>
         <div style={{ display: 'flex', justifyContent: 'center'}}>
           <WrapperLeft>
-            <h4>Phí giao hàng</h4>
+            <h2>Phí giao hàng</h2>
             <WrapperStyleHeaderDilivery>
               <StepComponent items={itemsDelivery} current={deliveryPriceMemo === 10000 
                 ? 2 : deliveryPriceMemo === 20000 ? 1 
@@ -327,12 +341,14 @@ const OrderPage = () => {
                   >
                     <MinusOutlined style={{ color: '#000', fontSize: '10px' }} />
                   </button>
-                  <WrapperInputNumber defaultValue={item.amount} value={item.amount} size="small" min={1} max={item.product.countInStock} />
+                  <WrapperInputNumber defaultValue={item.amount} value={item.amount} size="small" min={1} max={item.product.countInStock} readOnly  />
                   <button
-                    style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}
-                    onClick={() => handleChangeCount('increase', item.product._id)}
+                    style={{ border: 'none', background: 'transparent', 
+                      cursor: item.amount >= item.product.countInStock ? 'not-allowed' : 'pointer' }}
+                      onClick={() => item.amount < item.product.countInStock && handleChangeCount('increase', item.product._id)}
+                      disabled={item.amount >= item.product.countInStock}
                   >
-                    <PlusOutlined style={{ color: '#000', fontSize: '10px' }} />
+                    <PlusOutlined style={{ color: item.amount >= item.product.countInStock ? '#ccc' : '#000',fontSize: '10px'}}/>
                   </button>
                   </WrapperCountOrder>
                   <span style={{color: 'rgb(255, 66, 78)', fontSize: '13px', fontWeight: 500}}>{convertPrice(item.price*item.amount - item.price*item.amount*item.discount/100)}</span>
@@ -345,6 +361,7 @@ const OrderPage = () => {
           </WrapperLeft>
           <WrapperRight>
             <div style={{width: '100%'}}>
+              {user?.id &&(
               <WrapperInfo>
                 <div>
                   <span style={{ fontSize: "15px" , fontWeight: 'bold'}}>Địa chỉ: </span>
@@ -352,6 +369,7 @@ const OrderPage = () => {
                   <span onClick={handleChangeAddress} style={{color: '#9255FD', cursor:'pointer', fontSize: "15px"}}>Thay đổi</span>
                 </div>
               </WrapperInfo>
+              )}
               <WrapperInfo>
                 <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
                   <span style={{fontSize: "13px"}}>Tổng giá chưa khuyến mãi </span>
@@ -373,20 +391,21 @@ const OrderPage = () => {
                   <span style={{color: '#000', fontSize: '11px'}}>(Đã bao gồm VAT nếu có)</span>
                 </span>
               </WrapperTotal>
-            </div>
-            <ButtonComponent
+              <ButtonComponent
               onClick={() => handleAddCard()}
               size={40}
               styleButton={{
                   background: 'rgb(255, 57, 69)',
                   height: '48px',
-                  width: '320px',
+                  width: '360px',
                   border: 'none',
                   borderRadius: '4px'
               }}
               textbutton={'Mua hàng'}
               styleTextButton={{ color: '#fff', fontSize: '15px', fontWeight: '700' }}
           ></ButtonComponent>
+            </div>
+            
           </WrapperRight>
         </div>
       </div>

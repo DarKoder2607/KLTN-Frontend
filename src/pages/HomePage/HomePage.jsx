@@ -1,6 +1,6 @@
-    import React, { useEffect, useRef, useState } from "react";
+    import React, { useEffect, useState } from "react";
     import TypeProduct from "../../components/TypeProduct/TypeProduct";
-    import { WrapperButtonMore, WrapperProducts, WrapperTypeProduct , BlinkTitle, WrapperProducts2} from "./Style";
+    import { WrapperButtonMore, WrapperProducts, WrapperTypeProduct , BlinkTitle, WrapperProducts2, ButtonMore} from "./Style";
     import SliderComponent from "../../components/SliderComponent/SliderComponent";
     import slider1 from '../../assets/images/banner0.gif'
     import slider2 from '../../assets/images/banner1.png'
@@ -13,11 +13,12 @@
     import slider9 from '../../assets/images/banner8.png'
     import slider10 from '../../assets/images/banner9.png'
     import CardComponent from "../../components/CardComponent/CardComponent";
-    import { keepPreviousData, useQuery } from "@tanstack/react-query";
+    import { useQuery } from "@tanstack/react-query";
     import * as ProductService from '../../services/ProductService'
     import { useSelector } from "react-redux";
     import Loading from "../../components/LoadingComponent/Loading";
     import { useDebounce } from "../../hooks/useDebounce";
+    import { CaretUpOutlined} from "@ant-design/icons";
 
     
 
@@ -47,7 +48,7 @@
             watch: [],
             laptop: [],
             tablet: [],
-            headphone: [],
+            audio: [],
             loudspeaker: []
         });
     
@@ -56,12 +57,12 @@
             watch: 6,
             laptop: 6,
             tablet: 6,
-            headphone: 6,
+            audio: 6,
             loudspeaker: 6
         });
 
         const fetchProductsByDeviceType = async (deviceType, limit) => {
-            const res = await ProductService.getProductByDeviceType(deviceType, limit, 0); // 0 for page 1 (you can add pagination if needed)
+            const res = await ProductService.getProductByDeviceType(deviceType, limit, 0); 
             return res;
         };
         const { data: phoneProducts, isLoading: phoneLoading } = useQuery({
@@ -84,9 +85,9 @@
             queryFn: () => fetchProductsByDeviceType('tablet', productTypeLimit.tablet),
         });
         
-        const { data: headphoneProducts, isLoading: headphoneLoading } = useQuery({
-            queryKey: ['headphone', productTypeLimit.headphone],
-            queryFn: () => fetchProductsByDeviceType('headphone', productTypeLimit.headphone),
+        const { data: audioProducts, isLoading: audioLoading } = useQuery({
+            queryKey: ['audio', productTypeLimit.audio],
+            queryFn: () => fetchProductsByDeviceType('audio', productTypeLimit.audio),
         });
         
         const { data: loudspeakerProducts, isLoading: loudspeakerLoading } = useQuery({
@@ -99,10 +100,10 @@
                 watch: watchProducts?.data || [],
                 laptop: laptopProducts?.data || [],
                 tablet: tabletProducts?.data || [],
-                headphone: headphoneProducts?.data || [],
+                audio: audioProducts?.data || [],
                 loudspeaker: loudspeakerProducts?.data || []
             });
-        }, [phoneProducts, watchProducts, laptopProducts, tabletProducts, headphoneProducts, loudspeakerProducts]);
+        }, [phoneProducts, watchProducts, laptopProducts, tabletProducts, audioProducts, loudspeakerProducts]);
 
         const handleLoadMore = (deviceType) => {
             setProductTypeLimit((prev) => ({
@@ -115,7 +116,7 @@
             const limit = context?.queryKey && context?.queryKey[1]
             const page = context?.queryKey && context?.queryKey[2]
             const search = context?.queryKey && context?.queryKey[3]
-            const res = await ProductService.getAllProduct(search, limit, page) // thêm page vào hàm gọi API
+            const res = await ProductService.getAllProduct(search, limit, page)  
             return res
         }
 
@@ -138,6 +139,7 @@
             keepPreviousData: true,  
             retry: 3, 
             retryDelay: 1000,
+            
         })
 
         useEffect(() => {
@@ -163,44 +165,7 @@
                     <div id="contrainer" style={{width:'1330px', margin:'0 auto' }}>
                         <SliderComponent arrImages = {[slider1, slider2, slider3, slider4, 
                                     slider5, slider6, slider7, slider8, slider9, slider10]}/>
-                        <div style={{
-                            backgroundColor: '#ffc04d', 
-                            padding: '10px', 
-                            borderRadius: '8px', 
-                            margin: '20px 0' }}>
-                            <h2 style={{fontSize: '25px', fontWeight: 'bold', margin: '5px 0' }}>TẤT CẢ SẢN PHẨM</h2>
-                            <div style={{ 
-                                borderTop: '2px solid #000', 
-                                margin: '0px 0', 
-                                width: '50%' 
-                                }} />
-                            <WrapperProducts style={{ backgroundColor: '#2980B9', padding: '20px', borderRadius: '8px'} } >
-                                {products?.data && products?.data.map((product, index) =>{
-                                    return (
-                                        <CardComponent key={product._id} countInStock = {product.countInStock} 
-                                                        decription={product.decription} image={product.image} name={product.name}
-                                                        price={product.price} rating={product.rating} type={product.type}  
-                                                        deviceType={product.deviceType}
-                                                        selled={product.selled} discount={product.discount} id={product._id}/>
-                                    )
-                                })}
-                                
-                            </WrapperProducts>
-                            
-                            <div style={{width: '100%', justifyContent: 'center', display:'flex', marginTop: '20px', marginBottom : '10px'}}>
-                                <WrapperButtonMore textbutton={isPreviousData ? "Loading more" : "Xem thêm"} type="outline" styleButton={{
-                                    border: '1px solid rgb(11,116,229)',
-                                    color: `${products?.total === products?.data?.length ? '#ccc' : 'rgb(11,116,229)'}`,
-                                    width: '240px',
-                                    height: '38px',
-                                    borderRadius: '4px', 
-                                    }}
-                                    disabled={products?.total === products?.data?.length || products?.totalPage === 1}
-                                    styleTextButton={{fontWeight: 500, color: products?.total === products?.data?.length && '#fff   '}}
-                                    onClick= {() => setLimit((prev) => prev +6 )}
-                                />
-                            </div>
-                        </div>
+
                         <div style={{
                             backgroundColor: '#ffc04d', 
                             padding: '10px', 
@@ -226,13 +191,73 @@
                                         type={product.type}
                                         deviceType={product.deviceType}
                                         selled={product.selled}
-                                        discount={product.discount}
+                                        discount={product.discount} 
+                                        originPrice={product.originPrice} 
                                         id={product._id}
                                     />
                                 ))}
                             </WrapperProducts2>
                         </div>
-                            {['phone', 'watch', 'laptop', 'tablet', 'headphone', 'loudspeaker'].map((deviceType) => (
+
+                        <div style={{
+                            backgroundColor: '#ffc04d', 
+                            padding: '10px', 
+                            borderRadius: '8px', 
+                            margin: '20px 0' }}>
+                            <h2 style={{fontSize: '25px', fontWeight: 'bold', margin: '5px 0' }}>TẤT CẢ SẢN PHẨM</h2>
+                            <div style={{ 
+                                borderTop: '2px solid #000', 
+                                margin: '0px 0', 
+                                width: '50%' 
+                                }} />
+                            <WrapperProducts style={{ backgroundColor: '#2980B9', padding: '20px', borderRadius: '8px'} } >
+                                {products?.data && products?.data.map((product, index) =>{
+                                    return (
+                                        <CardComponent key={product._id} countInStock = {product.countInStock} 
+                                                        decription={product.decription} image={product.image} name={product.name}
+                                                        price={product.price} rating={product.rating} type={product.type}  
+                                                        deviceType={product.deviceType}
+                                                        selled={product.selled} originPrice={product.originPrice} discount={product.discount} id={product._id}/>
+                                    )
+                                })}
+                                
+                            </WrapperProducts>
+                            
+                            <div style={{width: '100%', justifyContent: 'center', display:'flex', marginTop: '20px', marginBottom : '10px'}}>
+                                <WrapperButtonMore textbutton={isPreviousData ? "Loading more" : "Xem thêm"} type="outline" styleButton={{
+                                    border: '1px solid rgb(11,116,229)',
+                                    color: `${products?.total === products?.data?.length ? '#ccc' : 'rgb(11,116,229)'}`,
+                                    width: '240px',
+                                    height: '38px', 
+                                    borderRadius: '4px', 
+                                    }}
+                                    disabled={products?.total === products?.data?.length || products?.totalPage === 1}
+                                    styleTextButton={{fontWeight: 500, color: products?.total === products?.data?.length && '#fff'}}
+                                    onClick= {() => setLimit((prev) => prev +6 )}
+                                />
+                               { limit > 6 && (
+                                  <div 
+                                    style={{
+                                        
+                                        marginLeft: '20px',
+                                        bottom: '10px',
+                                        right: '10px',
+                                        cursor: 'pointer',
+                                        fontSize: '38px',
+                                        color: 'rgb(11,116,229)',
+                                        zIndex: 1000,
+                                    }}
+                                    onClick={() => setLimit(6)}  
+                                    onMouseEnter={(e) => e.target.style.color = 'rgb(11,116,229)'}   
+                                    onMouseLeave={(e) => e.target.style.color = 'white'}   
+                                >
+                                    <CaretUpOutlined/>
+                                </div>
+                                )}
+                            </div>
+                        </div>
+                        
+                            {['phone', 'watch', 'laptop', 'tablet', 'audio', 'loudspeaker'].map((deviceType) => (
                             <div style={{
                                 backgroundColor: '#ffc04d', 
                                 padding: '10px', 
@@ -241,7 +266,7 @@
                                 <h2 style={{fontSize: '20px', fontWeight: 'bold', margin: '5px 0' }}>
                                         {deviceType === 'phone' ? 'ĐIỆN THOẠI DI ĐỘNG'  :''}
                                         {deviceType === 'watch' ? 'ĐỒNG HỒ ĐEO TAY'  :''}
-                                        {deviceType === 'headphone' ? 'TAI NGHE'  :''}
+                                        {deviceType === 'audio' ? 'TAI NGHE'  :''}
                                         {deviceType === 'loudspeaker' ? 'LOA ĐIỆN TỬ'  :''}
                                         {deviceType === 'laptop' ? 'MÁY TÍNH XÁCH TAY'  :''}
                                         {deviceType === 'tablet' ? 'MÁY TÍNH BẢNG'  :''}
@@ -257,25 +282,36 @@
                                                 key={product._id} countInStock = {product.countInStock} 
                                                 decription={product.decription} image={product.image} name={product.name}
                                                 price={product.price} rating={product.rating} type={product.type}  
-                                                deviceType={product.deviceType}
+                                                deviceType={product.deviceType} originPrice={product.originPrice} 
                                                 selled={product.selled} discount={product.discount} id={product._id}
                                             />
                                         ))}
                                     </WrapperProducts>
                                     <div style={{ width: '100%', justifyContent: 'center', display: 'flex', marginTop: '20px', marginBottom: '10px' }}>
-                                    <WrapperButtonMore
-                                        textbutton="Xem thêm"
-                                        onClick={() => handleLoadMore(deviceType)}
-                                        styleButton={{
-                                            border: '1px solid rgb(11,116,229)',
-                                            color: 'rgb(11,116,229)',
-                                            
-                                            width: '240px',
-                                            height: '38px',
-                                            borderRadius: '4px',
-                                            background: 'transparent',  
-                                        }}
-                                    />
+                                    <ButtonMore onClick={() => handleLoadMore(deviceType)}>
+                                        Xem thêm
+                                    </ButtonMore>
+                                    {productTypeLimit[deviceType] > 6 && (
+                                        <div 
+                                            style={{
+                                                marginLeft: '20px',
+                                                bottom: '10px',
+                                                right: '10px',
+                                                cursor: 'pointer',
+                                                fontSize: '38px',
+                                                color: 'rgb(11,116,229)',
+                                                zIndex: 1000,
+                                            }}
+                                            onClick={() => setProductTypeLimit((prev) => ({
+                                                ...prev, 
+                                                [deviceType]: 6 
+                                            }))}
+                                            onMouseEnter={(e) => e.target.style.color = 'rgb(11,116,229)'}
+                                            onMouseLeave={(e) => e.target.style.color = 'white'}
+                                        >
+                                            <CaretUpOutlined /> 
+                                        </div>
+                                    )}
 
                                     </div>
                                

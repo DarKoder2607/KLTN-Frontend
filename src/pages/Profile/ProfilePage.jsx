@@ -14,6 +14,8 @@ import { Button } from 'antd'
 import { UploadOutlined } from '@ant-design/icons'
 
 import axios from 'axios';
+import useHover from '../../hooks/useHover'
+import { useNavigate } from 'react-router-dom'
 
 const ProfilePage = () => {
     const user = useSelector((state) => state.user)
@@ -136,9 +138,24 @@ const ProfilePage = () => {
         mutation.mutate({ id: user?.id, email, name, phone, address, city, avatar, access_token: user?.access_token })
 
     }
+
+    const navigate = useNavigate()
+    const { isHovered , handleMouseEnter, handleMouseLeave  } = useHover()
     return (
         <div style={{ width: '1270px', margin: '0 auto', height: '500px', minHeight: '80vh', paddingBottom: '0px' }}>
-            <WrapperHeader>Thông tin người dùng</WrapperHeader>
+            
+            <span style={{fontSize : '15px'}}>
+                <span style={{
+                    cursor: 'pointer', 
+                    color: isHovered ? '#ea8500' : '#000' 
+                    }} 
+                    onMouseEnter={handleMouseEnter} 
+                    onMouseLeave={handleMouseLeave}  
+                    onClick={() => navigate('/')}>Trang chủ</span> <span>\</span>
+                        <span style={{fontWeight: 'bold', color: 'blue'}}> Thông tin người dùng </span>
+                </span>
+                <WrapperHeader style={{display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'red'}}>
+                    THÔNG TIN NGƯỜI DÙNG</WrapperHeader>
             <Loading isPending={isPending}>
                 <WrapperContentProfile>
                     <WrapperInput>

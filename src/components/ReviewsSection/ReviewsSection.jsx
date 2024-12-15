@@ -12,6 +12,8 @@ import {
   ReviewItem,
 } from './style';
 import { useSelector } from 'react-redux';
+import moment from 'moment/moment';
+import 'moment/locale/vi';  
 
 const ReviewsSection = ({ productId, userId }) => {
   const [isReviewing, setIsReviewing] = useState(false);
@@ -19,6 +21,8 @@ const ReviewsSection = ({ productId, userId }) => {
   const [comment, setComment] = useState('');
   const user = useSelector((state) => state.user);
   const queryClient = useQueryClient();
+ 
+  moment.locale('vi');
 
   const { data: reviewsData, isLoading } = useQuery({
     queryKey: ['product-reviews', productId],
@@ -29,7 +33,7 @@ const ReviewsSection = ({ productId, userId }) => {
     mutationFn: ({ reviewId }) =>
       ProductService.hideProductReview(productId, reviewId, user.accessToken),
     onSuccess: () => {
-      notification.success({ message: 'Review hidden successfully!' });
+      notification.success({ message: 'Đã ẩn bình luận thành công!' });
       queryClient.invalidateQueries(['product-reviews', productId]);
     },
     onError: (error) => {
@@ -44,7 +48,7 @@ const ReviewsSection = ({ productId, userId }) => {
     mutationFn: ({ reviewId }) =>
       ProductService.unhideProductReview(productId, reviewId, user.accessToken),
     onSuccess: () => {
-      notification.success({ message: 'Review unhidden successfully!' });
+      notification.success({ message: 'Bình luận đã được khôi phục thành công!' });
       queryClient.invalidateQueries(['product-reviews', productId]);
     },
     onError: (error) => {
@@ -88,14 +92,30 @@ const ReviewsSection = ({ productId, userId }) => {
     }
   };
 
+
+  const [currentPage, setCurrentPage] = useState(1);  
+  const commentsPerPage = 10;
+
   if (isLoading) return <div>Loading...</div>;
+
+  const totalReviews = reviewsData?.data.length || 0;
+  const currentReviews = reviewsData?.data.slice(
+    (currentPage - 1) * commentsPerPage,
+    currentPage * commentsPerPage
+  );
+
+  const onPageChange = (page) => {
+    setCurrentPage(page);
+  };
+
+  const sortedReviews = reviewsData?.data?.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
   return (
     <Container>
       <Header>Customer Reviews</Header>
       <List
         itemLayout="horizontal"
-        dataSource={reviewsData?.data}
+        dataSource={sortedReviews}
         renderItem={(review) => (
           <ReviewItem>
             <List.Item>
@@ -103,8 +123,11 @@ const ReviewsSection = ({ productId, userId }) => {
                 avatar={<Avatar>{review.name.charAt(0)}</Avatar>}
                 title={
                   <div>
-                    <div>
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
                       <strong>{review.name}</strong>
+                      <div style={{ fontSize: '12px', color: '#888', fontStyle: 'italic', marginLeft: '8px' }}>
+                        {moment(review.createdAt).fromNow()}
+                      </div>
                     </div>
                     <div>
                       <Rate disabled value={review.rating}  />
@@ -120,6 +143,7 @@ const ReviewsSection = ({ productId, userId }) => {
                     }}
                   >
                     {review.isHidden ? 'Bình luận đã bị ẩn do vi phạm điều lệ của website.' : review.comment}
+                   
                   </div>
                 }
               />
@@ -145,11 +169,17 @@ const ReviewsSection = ({ productId, userId }) => {
             </List.Item>
           </ReviewItem>
         )}
+        pagination={{
+          current: currentPage,
+          pageSize: commentsPerPage,
+          total: totalReviews,
+          onChange: onPageChange,
+        }}
       />
-      {reviewsData?.data?.length === 0 && <NoReviewsMessage>No reviews yet!</NoReviewsMessage>}
+      {reviewsData?.data?.length === 0 && <NoReviewsMessage>Hãy mua hàng để trở thành người đánh giá sản phẩm đầu tiên!</NoReviewsMessage>}
       {!user?.id ? (
         <p style={{ color: 'red', textAlign: 'center' }}>
-          Vui lòng đăng nhập để đánh giá sản phẩm.
+          Vui lòng đăng nhập để có thể đánh giá sản phẩm.
         </p>
       ) : (
         <>

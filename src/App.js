@@ -10,6 +10,7 @@ import { updateUser } from './redux/slides/userSlide'
 import Loading from './components/LoadingComponent/Loading'
 import Chatbot from './components/Chatbot/Chatbot'
 import ScrollToTop from './components/ScrollToTop/ScrollToTop'
+import StartFromTop from './components/ScrollToTop/StartFromTop'
 
 
 function App() {
@@ -73,6 +74,7 @@ function App() {
     <div>
       <Loading isPending={isPending}>
         <Router>
+          <StartFromTop/>
           <ScrollToTop/>
           <Routes>
             {routes.map((route) => {
