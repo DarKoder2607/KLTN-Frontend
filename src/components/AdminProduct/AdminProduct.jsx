@@ -5,7 +5,7 @@ import { WrapperHeader, WrapperUploadFile } from './style'
 import TableComponent from '../TableComponent/TableComponent'
 import { useState } from 'react'
 import InputComponent from '../InputComponent/InputComponent'
-import { getBase64, renderOptions } from '../../utils'
+import {  renderOptions } from '../../utils'
 import * as ProductService from '../../services/ProductService'
 import { useMutationHooks } from '../../hooks/useMutationHook'
 import Loading from '../../components/LoadingComponent/Loading'
@@ -88,7 +88,7 @@ const AdminProduct = () => {
         ports: '',
         feature: '',
       },
-      headphone: {
+      audio: {
         bluetooth: '',
         battery: '',
         length: '',
@@ -133,13 +133,11 @@ const AdminProduct = () => {
       relatedImages,
       image,
       rating,
-      ...specs // Tách phần thông số kỹ thuật động
+      ...specs  
     } = data;
-
-    // Xác định tên của trường specs dựa trên deviceType
+ 
     const specsField = `${deviceType}Specs`;
-
-    // Chuẩn bị payload
+ 
     const payload = {
       name,
       price,
@@ -150,10 +148,9 @@ const AdminProduct = () => {
       relatedImages,
       image,
       rating,
-      [specsField]: specs, // Gán thông số kỹ thuật vào đúng field
+      [specsField]: specs,  
     };
-
-    // Gọi API để tạo sản phẩm
+ 
     return ProductService.createProduct(payload);
   });
 
@@ -186,7 +183,7 @@ const AdminProduct = () => {
         discount,
         image,
         rating,
-        [specsField]: specs, // Gán thông số kỹ thuật vào đúng field dựa trên deviceType
+        [specsField]: specs,  
         relatedImages: data.relatedImages,
       };
       
@@ -244,7 +241,7 @@ const AdminProduct = () => {
           ...specs
         } = res.data;
   
-        // Lấy thông số kỹ thuật đúng loại thiết bị
+        
         const deviceSpecs = specs[`${deviceType}Specs`] || {};
   
         setStateProductDetails({
@@ -257,7 +254,7 @@ const AdminProduct = () => {
           relatedImages,
           image,
           rating,
-          ...deviceSpecs, // Gộp thông số kỹ thuật vào state
+          ...deviceSpecs,  
         });
       }
     } catch (error) {
@@ -463,7 +460,7 @@ const AdminProduct = () => {
       filters: [
         { text: 'Phone', value: 'phone' },
         { text: 'Tablet', value: 'tablet' },
-        { text: 'Headphone', value: 'headphone' },
+        { text: 'Audio', value: 'audio' },
         { text: 'Watch', value: 'watch' },
         { text: 'Loudspeaker', value: 'loudspeaker' },
         { text: 'Laptop', value: 'laptop' },
@@ -694,7 +691,7 @@ const onFinish = () => {
         params.feature = stateProduct.feature;
         break;
 
-      case 'headphone':
+      case 'audio':
         params.bluetooth = stateProduct.bluetooth;
         params.battery = stateProduct.battery;
         params.length = stateProduct.length;
@@ -919,7 +916,7 @@ const onFinish = () => {
       watch: ['screen', 'os', 'battery', 'bluetooth', 'sensors', 'size', 'feature', 'strap', 'material'],
       laptop: ['screen', 'os', 'cpu', 'ram', 'rom', 'battery', 'ports', 'chipCard', 'sound', 'design', 'feature'],
       tablet: ['screen', 'os', 'camera', 'cpu', 'ram', 'rom', 'battery', 'processorGraphics', 'design', 'ports', 'feature'],
-      headphone: ['bluetooth', 'battery', 'length', 'noiseCancellation', 'ports', 'scope', 'material', 'design', 'feature'],
+      audio: ['bluetooth', 'battery', 'length', 'noiseCancellation', 'ports', 'scope', 'material', 'design', 'feature'],
       loudspeaker: ['bluetooth', 'battery', 'waterproof', 'design', 'connectControl', 'audio'],
     };
   
@@ -943,7 +940,7 @@ const onFinish = () => {
       watch: ['screen', 'os', 'battery', 'bluetooth', 'sensors', 'size', 'feature', 'strap', 'material'],
       laptop: ['screen', 'os', 'cpu', 'ram', 'rom', 'battery', 'ports', 'chipCard', 'sound', 'design', 'feature'],
       tablet: ['screen', 'os', 'camera', 'cpu', 'ram', 'rom', 'battery', 'processorGraphics', 'design', 'ports', 'feature'],
-      headphone: ['bluetooth', 'battery', 'length', 'noiseCancellation', 'ports', 'scope', 'material', 'design', 'feature'],
+      audio: ['bluetooth', 'battery', 'length', 'noiseCancellation', 'ports', 'scope', 'material', 'design', 'feature'],
       loudspeaker: ['bluetooth', 'battery', 'waterproof', 'design', 'connectControl', 'audio'],
     };
   
@@ -1034,7 +1031,7 @@ const onFinish = () => {
                   { value: 'watch', label: 'Watch' },
                   { value: 'laptop', label: 'Laptop' },
                   { value: 'tablet', label: 'Tablet' },
-                  { value: 'headphone', label: 'Headphone' },
+                  { value: 'audio', label: 'Audio' },
                   { value: 'loudspeaker', label: 'Loudspeaker' },
                 ]}
               />
@@ -1198,7 +1195,7 @@ const onFinish = () => {
                   { value: 'watch', label: 'Watch' },
                   { value: 'laptop', label: 'Laptop' },
                   { value: 'tablet', label: 'Tablet' },
-                  { value: 'headphone', label: 'Headphone' },
+                  { value: 'audio', label: 'Audio' },
                   { value: 'loudspeaker', label: 'Loudspeaker' },
                 ]}
               />

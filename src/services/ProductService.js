@@ -53,6 +53,11 @@ export const getDetailsProduct = async (id) => {
     return res.data
 }
 
+export const getRecommedProduct = async (id) => {
+  const res = await axios.get(`${process.env.REACT_APP_API_KEY}/product/recommend/${id}`)
+  return res.data
+}
+
 export const updateProduct = async (id, access_token, data) => {
     const res = await axiosJWT.put(`${process.env.REACT_APP_API_KEY}/product/update/${id}`, data, {
         headers: {
@@ -60,6 +65,11 @@ export const updateProduct = async (id, access_token, data) => {
         }
     })
     return res.data
+}
+
+export const getAllBrands = async (data) => {
+  const res = await axios.get(`${process.env.REACT_APP_API_KEY}/product/brands`, data)
+  return res.data
 }
 
 export const deleteProduct = async (id, access_token) => {

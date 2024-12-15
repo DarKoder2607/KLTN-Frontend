@@ -5,7 +5,7 @@ export const WrapperTypeProduct = styled.div`
     display: flex;
     align-items: center;
     gap: 0px;
-    justify-content: flex-start;
+    justify-content: center;
     height: 60px;
 `
 
@@ -21,24 +21,28 @@ export const WrapperButtonMore = styled(ButtonComponent)`
     text-align: center;
     cursor : ${(props) => props.disabled ? 'not-allowed' : 'pointers'}
 `
-const flashingBackground = `
-  @keyframes flashingBackground {
-    0% {
-      background-color: orange;
+
+export const ButtonMore = styled.button`
+    width: 240px;
+    height: 38px;
+    border: 1px solid rgb(11,116,229);
+    color: rgb(11,116,229);
+    border-radius: 4px;
+    background: transparent;
+    font-weight: normal;
+    transition: all 0.3s ease-in-out;
+    cursor: pointer;
+
+    &:hover {
+        background-color: rgb(11,116,229);
+        color: white;
+        font-weight: bold;
     }
-    50% {
-      background-color: #2980B9;
-    }
-    100% {
-      background-color: orange;
-    }
-  }
 `;
+
 export const WrapperProducts = styled.div`
-    ${flashingBackground}  
     padding: 20px;
     border-radius: 8px;
-    animation: flashingBackground 1s infinite; 
     display: flex;
     gap: 14px;
     margin-top: 20px;
@@ -50,7 +54,7 @@ const flashingBackground2 = `
       background-color: red;
     }
     50% {
-      background-color: green;
+      background-color: rgb(13,92,182);
     }
     100% {
       background-color: red;
@@ -61,7 +65,7 @@ export const WrapperProducts2 = styled.div`
     ${flashingBackground2}  
     padding: 20px;
     border-radius: 8px;
-    animation: flashingBackground2 1s infinite; 
+    animation: flashingBackground2 2s infinite; 
     display: flex;
     gap: 14px;
     margin-top: 20px;
@@ -72,7 +76,7 @@ export const BlinkTitle = styled.h2`
     font-size: 20px;
     font-weight: bold;
     margin: 5px 0;
-    animation: blink 1.5s infinite;
+    animation: blink 2s infinite;
 
     @keyframes blink {
         0% {
@@ -81,7 +85,7 @@ export const BlinkTitle = styled.h2`
         }
         50% {
             opacity: 0.5;
-            color: #33ff57;  
+            color: green;  
         }
         100% {
             opacity: 1;

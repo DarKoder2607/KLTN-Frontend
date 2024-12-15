@@ -11,7 +11,8 @@ const initialState = {
     isAdmin: false,
     city: '',
     refreshToken: '',
-    rewardPoints: 0
+    rewardPoints: 0,
+    notifications: []
 }
 
 export const userSlide = createSlice({
@@ -19,7 +20,7 @@ export const userSlide = createSlice({
     initialState,
     reducers: {
         updateUser: (state, action) => {
-            const { name = '', email = '', access_token = '', address = '', phone = '', avatar = '', _id = '', isAdmin,city= '',refreshToken = '', rewardPoints = 0 } = action.payload
+            const { name = '', email = '', access_token = '', address = '', phone = '', avatar = '', _id = '', isAdmin,city= '',refreshToken = '', rewardPoints = 0,  notifications = []} = action.payload
             state.name = name ? name : state.name;
             state.email = email ? email : state.email;
             state.address = address ? address : state.address;
@@ -31,6 +32,7 @@ export const userSlide = createSlice({
             state.city = city ? city : state.city;
             state.refreshToken = refreshToken ? refreshToken : state.refreshToken;
             state.rewardPoints = rewardPoints ? rewardPoints : state.rewardPoints;
+            state.notifications = notifications ? notifications : state.notifications; 
         },
         resetUser: (state) => {
             state.name = '';
@@ -43,8 +45,9 @@ export const userSlide = createSlice({
             state.isAdmin = false;
             state.city = '';
             state.refreshToken = ''
-            state.rewardPoints = 0
-        },
+            state.rewardPoints = 0;
+            state.notifications = [];
+        }
     },
 })
 

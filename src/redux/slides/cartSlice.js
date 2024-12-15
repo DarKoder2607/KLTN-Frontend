@@ -11,9 +11,9 @@ const cartSlice = createSlice({
     addingToCart: (state, action) => {
       const existingItem = state.cartItems.find(item => item.product === action.payload.product);
       if (existingItem) {
-        existingItem.amount += action.payload.amount; // Tăng số lượng nếu sản phẩm đã có trong giỏ
+        existingItem.amount += action.payload.amount;  
       } else {
-        state.cartItems.push(action.payload); // Thêm sản phẩm mới
+        state.cartItems.push(action.payload);  
       }
     },
     removesFromCart: (state, action) => {
@@ -30,9 +30,32 @@ const cartSlice = createSlice({
     },
     setCarts: (state, action) => {
       state.cartItems = action.payload;
+    },
+    increaseAmount: (state, action) => {
+      const { idProduct, maxStock } = action.payload; 
+      const cartItems = state?.cartItems?.find((item) => item?.product === idProduct);
+      const cartItemsSelected = state?.cartItemsSlected?.find((item) => item?.product === idProduct);
+      
+      if (cartItems && cartItems.amount < maxStock) {
+        cartItems.amount++;
+      }
+      if (cartItemsSelected && cartItemsSelected.amount < maxStock) {
+        cartItemsSelected.amount++;
+      }
+    },
+    decreaseAmount: (state, action) => {
+      const { idProduct } = action.payload;
+      const cartItems = state?.cartItems?.find((item) => item?.product === idProduct);
+      const cartItemsSelected = state?.cartItemsSlected?.find((item) => item?.product === idProduct);
+      if (cartItems && cartItems.amount > 1) {
+        cartItems.amount--;
+      }
+      if (cartItemsSelected && cartItemsSelected.amount > 1) {
+        cartItemsSelected.amount--;
+      }
     }
   }
 });
 
-export const { addingToCart, removesFromCart, updatesCartItem, clearsCart, setCarts } = cartSlice.actions;
+export const { addingToCart, removesFromCart, updatesCartItem, clearsCart, setCarts, increaseAmount, decreaseAmount } = cartSlice.actions;
 export default cartSlice.reducer;

@@ -52,8 +52,15 @@ const SignInPage = () => {
           handleGetDetailsUser(decoded?.id, data?.access_token)
         }
       }
+    }else if (data?.status === 'ERR') {
+      // Hiển thị thông báo lỗi nếu tài khoản bị khóa
+      if (data.message === 'This account is locked') {
+          message.error('Tài khoản của bạn đã bị khóa. Vui lòng liên hệ với với nhân viên để được hỗ trợ');
+      } else {
+          message.error(data.message);
+      }
     }
-  }, [isSuccess])
+  }, [isSuccess, data, location, navigate])
 
   const handleGetDetailsUser = async (id, token) => {
     const res = await UserService.getDetailsUser(id, token)
@@ -104,11 +111,14 @@ const SignInPage = () => {
           onSuccess: async (data) => {
               console.log("Google Login Response:", data);
 
+                if (data?.status === 'ERR' && data.message === 'This account is locked') {
+                  message.error('Tài khoản của bạn đã bị khóa. Vui lòng liên hệ với nhân viên để được hỗ trợ');
+                  return;  
+              }
+
               if (data?.access_token) {
-                  // Lưu token vào localStorage
                   localStorage.setItem("access_token", JSON.stringify(data.access_token));
 
-                  // Giải mã token để lấy user ID
                   const decoded = jwtDecode(data.access_token);
 
                   if (decoded?.id) {
@@ -120,6 +130,8 @@ const SignInPage = () => {
           },
           onError: (error) => {
               console.error("Google Login Error:", error);
+              message.error('Đăng nhập thất bại. Vui lòng thử lại!');
+
           },
       }
     );

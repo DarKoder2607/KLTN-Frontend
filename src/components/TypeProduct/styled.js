@@ -7,7 +7,7 @@ export const WrapperType = styled.div`
   &:hover {
     background-color: orange;
     color: #fff;
-    font-weight : bold;
+    
     border-radius: 4px;
   }
 `

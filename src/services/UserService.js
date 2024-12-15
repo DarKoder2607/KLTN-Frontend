@@ -101,3 +101,51 @@ export const chatbotChat = async (data) => {
     const res = await axios.post(`${process.env.REACT_APP_API_KEY}/chat/chatbot/chat`,data)
     return res.data
 }
+
+export const lockUserAccount = async (id, token) => {
+    const res = await axiosJWT.put(
+      `${process.env.REACT_APP_API_KEY}/user/lock/${id}`,
+      {},
+      {
+        headers: {
+          token: `Bearer ${token}`,
+        },
+      }
+    );
+    return res.data;
+  };
+  
+  export const unlockUserAccount = async (id, token) => {
+    const res = await axiosJWT.put(
+      `${process.env.REACT_APP_API_KEY}/user/unlock/${id}`,
+      {},
+      {
+        headers: {
+          token: `Bearer ${token}`,
+        },
+      }
+    );
+    return res.data;
+  };
+
+  export const getNotifications = async (userId, access_token) => {
+    const res = await axiosJWT.get(`${process.env.REACT_APP_API_KEY}/user/${userId}/notifications`, {
+        headers: {
+            token: `Bearer ${access_token}`,
+        }
+    });
+    return res.data;
+};
+
+export const markNotificationsAsRead = async (userId, access_token) => {
+    const res = await axiosJWT.put(`${process.env.REACT_APP_API_KEY}/user/${userId}/notifications/read`, {}, {
+        headers: {
+            token: `Bearer ${access_token}`,
+        }
+    });
+    return res.data;
+};
+
+
+
+  

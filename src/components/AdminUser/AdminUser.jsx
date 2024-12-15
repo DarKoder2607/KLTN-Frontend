@@ -6,12 +6,11 @@ import InputComponent from '../InputComponent/InputComponent'
 import DrawerComponent from '../DrawerComponent/DrawerComponent'
 import Loading from '../LoadingComponent/Loading'
 import ModalComponent from '../ModalComponent/ModalComponent'
-import { getBase64 } from '../../utils'
 import { useSelector } from 'react-redux'
 import { useMutationHooks } from '../../hooks/useMutationHook'
 import * as UserService from '../../services/UserService'
 import { useIsFetching, useQueryClient } from '@tanstack/react-query'
-import { DeleteOutlined, EditOutlined, SearchOutlined } from '@ant-design/icons'
+import { DeleteOutlined, EditOutlined, LockOutlined, SearchOutlined, UnlockOutlined } from '@ant-design/icons'
 import axios from 'axios';
 
 const AdminUser = () => {
@@ -65,6 +64,37 @@ const AdminUser = () => {
     })
   }
 
+  const handleLockUser = (id) => {
+    setIsLoadingUpdate(true);
+    UserService.lockUserAccount(id, user?.access_token)
+      .then((response) => {
+        message.success('Đã khóa tài khoản User thành công');
+        queryClient.invalidateQueries(['users']);   
+      })
+      .catch((error) => {
+        message.error('Error locking user account');
+      })
+      .finally(() => {
+        setIsLoadingUpdate(false);
+      });
+  };
+  
+  const handleUnlockUser = (id) => {
+    setIsLoadingUpdate(true);
+    UserService.unlockUserAccount(id, user?.access_token)
+      .then((response) => {
+        message.success('Tài khoản User đã được mở khóa thành công');
+        queryClient.invalidateQueries(['users']); 
+      })
+      .catch((error) => {
+        message.error('Error unlocking user account');
+      })
+      .finally(() => {
+        setIsLoadingUpdate(false);
+      });
+  };
+  
+
   const mutationDeleted = useMutationHooks(
     (data) => {
       const { id,
@@ -114,14 +144,20 @@ const AdminUser = () => {
   const queryClient = useQueryClient()
   const users = queryClient.getQueryData(['users'])
   const isFetchingUser = useIsFetching(['users'])
-  const renderAction = () => {
+  const renderAction = (record) => {
+    console.log('record',record);
     return (
       <div>
         <DeleteOutlined style={{ color: 'red', fontSize: '30px', cursor: 'pointer' }} onClick={() => setIsModalOpenDelete(true)} />
         <EditOutlined style={{ color: 'orange', fontSize: '30px', cursor: 'pointer' }} onClick={handleDetailsProduct} />
+        {record?.isLocked ? (
+          <LockOutlined style={{ color: 'blue', fontSize: '30px', cursor: 'pointer' }} onClick={() => handleUnlockUser(record._id)} />
+        ) : (
+          <UnlockOutlined style={{ color: 'green', fontSize: '30px', cursor: 'pointer' }} onClick={() => handleLockUser(record._id)} />
+        )}
       </div>
-    )
-  }
+    );
+  };
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -250,12 +286,13 @@ const AdminUser = () => {
     {
       title: 'Action',
       dataIndex: 'action',
-      render: renderAction
+      render: (text, record) => renderAction(record),
     },
   ];
   const dataTable = users?.data?.length > 0 && users?.data?.map((user) => {
-    return { ...user, key: user._id }
+    return { ...user, key: user._id, _id: user._id }
   })
+  console.log(dataTable);
 
   useEffect(() => {
     if (isSuccessDelected && dataDeleted?.status === 'OK') {
@@ -398,8 +435,10 @@ const AdminUser = () => {
       <div style={{ marginTop: '20px' }}>
         <TableComponent handleDelteMany={handleDelteManyUsers} columns={columns} isPending={isFetchingUser} data={dataTable} onRow={(record, rowIndex) => {
           return {
-            onClick: event => {
-              setRowSelected(record._id)
+            onClick: () => {
+              console.log('Selected record:', record);
+              if (record._id) {
+                setRowSelected(record._id); }
             }
           };
         }} />

@@ -11,11 +11,29 @@ export const WrapperHeader = styled(Row)`
     padding: 10px 0;
 `
 
-export const WrapperTextHeader = styled.span`
-    font-size: 18px;
-    color: #fff;
-    font-weight: bold;
-    text-align: left;
+export const WrapperTextHeader = styled.div`
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+
+    .logo-image {
+        width: 70px;
+        height: 70px;
+        transition: transform 0.3s ease-in-out;
+    }
+
+    .header-text {
+        transition: color 0.3s ease-in-out;
+        color: white
+    }
+
+    &:hover .logo-image {
+        transform: scale(1.5);
+    }
+
+    &:hover .header-text {
+        color: #FF5733;
+    }
 `
 
 export const WrapperHeaderAccount = styled.div`

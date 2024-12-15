@@ -19,16 +19,18 @@ import { PayPalButton } from 'react-paypal-button-v2';
 import * as PaymentService from '../../services/PaymentService'
 import { removesFromCart, setCarts } from '../../redux/slides/cartSlice';
 import { getCart } from '../../services/CartService';
+import useHover from '../../hooks/useHover';
 
 const PaymentPage = () => {
   const order = useSelector((state) => state.order)
   const user = useSelector((state) => state.user)
-
+  const { isHovered: isHomeHovered, handleMouseEnter: handleHomeEnter, handleMouseLeave: handleHomeLeave } = useHover()
+  const { isHovered: isCartHovered, handleMouseEnter: handleMyOrderEnter, handleMouseLeave: handleMyOrderLeave } = useHover()
   const [delivery, setDelivery] = useState('fast')
   const [payment, setPayment] = useState('later_money')
   const navigate = useNavigate()
   const [sdkReady , setSdkReady] = useState(false)
-  const [rewardPointsUsed, setRewardPointsUsed] = useState(1000);
+  const [rewardPointsUsed, setRewardPointsUsed] = useState(0);
   const [isOpenModalUpdateInfo, setIsOpenModalUpdateInfo] = useState(false)
   const [stateUserDetails, setStateUserDetails] = useState({
     name: '',
@@ -281,10 +283,23 @@ const PaymentPage = () => {
     <div style={{background: '#f5f5fa', with: '100%', height: '100vh'}}>
       <Loading isPending={isPendingAddOrder}>
         <div style={{height: '100%', width: '1270px', margin: '0 auto'}}>
-          <h3 style={{fontSize : '20px'}}><span style={{cursor: 'pointer', fontWeight: 'bold'}} 
+          <span style={{fontSize : '15px' }}>
+            <span style={{
+              cursor: 'pointer',  
+              color: isHomeHovered ? '#ea8500' : '#000' 
+                      }} 
+                      onMouseEnter={handleHomeEnter} 
+                      onMouseLeave={handleHomeLeave}  
                       onClick={() => navigate('/')}>Trang chủ</span>
-                      <span style={{cursor: 'pointer', fontWeight: 'bold'}} 
-                      onClick={() => navigate('/order')}> \ Giỏ hàng</span> \ Thanh toán </h3>
+                      <span style={{
+                        cursor: 'pointer',  
+                        color: isCartHovered ? '#ea8500' : '#000' 
+                      }} 
+                      onMouseEnter={handleMyOrderEnter} 
+                      onMouseLeave={handleMyOrderLeave}  
+                      onClick={() => navigate('/order')}> <span>\</span> Giỏ hàng</span> <span>\ </span> 
+                      <span style={{color: 'blue', fontWeight: 'bold'}}> Thanh toán </span>
+          </span>
           <div style={{ display: 'flex', justifyContent: 'center'}}>
             <WrapperLeft>
               <WrapperInfo>
