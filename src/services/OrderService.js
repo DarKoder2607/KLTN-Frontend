@@ -1,4 +1,5 @@
 import { axiosJWT } from "./UserService"
+import axios from 'axios';
 
 // export const createProduct = async (data) => {
 //   const res = await axios.post(`${process.env.REACT_APP_API_KEY}/product/create`, data)
@@ -77,3 +78,15 @@ export const getTotalOrderPriceByProduct = async (access_token) => {
   })
   return res.data
 }
+
+export const getRevenueByUser = async (accessToken, timeFrame) => {
+  const response = await axios.get(`${process.env.REACT_APP_API_KEY}/order/revenue-by-user`, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+    params: {
+      [timeFrame]: true, 
+    },
+  });
+  return response;
+};

@@ -9,18 +9,22 @@ import { addingToCart } from '../../redux/slides/cartSlice'
 import { message } from 'antd'
 const CardComponent = (props ) => {
 
-  const  {countInStock, image, name, price, rating, selled, discount, id, originPrice } = props
+  const  {isHidden, countInStock, image, name, price, rating, selled, discount, id, originPrice } = props
   console.log('props', props.originPrice)
   const navigate = useNavigate()
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user);
+
+  if (isHidden) {
+    return null;
+  }
 
   const handleDetailsProduct = (id) => {
     navigate(`/product-details/${id}`)
   }
 
   const handleAddToCart = async (e) => {
-    e.stopPropagation(); // Ngăn chặn sự kiện click lan toả đến WrapperCardStyle
+    e.stopPropagation(); 
 
     if (!user?.id) {
       message.warning('Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng');

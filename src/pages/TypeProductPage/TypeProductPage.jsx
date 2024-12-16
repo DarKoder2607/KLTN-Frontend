@@ -40,7 +40,7 @@ const TypeProductPage = () => {
     type: 'all',
     deviceType: state,  
     minPrice: 0,
-    maxPrice: 100000000,
+    maxPrice: 500000000,
     minRating: 0,
     maxRating: 5,
   });
@@ -187,7 +187,10 @@ const TypeProductPage = () => {
                       return pro?.name?.toLowerCase()?.includes(searchDebounce?.toLowerCase());
                     }
                   })
-                  ?.map((product) => (
+                  ?.map((product) => {
+                     
+                    if (!product.isHidden) {
+                      return (
                     <CardComponent
                       key={product._id}
                       countInStock={product.countInStock}
@@ -202,7 +205,10 @@ const TypeProductPage = () => {
                       discount={product.discount}
                       id={product._id}
                     />
-                  ))}
+                    );
+                    }
+                    return null;  
+                  })}
               </WrapperProducts>
               <Pagination
                 defaultCurrent={panigate.page + 1}

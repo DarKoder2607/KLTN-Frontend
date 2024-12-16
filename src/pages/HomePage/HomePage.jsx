@@ -179,7 +179,10 @@
                                 width: '50%' 
                                 }} />
                             <WrapperProducts2 style={{ backgroundColor: 'red', padding: '20px', borderRadius: '8px' }}>
-                                {topSelledProducts?.data?.map((product) => (
+                                {topSelledProducts?.data?.map((product) => {
+    
+                                if (!product.isHidden) {
+                                return (
                                     <CardComponent
                                         key={product._id}
                                         countInStock={product.countInStock}
@@ -194,8 +197,12 @@
                                         discount={product.discount} 
                                         originPrice={product.originPrice} 
                                         id={product._id}
+                                        isHidden= {product.isHidden}
                                     />
-                                ))}
+                                )
+                            }
+                            return null; // Return nothing if the product is hidden
+                          })}
                             </WrapperProducts2>
                         </div>
 
@@ -212,6 +219,7 @@
                                 }} />
                             <WrapperProducts style={{ backgroundColor: '#2980B9', padding: '20px', borderRadius: '8px'} } >
                                 {products?.data && products?.data.map((product, index) =>{
+                                if (!product.isHidden) {
                                     return (
                                         <CardComponent key={product._id} countInStock = {product.countInStock} 
                                                         decription={product.decription} image={product.image} name={product.name}
@@ -219,6 +227,8 @@
                                                         deviceType={product.deviceType}
                                                         selled={product.selled} originPrice={product.originPrice} discount={product.discount} id={product._id}/>
                                     )
+                                }
+                                return null;
                                 })}
                                 
                             </WrapperProducts>
@@ -277,7 +287,10 @@
                                     width: '50%' 
                                     }} />
                                     <WrapperProducts style={{ backgroundColor: '#2980B9', padding: '20px', borderRadius: '8px'} }>
-                                        {deviceTypeProducts[deviceType].map((product) => (
+                                        {deviceTypeProducts[deviceType].map((product) => {
+                                        // Only render the product if it is not hidden
+                                        if (!product.isHidden) {
+                                        return (
                                             <CardComponent
                                                 key={product._id} countInStock = {product.countInStock} 
                                                 decription={product.decription} image={product.image} name={product.name}
@@ -285,7 +298,9 @@
                                                 deviceType={product.deviceType} originPrice={product.originPrice} 
                                                 selled={product.selled} discount={product.discount} id={product._id}
                                             />
-                                        ))}
+                                            )}
+                                            return null;
+                                        })}
                                     </WrapperProducts>
                                     <div style={{ width: '100%', justifyContent: 'center', display: 'flex', marginTop: '20px', marginBottom: '10px' }}>
                                     <ButtonMore onClick={() => handleLoadMore(deviceType)}>

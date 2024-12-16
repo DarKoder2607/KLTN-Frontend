@@ -680,7 +680,9 @@ const ProductDetailsComponent = ({idProduct, userId }) => {
                         <BlinkTitle>SẢN PHẨM BẠN CÓ THỂ QUAN TÂM</BlinkTitle>
                 
                         <WrapperProducts2 style={{  display: 'flex', justifyContent: 'center', textAlign:'center',backgroundColor: '#fff', padding: '20px', borderRadius: '8px' }}>
-                            {relatedProducts?.map((product) => (
+                            {relatedProducts?.map((product) => {
+                            if (!product.isHidden) {
+                            return (
                                 <CardComponent
                                     key={product._id}
                                     countInStock={product.countInStock}
@@ -695,7 +697,10 @@ const ProductDetailsComponent = ({idProduct, userId }) => {
                                     discount={product.discount}
                                     id={product._id}
                                 />
-                            ))}
+                                );
+                            }
+                            return null; 
+                        })}
                         </WrapperProducts2>
                     </div>
                 </Col>
