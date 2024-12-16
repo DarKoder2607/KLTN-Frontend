@@ -1,5 +1,5 @@
 import { Button, Form, Select, Space } from 'antd'
-import { PlusOutlined, DeleteOutlined, EditOutlined, SearchOutlined } from '@ant-design/icons'
+import { PlusOutlined, DeleteOutlined, EditOutlined, SearchOutlined, EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons'
 import React, { useRef } from 'react'
 import { WrapperHeader, WrapperUploadFile } from './style'
 import TableComponent from '../TableComponent/TableComponent'
@@ -37,6 +37,7 @@ const AdminProduct = () => {
       image: '',
       rating: '',
       deviceType: deviceType || '',
+      isHidden: false
     };
   
     const specsTemplate = {
@@ -133,6 +134,7 @@ const AdminProduct = () => {
       relatedImages,
       image,
       rating,
+      isHidden,
       ...specs  
     } = data;
  
@@ -148,6 +150,7 @@ const AdminProduct = () => {
       relatedImages,
       image,
       rating,
+      isHidden,
       [specsField]: specs,  
     };
  
@@ -166,12 +169,11 @@ const AdminProduct = () => {
         relatedImages,
         image,
         rating,
+        isHidden,
         ...specs} = data;
-      
-      // Xác định tên trường specs dựa trên deviceType
+       
       const specsField = `${deviceType}Specs`;
-  
-      // Chuyển phần specs vào đúng trường trong payload
+   
       const payload = {
         id,
         token,
@@ -183,6 +185,7 @@ const AdminProduct = () => {
         discount,
         image,
         rating,
+        isHidden,
         [specsField]: specs,  
         relatedImages: data.relatedImages,
       };
@@ -238,6 +241,7 @@ const AdminProduct = () => {
           relatedImages,
           image,
           rating,
+          isHidden,
           ...specs
         } = res.data;
   
@@ -254,6 +258,7 @@ const AdminProduct = () => {
           relatedImages,
           image,
           rating,
+          isHidden,
           ...deviceSpecs,  
         });
       }
@@ -306,11 +311,21 @@ const AdminProduct = () => {
   const queryProduct = useQuery({ queryKey: ['products'], queryFn: getAllProducts })
   const typeProduct = useQuery({ queryKey: ['type-product'], queryFn: fetchAllTypeProduct })
   const { isPending: isPendingProducts, data: products } = queryProduct
-  const renderAction = () => {
+  const renderAction = (record) => {
     return (
       <div>
-        <DeleteOutlined style={{ color: 'red', fontSize: '30px', cursor: 'pointer' }} onClick={() => setIsModalOpenDelete(true)} />
         <EditOutlined style={{ color: 'orange', fontSize: '30px', cursor: 'pointer' }} onClick={handleDetailsProduct} />
+        {record?.isHidden ? (
+        <EyeInvisibleOutlined 
+          style={{ color: 'gray', fontSize: '30px', cursor: 'pointer' }} 
+          onClick={() => handleToggleVisibility(record._id)} 
+        />
+      ) : (
+        <EyeOutlined
+          style={{ color: 'blue', fontSize: '30px', cursor: 'pointer' }} 
+          onClick={() => handleToggleVisibility(record._id)} 
+        />
+      )}
       </div>
     )
   }
@@ -470,7 +485,7 @@ const AdminProduct = () => {
     {
       title: 'Action',
       dataIndex: 'action',
-      render: renderAction
+      render: (text, record) => renderAction(record)
     },
   ];
   const dataTable = products?.data?.length && products?.data?.map((product) => {
@@ -517,6 +532,7 @@ const AdminProduct = () => {
       rating: '',
       image: '',
       relatedImages: [],
+      isHidden: false,
       // Reset tất cả specs
       screen: '',
       os: '',
@@ -586,6 +602,7 @@ const handleCancel = () => {
     rating: '',
     image: '',
     relatedImages: [],
+    isHidden: false,
     // Reset tất cả thông số kỹ thuật
     screen: '',
     os: '',
@@ -717,16 +734,12 @@ const onFinish = () => {
         break;
     }
 
-   
-
     // Gọi mutate với params
     mutation.mutate(params, {
       onSettled: () => {
         queryProduct.refetch();
       },
     });
-
-    
 
   };
 
@@ -903,6 +916,25 @@ const onFinish = () => {
     })
   }
 
+  const handleToggleVisibility = (id) => {
+    mutationToggleVisibility.mutate({ id, token: user?.access_token }, {
+        onSettled: (data) => {
+            queryProduct.refetch();
+
+            if (data?.data?.isHidden) {
+              message.success('Sản phẩm đã bị ẩn thành công!');
+            } else {
+              message.success('Sản phẩm đã được hiển thị lại!');
+            }
+        },
+    });
+};
+
+  const mutationToggleVisibility = useMutationHooks(
+    (data) => ProductService.toggleProductVisibility(data.id, data.token)
+  );
+
+
   const handleChangeSelect = (value) => {
       setStateProduct({
         ...stateProduct,
@@ -1015,6 +1047,14 @@ const onFinish = () => {
               rules={[{ required: true, message: 'Please input your name!' }]}
             >
               <InputComponent value={stateProduct['name']} onChange={handleOnchange} name="name" />
+            </Form.Item>
+
+            <Form.Item
+              label="Rating"
+              name="rating"
+              rules={[{ required: true, message: 'Please input rating!' }]}
+            >
+              <InputComponent value={stateProduct.rating} onChange={handleOnchange} name="rating" />
             </Form.Item>
 
             <Form.Item

@@ -71,7 +71,7 @@ const ReviewsSection = ({ productId, userId }) => {
           } else {
             notification.success({
               message: 'Review Added',
-              description: 'Your review has been successfully added!',
+              description: 'Bình luận của bạn đã được thêm thành công!',
             });
             setIsReviewing(false);
             queryClient.invalidateQueries(['product-reviews', productId]);
@@ -81,7 +81,7 @@ const ReviewsSection = ({ productId, userId }) => {
           console.error('Error adding review:', error);
           notification.error({
             message: 'Error',
-            description: 'There was an error while adding your review.',
+            description: 'Bạn không thể thực hiện bình luận',
           });
         });
     } else {

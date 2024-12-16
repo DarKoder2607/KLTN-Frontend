@@ -63,13 +63,16 @@ const AdminUser = () => {
       }
     })
   }
-
   const handleLockUser = (id) => {
     setIsLoadingUpdate(true);
     UserService.lockUserAccount(id, user?.access_token)
       .then((response) => {
-        message.success('Đã khóa tài khoản User thành công');
-        queryClient.invalidateQueries(['users']);   
+        if (response.status === 'ERR') {
+          message.error(response.message); // Thông báo lỗi nếu không thể khóa Admin
+        } else {
+          message.success('Đã khóa tài khoản User thành công');
+          queryClient.invalidateQueries(['users']);   
+        }
       })
       .catch((error) => {
         message.error('Error locking user account');
@@ -77,7 +80,8 @@ const AdminUser = () => {
       .finally(() => {
         setIsLoadingUpdate(false);
       });
-  };
+};
+
   
   const handleUnlockUser = (id) => {
     setIsLoadingUpdate(true);

@@ -40,9 +40,14 @@ const SignInPage = () => {
       if(location?.state){
         navigate(location.state)
       } else{
-        navigate('/')
-        message.success('Đăng nhập thành công!')
+        const decoded = jwtDecode(data?.access_token);
+      if (decoded?.isAdmin) {
+        navigate('/system/admin');  // Redirect to Admin page if isAdmin is true
+      } else {
+        navigate('/');  // Redirect to Homepage if not admin
       }
+      message.success('Đăng nhập thành công!');
+    }
       
       localStorage.setItem('access_token', JSON.stringify(data?.access_token))
       if(data?.access_token){

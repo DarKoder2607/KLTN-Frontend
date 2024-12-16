@@ -183,7 +183,9 @@ const HeaderComponent = ({isHiddenSearch = false, isHiddenCart =false, isHiddenN
             {user?.isAdmin && (
                 <WrapperContentPopup onClick={() => handleClickNavigate('admin')}><SettingOutlined/> Quản lí hệ thống</WrapperContentPopup>
             )}
+            {!user?.isAdmin&& (
             <WrapperContentPopup onClick={() => handleClickNavigate(`my-order`)}><ShoppingOutlined/> Đơn hàng của tôi</WrapperContentPopup>
+            )}
             <WrapperContentPopup onClick={() => setIsLogoutModalVisible(true)}><LogoutOutlined/> Đăng xuất</WrapperContentPopup> 
         </div>
     )

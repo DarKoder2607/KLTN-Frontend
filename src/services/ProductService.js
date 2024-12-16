@@ -12,6 +12,13 @@ export const getAllProduct = async (search, limit, page) => {
     return res.data
 }
 
+export const toggleProductVisibility = async (id, access_token) => {
+  const res = await axiosJWT.put(`${process.env.REACT_APP_API_KEY}/product/toggleVisibility/${id}`, {}, {
+      headers: { token: `Bearer ${access_token}` },
+  });
+  return res.data;
+};
+
 export const getProductByDeviceType = async (deviceType, limit, page) => {
   if (deviceType) {
     const res = await axios.get(

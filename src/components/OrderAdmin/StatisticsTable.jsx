@@ -10,6 +10,8 @@ import PieChartComponent from './PieChart'
 
 const StatisticsTable = () => {
   const user = useSelector((state) => state?.user)
+  const [revenueByUser, setRevenueByUser] = useState([]);
+  const [selectedTimeFrame, setSelectedTimeFrame] = useState('month');
   const [totalPriceByProduct, setTotalPriceByProduct] = useState([])
 
   const getTotalOrderPriceByProduct = async () => {
@@ -28,7 +30,48 @@ const StatisticsTable = () => {
     return res
   }
 
+  const getRevenueData = async () => {
+    try {
+      let queryParams = {};
+      if (selectedTimeFrame === 'year') {
+        queryParams.year = new Date().getFullYear();  
+      }
+      if (selectedTimeFrame === 'month') {
+        queryParams.month = new Date().getMonth() + 1; 
+      }
+      if (selectedTimeFrame === 'quarter') {
+        queryParams.quarter = Math.floor((new Date().getMonth() + 3) / 3);  
+      }
+      const res = await OrderService.getRevenueByUser(queryParams);
+      setRevenueByUser(res.data);
+    } catch (error) {
+      console.error('Error fetching revenue data:', error);
+    }
+  };
+  useEffect(() => {
+    getRevenueData();
+  }, [user?.access_token, selectedTimeFrame]);
 
+  const revenueColumns = [
+    {
+      title: 'Tên người dùng',
+      dataIndex: 'userName',
+      align: 'center',
+    },
+    {
+      title: 'Email',
+      dataIndex: 'userEmail', 
+      align: 'center',
+    },
+    { 
+      title: 'Tổng doanh thu',
+      dataIndex: 'totalRevenue',
+      align: 'center',
+      render: (text) => convertPrice(text),
+      sorter: (a, b) => a.totalRevenue - b.totalRevenue,  
+      sortDirections: ['descend', 'ascend'], 
+    },
+  ];
 
   const queryOrder = useQuery({ queryKey: ['orders'], queryFn: getAllOrder })
   const { isPending: isPendingOrders, data: orders } = queryOrder
@@ -102,55 +145,83 @@ const StatisticsTable = () => {
         margin: '0px 0', 
         width: '20%' 
         }} />
-    <div style={{ 
-        display: "flex", 
-        gap: "20px", 
-        flexWrap: "wrap", 
-        justifyContent: "center",  
-        alignItems: "center",      
-        margin: "0 auto",         
-        maxWidth: "1200px"        
-        }}>
-        {Object.keys(STATISTICS_CONFIG).map((key, index) => (
-            <div style={{ display: "flex", alignItems: "center" }} key={key}>
+      <div style={{ 
+          display: "flex", 
+          gap: "20px", 
+          flexWrap: "wrap", 
+          justifyContent: "center",  
+          alignItems: "center",      
+          margin: "0 auto",         
+          maxWidth: "1200px"        
+          }}>
+          {Object.keys(STATISTICS_CONFIG).map((key, index) => (
+              <div style={{ display: "flex", alignItems: "center" }} key={key}>
 
-            <div style={{ height: 250, width: 250 }}>
-                <h3 style={{ textAlign: "center" }}>{STATISTICS_CONFIG[key].title}</h3>
-                <PieChartComponent
-                data={orders?.data}
-                type={STATISTICS_CONFIG[key].type}
-                mapping={STATISTICS_CONFIG[key].mapping}
-                colors={STATISTICS_CONFIG[key].colors}
-                />
-            </div>
+              <div style={{ height: 250, width: 250 }}>
+                  <h3 style={{ textAlign: "center" }}>{STATISTICS_CONFIG[key].title}</h3>
+                  <PieChartComponent
+                  data={orders?.data}
+                  type={STATISTICS_CONFIG[key].type}
+                  mapping={STATISTICS_CONFIG[key].mapping}
+                  colors={STATISTICS_CONFIG[key].colors}
+                  />
+              </div>
 
-            {index !== Object.keys(STATISTICS_CONFIG).length - 1 && (
-                <div style={{ 
-                height: '200px', 
-                borderLeft: '2px solid #D3D3D3', 
-                marginLeft: '20px' 
-                }}></div>
-            )}
-            </div>
-        ))}
+              {index !== Object.keys(STATISTICS_CONFIG).length - 1 && (
+                  <div style={{ 
+                  height: '200px', 
+                  borderLeft: '2px solid #D3D3D3', 
+                  marginLeft: '20px' 
+                  }}></div>
+              )}
+              </div>
+          ))}
+          </div>
+
+        <div style={{ 
+          borderTop: '2px solid #000', 
+          margin: '20px auto', 
+          width: '80%',   
+          textAlign: 'center'  
+          }} />
+
+        <div style={{ marginTop: '20px' }}>
+          <h2 style={{textAlign: "center" }}>Tổng giá trị theo sản phẩm</h2>
+          <Table 
+            columns={productColumns}
+            dataSource={totalPriceByProduct}
+            pagination={false}
+          />
+        </div>
+        <div style={{ 
+          borderTop: '2px solid #000', 
+          margin: '20px auto', 
+          width: '80%',   
+          textAlign: 'center'  
+          }} />
+        <div>
+        <h2 style={{textAlign: "center" }}>THỐNG KÊ DOANH THU THEO NGƯỜI DÙNG</h2>
+
+        <div>
+          <h3>Chọn thời gian</h3>
+          <select onChange={(e) => setSelectedTimeFrame(e.target.value)} value={selectedTimeFrame}>
+            <option value="month">Theo tháng</option>
+            <option value="quarter">Theo quý</option>
+            <option value="year">Theo năm</option>
+          </select>
         </div>
 
-      <div style={{ 
-        borderTop: '2px solid #000', 
-        margin: '20px auto', 
-        width: '80%',   
-        textAlign: 'center'  
-        }} />
-
-      <div style={{ marginTop: '20px' }}>
-        <h2 style={{textAlign: "center" }}>Tổng giá trị theo sản phẩm</h2>
-        <Table 
-          columns={productColumns}
-          dataSource={totalPriceByProduct}
-          pagination={false}
-        />
+        <div style={{ marginTop: '20px' }}>
+          <Table
+            columns={revenueColumns}
+            dataSource={revenueByUser}
+            pagination={false}
+          />
+        </div>
       </div>
     </div>
+
+    
   )
 }
 
