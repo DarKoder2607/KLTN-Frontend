@@ -47,7 +47,7 @@ const MyOrderPage = () => {
   )
 
   const handleCanceOrder = (order) => {
-    if (!order?.isDelivered && !order?.isPaid)
+    if (order?.isDelivered !== "Đã giao" && order?.isDelivered !== "Đang vận chuyển")
     {
       mutation.mutate({id : order._id, token:state?.token, orderItems: order?.orderItems, userId: user.id }, {
         onSuccess: () => {
@@ -121,7 +121,7 @@ const MyOrderPage = () => {
                     <span style={{fontSize: '18px', fontWeight: 'bold'}}>Trạng thái</span>
                     <div>
                       <span style={{color: 'rgb(255, 66, 78)'}}>Giao hàng: </span>
-                      <span style={{color: 'rgb(90, 32, 193)', fontWeight: 'bold'}}>{`${order.isDelivered ? 'Đã giao hàng': 'Chưa giao hàng'}`}</span>
+                      <span style={{color: 'rgb(90, 32, 193)', fontWeight: 'bold'}}>{`${order.isDelivered}`}</span>
                     </div>
                     <div>
                       <span style={{color: 'rgb(255, 66, 78)'}}>Thanh toán: </span>
@@ -129,7 +129,7 @@ const MyOrderPage = () => {
                     </div>
                     <div>
                       <span style={{}}>Mã đơn hàng: </span>
-                      <span style={{color: 'rgb(0, 148, 22)', fontWeight: 'bold'}}>{`${order._id}`}</span>
+                      <span style={{color: 'rgb(0, 148, 22)', fontWeight: 'bold'}}>  {order.orderCode ? order.orderCode : order._id}</span>
                     </div>
                   </WrapperStatus>
                   {renderProduct(order?.orderItems)}
@@ -142,7 +142,7 @@ const MyOrderPage = () => {
                     </div>
                     <div style={{display: 'flex', gap: '10px'}}>
                     <ButtonComponent
-                        disabled = {order.isPaid || order.isDelivered }
+                        disabled = {order.isDelivered === 'Đã giao' || order.isDelivered ==='Đang vận chuyển'}
                         onClick={() => handleCanceOrder(order)}
                         size={40}
                         styleButton={{

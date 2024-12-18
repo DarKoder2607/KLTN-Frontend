@@ -146,8 +146,7 @@
             fetchAllTypeProduct()
         
         }, [])
-
-        console.log('typeProducts', typeProducts)
+ 
 
         
         return (

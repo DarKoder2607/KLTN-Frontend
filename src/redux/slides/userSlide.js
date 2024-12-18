@@ -12,7 +12,15 @@ const initialState = {
     city: '',
     refreshToken: '',
     rewardPoints: 0,
-    notifications: []
+    notifications: [],
+    shippingAddress: {
+        name: '',
+        address: '',
+        ward: '',
+        district: '',
+        city: '',
+        phone: '',
+    },
 }
 
 export const userSlide = createSlice({
@@ -20,7 +28,16 @@ export const userSlide = createSlice({
     initialState,
     reducers: {
         updateUser: (state, action) => {
-            const { name = '', email = '', access_token = '', address = '', phone = '', avatar = '', _id = '', isAdmin,city= '',refreshToken = '', rewardPoints = 0,  notifications = []} = action.payload
+            const { name = '', email = '', access_token = '', address = '', phone = '', avatar = '', _id = '', isAdmin,city= '',refreshToken = '', rewardPoints = 0,  notifications = [], 
+                shippingAddress = {
+                    // name: '',
+                    // address: '',
+                    // ward: '',
+                    // district: '',
+                    // city: '',
+                    // phone: '',
+                },
+            } = action.payload
             state.name = name ? name : state.name;
             state.email = email ? email : state.email;
             state.address = address ? address : state.address;
@@ -33,6 +50,15 @@ export const userSlide = createSlice({
             state.refreshToken = refreshToken ? refreshToken : state.refreshToken;
             state.rewardPoints = rewardPoints ? rewardPoints : state.rewardPoints;
             state.notifications = notifications ? notifications : state.notifications; 
+            state.shippingAddress = shippingAddress ? shippingAddress : state.shippingAddress;
+            // state.shippingAddress = {
+            //     name: shippingAddress.name || state.shippingAddress.name,
+            //     address: shippingAddress.address || state.shippingAddress.address,
+            //     ward: shippingAddress.ward || state.shippingAddress.ward,
+            //     district: shippingAddress.district || state.shippingAddress.district,
+            //     city: shippingAddress.city || state.shippingAddress.city,
+            //     phone: shippingAddress.phone || state.shippingAddress.phone,
+            // };
         },
         resetUser: (state) => {
             state.name = '';
@@ -47,6 +73,15 @@ export const userSlide = createSlice({
             state.refreshToken = ''
             state.rewardPoints = 0;
             state.notifications = [];
+            state.shippingAddress={};
+            state.shippingAddress = {
+                name: '',
+                address: '',
+                ward: '',
+                district: '',
+                city: '',
+                phone: '',
+            };
         }
     },
 })
