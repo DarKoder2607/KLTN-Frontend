@@ -8,7 +8,6 @@ const initialState = {
   paymentMethod: '',
   itemsPrice: 0,
   shippingPrice: 0,
-  taxPrice: 0,
   totalPrice: 0,
   user: '',
   isPaid: false,
@@ -83,11 +82,14 @@ export const orderSlide = createSlice({
       state.orderItems = []
       state.orderItemsSlected = []
     },
+    setsShippingFee: (state, action) => {
+      state.shippingPrice = action.payload;
+    },
   },
   
 })
 
 // Action creators are generated for each case reducer function
-export const { addOrderProduct,increaseAmount,decreaseAmount,removeOrderProduct,removeAllOrderProduct, selectedOrder,resetOrder, removeAllOrderLogout } = orderSlide.actions
+export const {setsShippingFee, addOrderProduct,increaseAmount,decreaseAmount,removeOrderProduct,removeAllOrderProduct, selectedOrder,resetOrder, removeAllOrderLogout } = orderSlide.actions
 
 export default orderSlide.reducer

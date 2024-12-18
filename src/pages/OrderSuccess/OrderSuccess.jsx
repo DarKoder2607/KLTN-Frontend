@@ -20,7 +20,7 @@ const OrderSucess = () => {
                 <div>
                   <Lable>Phương thức giao hàng</Lable>
                     <WrapperValue>
-                      <span style={{color: '#ea8500', fontWeight: 'bold'}}>{orderContant.delivery[state?.delivery]}</span> Giao hàng tiết kiệm
+                      <span style={{color: '#ea8500', fontWeight: 'bold'}}>{orderContant.delivery[state?.delivery]}</span> GIAO HÀNG NHANH
                     </WrapperValue>
                 </div>
               </WrapperInfo>

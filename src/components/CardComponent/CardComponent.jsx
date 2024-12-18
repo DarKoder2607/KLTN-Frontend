@@ -10,7 +10,6 @@ import { message } from 'antd'
 const CardComponent = (props ) => {
 
   const  {isHidden, countInStock, image, name, price, rating, selled, discount, id, originPrice } = props
-  console.log('props', props.originPrice)
   const navigate = useNavigate()
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user);

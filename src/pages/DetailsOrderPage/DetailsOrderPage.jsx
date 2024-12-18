@@ -56,7 +56,7 @@ const DetailsOrderPage = () => {
 
   return (
     <Loading isPending={isPending}>
-      <div style={{ width: '100%', height: '100vh', background: '#f5f5fa' }}>
+      <div style={{ width: '100%', height: '100vh', background: '#f5f5fa' ,   minHeight: '100vh', paddingBottom: '200px' }}>
         <div style={{ width: '1270px', margin: '0 auto', height: '1270px' }}>
           {/* Navigation and title */}
           <span style={{ fontSize: '15px' }}>
@@ -110,7 +110,7 @@ const DetailsOrderPage = () => {
                   style={{ fontSize: '15px', color: '#ef7f00' }}
                 >
                   <span style={{ color: 'black', fontWeight: 'bold' }}>Địa chỉ: </span>{' '}
-                  {`${data?.shippingAddress?.address} ${data?.shippingAddress?.city}`}
+                  {`${data?.shippingAddress?.address}, ${data?.shippingAddress?.ward}, ${data?.shippingAddress?.district}, ${data?.shippingAddress?.city}`}
                 </div>
                 <div className="phone-info">
                   <span style={{ color: 'black', fontWeight: 'bold' }}>Điện thoại: </span>{' '}
@@ -125,14 +125,14 @@ const DetailsOrderPage = () => {
                   className="delivery-fee"
                   style={{ fontSize: '15px', color: 'blue' }}
                 >
-                  <span style={{ color: 'black', fontWeight: 'bold' }}>Phí giao hàng: </span>{' '}
-                  {shippingFee}
+                  <span style={{ color: 'black', fontWeight: 'bold' }}>Phí vận chuyển: </span>{' '}
+                  {convertPrice(data?.shippingPrice)}
                 </div>
                 <div
                   className="status-payment"
-                  style={{ fontSize: '20px', fontWeight:data?.isDelivered ? 'bold' : 'unset',  color: data?.isDelivered ? 'blue' : '#3e3e3d ' }}
+                  style={{ fontSize: '20px', fontWeight:  'bold' }}
                 >
-                  {data?.isDelivered ? 'Đã giao hàng' : 'Đang giao hàng'}
+                  {data?.isDelivered}
                 </div>
               </WrapperContentInfo>
             </WrapperInfoUser>
@@ -250,7 +250,7 @@ const DetailsOrderPage = () => {
                     Phí vận chuyển
                   </WrapperItemLabel>
                   <WrapperItem style={{ fontSize: '20px' }}>
-                    {convertPrice(shippingFee)}
+                    + {convertPrice(data?.shippingPrice)}
                   </WrapperItem>
                 </WrapperContentProductBill>
               </WrapperAllPrice>
@@ -260,17 +260,17 @@ const DetailsOrderPage = () => {
                     Điểm tích lũy sử dụng
                   </WrapperItemLabel>
                   <WrapperItem style={{ fontSize: '20px' }}>
-                    {convertPrice(rewardPointsValue)}
+                   - {convertPrice(rewardPointsValue)}
                   </WrapperItem>
                 </WrapperContentProductBill>
               </WrapperAllPrice>
               <WrapperAllPrice>
                 <WrapperContentProductBill>
                   <WrapperItemLabel style={{ fontSize: '15px', fontWeight: 'bold' }}>
-                    Tổng cộng
+                    Thành tiền
                   </WrapperItemLabel>
                   <WrapperItem style={{ fontSize: '20px' }}>
-                    {convertPrice(totalAfterRewards)}
+                    {convertPrice(data?.totalPrice)}
                   </WrapperItem>
                 </WrapperContentProductBill>
               </WrapperAllPrice>

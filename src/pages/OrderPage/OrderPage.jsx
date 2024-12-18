@@ -1,4 +1,4 @@
-import {Checkbox, Form } from 'antd'
+import {Checkbox, Form, Select } from 'antd'
 import React, { useEffect, useState } from 'react'
 import { CustomCheckbox, WrapperCountOrder, WrapperInfo, WrapperItemOrder, WrapperLeft, WrapperListOrder, WrapperRight, WrapperStyleHeader, WrapperStyleHeaderDilivery, WrapperTotal } from './style';
 import { DeleteOutlined, MinusOutlined, PlusOutlined} from '@ant-design/icons'
@@ -6,7 +6,7 @@ import { DeleteOutlined, MinusOutlined, PlusOutlined} from '@ant-design/icons'
 import { WrapperInputNumber } from '../../components/ProductDetailsComponent/Style';
 import ButtonComponent from '../../components/ButtonComponent/ButtonComponent';
 import { useDispatch, useSelector } from 'react-redux';
-import { selectedOrder } from '../../redux/slides/orderSlide';
+import { selectedOrder, setsShippingFee } from '../../redux/slides/orderSlide';
 import { convertPrice } from '../../utils';
 import { useMemo } from 'react';
 import ModalComponent from '../../components/ModalComponent/ModalComponent';
@@ -23,20 +23,42 @@ import { createOrder } from '../../services/OrderService';
 import { clearsCart, decreaseAmount, increaseAmount, removesFromCart, setCarts, updatesCartItem } from '../../redux/slides/cartSlice';
 import useHover from '../../hooks/useHover';
 
+import * as ShippingService from '../../services/ShippingService'
+
 const OrderPage = () => {
   const order = useSelector((state) => state.order)
   const user = useSelector((state) => state.user)
+  const shippingAddress = useSelector(state => state.user.shippingAddress);
   const [cart, setCart] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [listChecked, setListChecked] = useState([])
   const [isOpenModalUpdateInfo, setIsOpenModalUpdateInfo] = useState(false)
   const { isHovered, handleMouseEnter, handleMouseLeave } = useHover()
   const [stateUserDetails, setStateUserDetails] = useState({
-    name: '',
-    phone: '',
-    address: '',
-    city: ''
-  })
+    shippingAddress: {
+      nameship: '',         // Tên người nhận
+      addressShip: '',      // Địa chỉ giao hàng
+      wardShip: '',         // Phường
+      districtShip: '',     // Quận/huyện
+      cityShip: '',         // Thành phố
+      phoneShip: '',        // Số điện thoại
+    },
+  });
+
+  useEffect(() => {
+    if (shippingAddress) {
+      setStateUserDetails({
+        shippingAddress: {
+          nameship: shippingAddress.nameship || '',
+          addressShip: shippingAddress.addressShip || '',
+          wardShip: shippingAddress.wardShip || '',
+          districtShip: shippingAddress.districtShip || '',
+          cityShip: shippingAddress.cityShip || '',
+          phoneShip: shippingAddress.phoneShip || '',
+        },
+      });
+    }
+  }, [shippingAddress]);
   const navigate = useNavigate()
   const [form] = Form.useForm();
   const dispatch = useDispatch()
@@ -151,21 +173,42 @@ const OrderPage = () => {
   };
 
   useEffect(() => {
-    form.setFieldsValue(stateUserDetails)
-  }, [form, stateUserDetails])
+    form.setFieldsValue({
+      nameship: stateUserDetails.shippingAddress.nameship,
+      phoneShip: stateUserDetails.shippingAddress.phoneShip,
+      cityShip: stateUserDetails.shippingAddress.cityShip,
+      districtShip: stateUserDetails.shippingAddress.districtShip,
+      wardShip: stateUserDetails.shippingAddress.wardShip,
+      addressShip: stateUserDetails.shippingAddress.addressShip,
+    });
+  }, [stateUserDetails, form]);
 
   useEffect(() => {
-    if(isOpenModalUpdateInfo) {
+    if (isOpenModalUpdateInfo) {
       setStateUserDetails({
-        city: user?.city,
-        name: user?.name,
-        address: user?.address,
-        phone: user?.phone
-      })
+        shippingAddress: {
+          nameship: shippingAddress.nameship || '',
+          addressShip: shippingAddress.addressShip || '',
+          wardShip: shippingAddress.wardShip || '',
+          districtShip: shippingAddress.districtShip || '',
+          cityShip: shippingAddress.cityShip || '',
+          phoneShip: shippingAddress.phoneShip || '',
+        }
+      });
     }
-  }, [isOpenModalUpdateInfo])
+}, [isOpenModalUpdateInfo]);
 
   const handleChangeAddress = () => {
+    setStateUserDetails({
+      isAdmin: false,
+      shippingAddress: {  
+        nameship: shippingAddress.nameship,
+        addressShip: shippingAddress.addressShip,
+        wardShip: shippingAddress.wardShip,
+        districtShip: shippingAddress.districtShip,
+        cityShip: shippingAddress.cityShip,
+        phoneShip: shippingAddress.phoneShip,
+    }})
     setIsOpenModalUpdateInfo(true)
   }
 
@@ -197,15 +240,10 @@ const OrderPage = () => {
       return 20000;
     } else return 0;
   }, [priceMemo]);
-
-  const totalPriceMemo = useMemo(() => {
-    return priceMemo - priceDiscountMemo + deliveryPriceMemo;
-  }, [priceMemo, priceDiscountMemo, deliveryPriceMemo]);
-
-
  
   const handleAddCard = () => {
-    if (!user?.phone || !user.address || !user.name || !user.city) {
+    if (!shippingAddress?.phoneShip || !shippingAddress?.addressShip || !shippingAddress?.nameship || 
+        !shippingAddress?.cityShip || !shippingAddress?.wardShip || !shippingAddress?.districtShip) {
       setIsOpenModalUpdateInfo(true);
     } else {
       // Filter cart items based on the checked list
@@ -224,60 +262,226 @@ const OrderPage = () => {
 
   const mutationUpdate = useMutationHooks(
     (data) => {
-      const { id,
-        token,
-        ...rests } = data
+      const { id, token, shippingAddress } = data; 
       const res = UserService.updateUser(
         id,
-        { ...rests }, token)
-      return res
-    },
-  )
+        { shippingAddress }, // Truyền cả đối tượng shippingAddress
+        token
+      );
+      return res;
+    }
+  );
 
   const {isPending, data} = mutationUpdate
 
   const handleCancleUpdate = () => {
     setStateUserDetails({
-      name: '',
-      email: '',
-      phone: '',
       isAdmin: false,
+      shippingAddress: {  
+        nameship: shippingAddress.nameship,
+        addressShip: shippingAddress.addressShip,
+        wardShip: shippingAddress.wardShip,
+        districtShip: shippingAddress.districtShip,
+        cityShip: shippingAddress.cityShip,
+        phoneShip: shippingAddress.phoneShip,
+    },
     })
-    form.resetFields()
+    form.setFieldsValue({
+      nameship: shippingAddress.nameship,
+      phoneShip: shippingAddress.phoneShip,
+      cityShip: shippingAddress.cityShip,
+      districtShip: shippingAddress.districtShip,
+      wardShip: shippingAddress.wardShip,
+      addressShip: shippingAddress.addressShip,
+    });
     setIsOpenModalUpdateInfo(false)
   }
   const handleUpdateInforUser = () => {
-    const {name, address,city, phone} = stateUserDetails
-    if(name && address && city && phone){
-      mutationUpdate.mutate({ id: user?.id, token: user?.access_token, ...stateUserDetails }, {
-        onSuccess: () => {
-          dispatch(updateUser({name, address,city, phone}))
-          setIsOpenModalUpdateInfo(false)
+    const { nameship, addressShip, wardShip, districtShip, cityShip, phoneShip } = stateUserDetails.shippingAddress;
+  
+  
+    // Kiểm tra nếu có đầy đủ thông tin trong shippingAddress
+    if (nameship && addressShip && cityShip && phoneShip && wardShip && districtShip) {
+      mutationUpdate.mutate(
+        { 
+          id: user?.id, 
+          token: user?.access_token, 
+          shippingAddress: { 
+            nameship, 
+            addressShip, 
+            wardShip, 
+            districtShip, 
+            cityShip, 
+            phoneShip 
+          }
+        },
+        {
+          onSuccess: () => {
+            // Dispatch action để cập nhật thông tin người dùng với các thông tin mới
+            dispatch(updateUser({
+              shippingAddress: { nameship, addressShip, wardShip, districtShip, cityShip, phoneShip },
+            }));
+            setIsOpenModalUpdateInfo(false); // Đóng modal sau khi cập nhật thành công
+          }
         }
-      })
+      );
+    } else {
+      console.log("Vui lòng nhập đầy đủ thông tin giao hàng.");
     }
-  }
+  };
+  
 
   const handleOnchangeDetails = (e) => {
-    setStateUserDetails({
-      ...stateUserDetails,
-      [e.target.name]: e.target.value
-    })
-  }
+    const { name, value } = e.target;
+    setStateUserDetails((prev) => ({
+      ...prev,
+      shippingAddress: { ...prev.shippingAddress, [name]: value }
+    }));
+  };
+
+  const [cities, setCities] = useState([]);
+  const [districts, setDistricts] = useState([]);
+  const [wards, setWards] = useState([]);
+
+  useEffect(() => {
+    const fetchCities = async () => {
+      try {
+        const response = await ShippingService.getProvinces();  
+        setCities(response);
+      } catch (error) {
+        message.error('Không thể tải danh sách thành phố!');
+      }
+    };
+
+    fetchCities();
+  }, []);
+
+  const handleCityChange = async (cityId) => {
+    const selectedCity = cities.find((city) => city.ProvinceID === cityId);
+
+    setStateUserDetails((prev) => ({
+      ...prev,
+      shippingAddress: {
+        ...prev.shippingAddress,
+        cityShip: selectedCity?.ProvinceName || '',   
+        districtShip: '',  
+        wardShip: ''   
+      }
+    }));
+    try {
+      const response = await ShippingService.getDistricts(cityId); 
+      console.log("Quận: ", response); 
+      setDistricts(response);
+    } catch (error) {
+      message.error('Không thể tải danh sách quận/huyện!');
+    }
+  };
+
+  const handleDistrictChange = async (districtId) => {
+    console.log("District ID selected: ", districtId);   
+    const selectedDistrict = districts.find((district) => district.DistrictID === districtId);
+    console.log("name District: ", selectedDistrict);
+    setStateUserDetails((prev) => ({
+      ...prev,
+      shippingAddress: {
+        ...prev.shippingAddress,
+        districtShip: selectedDistrict?.DistrictName || '',  
+        wardShip: ''  
+      }
+    }));
+    try {
+      const response = await ShippingService.getWards(districtId); 
+      console.log("Huyện: ", response); 
+      setWards(response);
+    } catch (error) {
+      message.error('Không thể tải danh sách phường/xã!');
+    }
+  };
+
+  const handleWardChange = (wardId) => {
+    console.log("wardId: ",wardId);
+    setStateUserDetails((prev) => ({
+      ...prev,
+      shippingAddress: {
+        ...prev.shippingAddress,
+        wardShip: wardId || ''
+      }
+    }));
+  };
+  
+  const totalWeight = useMemo(() => {
+    return cart.reduce((total, item) => {
+      if (listChecked.includes(item.product._id)) {
+        return total + item.amount * 1000;   
+      }
+      return total;
+    }, 0);
+  }, [cart, listChecked]);
+  
+  const getDistrictsByProvince = async (provinceId) => { 
+    const districts = await ShippingService.getDistricts(provinceId);
+    return districts;
+  };
+
+  const getWardsByDistrict = async (districtId) => { 
+    const wards = await ShippingService.getWards(districtId);
+    return wards;
+  };
+  const [shippingFee, setShippingFee] = useState(0);
+
+  const calculateShippingFee = async () => {
+    const fromDistrictId = 1458;  // Quận Bình Tân
+    const { cityShip, districtShip, wardShip } = stateUserDetails.shippingAddress;
+   
+    const city = cities.find(c => c.ProvinceName === cityShip);
+
+    const districts = await getDistrictsByProvince(city.ProvinceID);
+    const district = districts.find(d => d.DistrictName === districtShip);
+    console.log('district', district)
+    const wards = await getWardsByDistrict(district.DistrictID);
+    const ward = wards.find(w => w.WardName === wardShip);
+  
+    if (!city || !district || !ward) {
+      message.error("Thông tin địa chỉ không hợp lệ.");
+      return;
+    }
+  
+    const shippingFee = await ShippingService.getShippingFee(
+      fromDistrictId,
+      district.DistrictID,
+      ward.WardCode,
+      totalWeight,
+      priceMemo,
+      priceDiscountMemo
+    );
+    setShippingFee(shippingFee);  
+    console.log("Phí giao hàng: ", shippingFee);
+    dispatch(setsShippingFee(shippingFee));
+  };
+
+  useEffect(() => {
+    if (shippingAddress && listChecked.length > 0) {
+      calculateShippingFee();
+    }
+  }, [shippingAddress, listChecked, cart, priceMemo, priceDiscountMemo]);
+
+  const totalPriceMemo = useMemo(() => {
+    return priceMemo - priceDiscountMemo + shippingFee;  
+  }, [priceMemo, priceDiscountMemo, shippingFee]);
+
   const itemsDelivery = [
     {
-      title: '20.000 VND',
-      description: 'Dưới 2.000.000 VND',
+      title: 'Phương thức giao hàng',  // Bước 1
+      description: 'GiaoHangNhanh',
     },
     {
-      title: '10.000 VND',
-      description: 'Từ 2.000.000 VND đến dưới 5.000.000 VND',
-    },
-    {
-      title: '2.000 VNĐ',
-      description : 'Trên 5.000.000 VND',
-    },
-  ]
+      title: 'Phí giao hàng',  // Bước 2 (hiển thị phí giao hàng)
+      description:  `${convertPrice(shippingFee)} VND`,
+    }
+  ];
+
+  const currentStep = shippingFee === 0 ? 0 : listChecked.length > 0 ? 1 : 2;
+
   return (
     <div style={{background: '#f5f5fa', width: '100%', minHeight: '100vh', paddingBottom: '200px'}}>
       <div style={{height: '100%', width: '1270px', margin: '0 auto'}}>
@@ -295,9 +499,7 @@ const OrderPage = () => {
           <WrapperLeft>
             <h2>Phí giao hàng</h2>
             <WrapperStyleHeaderDilivery>
-              <StepComponent items={itemsDelivery} current={deliveryPriceMemo === 10000 
-                ? 2 : deliveryPriceMemo === 20000 ? 1 
-                : cart.length === 0 ? 0:  3}/>
+              <StepComponent items={itemsDelivery} current={currentStep} />;
             </WrapperStyleHeaderDilivery>
             <WrapperStyleHeader>
                 <span style={{display: 'inline-block', width: '390px'}}>
@@ -365,8 +567,15 @@ const OrderPage = () => {
               <WrapperInfo>
                 <div>
                   <span style={{ fontSize: "15px" , fontWeight: 'bold'}}>Địa chỉ: </span>
-                  <span style={{fontSize: "18px"}}>{ `${user?.address} - ${user?.city}`} </span>
-                  <span onClick={handleChangeAddress} style={{color: '#9255FD', cursor:'pointer', fontSize: "15px"}}>Thay đổi</span>
+                  <span style={{ fontSize: "18px" }}>
+                    {shippingAddress.addressShip &&
+                    shippingAddress.wardShip &&
+                    shippingAddress.districtShip &&
+                    shippingAddress.cityShip
+                      ? `${shippingAddress.addressShip}, ${shippingAddress.wardShip}, ${shippingAddress.districtShip}, ${shippingAddress.cityShip}`
+                      : "Chưa có thông tin địa chỉ"}
+                  </span>
+                  <span onClick={handleChangeAddress} style={{fontWeight: 'bold', marginLeft: '5px',color: '#9255FD', cursor:'pointer', fontSize: "15px"}}>Thay đổi</span>
                 </div>
               </WrapperInfo>
               )}
@@ -381,7 +590,7 @@ const OrderPage = () => {
                 </div>
                 <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
                   <span style={{fontSize: "13px"}}>Phí giao hàng</span>
-                  <span style={{color: '#000', fontSize: '14px', fontWeight: 'bold'}}> + {convertPrice(deliveryPriceMemo)}</span>
+                  <span style={{color: '#000', fontSize: '14px', fontWeight: 'bold'}}> + {convertPrice(shippingFee)}</span>
                 </div>
               </WrapperInfo>
               <WrapperTotal>
@@ -418,35 +627,102 @@ const OrderPage = () => {
             // onFinish={onUpdateUser}
             autoComplete="on"
             form={form}
+            initialValues={{
+              nameship: stateUserDetails.shippingAddress.nameship,
+              phoneShip: stateUserDetails.shippingAddress.phoneShip,
+              cityShip: stateUserDetails.shippingAddress.cityShip,
+              districtShip: stateUserDetails.shippingAddress.districtShip,
+              wardShip: stateUserDetails.shippingAddress.wardShip,
+              addressShip: stateUserDetails.shippingAddress.addressShip,
+            }}
           >
             <Form.Item
               label="Name"
-              name="name"
+              name="nameship"
               rules={[{ required: true, message: 'Please input your name!' }]}
             >
-              <InputComponent value={stateUserDetails['name']} onChange={handleOnchangeDetails} name="name" />
-            </Form.Item>
-            <Form.Item
-              label="City"
-              name="city"
-              rules={[{ required: true, message: 'Please input your city!' }]}
-            >
-              <InputComponent value={stateUserDetails['city']} onChange={handleOnchangeDetails} name="city" />
+              <InputComponent value={stateUserDetails.shippingAddress.nameship} onChange={handleOnchangeDetails} name="nameship" />
             </Form.Item>
             <Form.Item
               label="Phone"
-              name="phone"
+              name="phoneShip"
               rules={[{ required: true, message: 'Please input your  phone!' }]}
             >
-              <InputComponent value={stateUserDetails.phone} onChange={handleOnchangeDetails} name="phone" />
+              <InputComponent value={stateUserDetails.shippingAddress.phoneShip} onChange={handleOnchangeDetails} name="phoneShip" />
+            </Form.Item>
+            <Form.Item
+              label="City"
+              name="cityShip"
+              rules={[{ required: true, message: 'Please input your city!' }]}
+            >
+              <Select
+                value={stateUserDetails.shippingAddress.cityShip}
+                onChange={handleCityChange}
+                style={{ width: '100%' }}
+              >
+                {cities && cities.length > 0 ? (
+                  cities.map((city) => (
+                    <Select.Option key={city.ProvinceID} value={city.ProvinceID}>
+                      {city.ProvinceName}
+                    </Select.Option>
+                  ))
+                ) : (
+                  <Select.Option value={null}>No cities available</Select.Option>
+                )}
+              </Select>
             </Form.Item>
 
             <Form.Item
+              label="District"
+              name="districtShip"
+              rules={[{ required: true, message: 'Please input your district!' }]}
+            >
+              <Select
+                value={stateUserDetails.shippingAddress.districtShip}
+                onChange={handleDistrictChange}
+                style={{ width: '100%' }}
+              >
+                  {districts && districts.length > 0 ? (
+                    districts.map((district) => (
+                      <Select.Option key={district.DistrictID} value={district.DistrictID}>
+                        {district.DistrictName}
+                      </Select.Option>
+                    ))
+                  ) : (
+                    <Select.Option value={null}>No districts available</Select.Option>
+                  )}
+              </Select>
+            </Form.Item>
+
+            <Form.Item
+              label="Ward"
+              name="wardShip"
+              rules={[{ required: true, message: 'Please input your ward!' }]}
+            >
+              <Select
+                value={stateUserDetails.shippingAddress.wardShip}
+                onChange={handleWardChange}
+                style={{ width: '100%' }}
+              >
+                {wards && wards.length > 0 ? (
+                  wards.map((ward) => (
+                    <Select.Option key={ward.WardCode} value={ward.WardName}>
+                      {ward.WardName}
+                    </Select.Option>
+                  ))
+                ) : (
+                  <Select.Option value={null}>No wards available</Select.Option>
+                )}
+              </Select>
+            </Form.Item>
+            
+
+            <Form.Item
               label="Address"
-              name="address"
+              name="addressShip"
               rules={[{ required: true, message: 'Please input your  address!' }]}
             >
-              <InputComponent value={stateUserDetails.address} onChange={handleOnchangeDetails} name="address" />
+              <InputComponent value={stateUserDetails.shippingAddress.addressShip} onChange={handleOnchangeDetails} name="addressShip" />
             </Form.Item>
           </Form>
         </Loading>

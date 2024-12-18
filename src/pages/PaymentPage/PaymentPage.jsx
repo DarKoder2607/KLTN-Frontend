@@ -23,7 +23,9 @@ import useHover from '../../hooks/useHover';
 
 const PaymentPage = () => {
   const order = useSelector((state) => state.order)
+  const shippingFee = order.shippingPrice; 
   const user = useSelector((state) => state.user)
+   const shippingAddress = useSelector(state => state.user.shippingAddress);
   const { isHovered: isHomeHovered, handleMouseEnter: handleHomeEnter, handleMouseLeave: handleHomeLeave } = useHover()
   const { isHovered: isCartHovered, handleMouseEnter: handleMyOrderEnter, handleMouseLeave: handleMyOrderLeave } = useHover()
   const [delivery, setDelivery] = useState('fast')
@@ -33,10 +35,14 @@ const PaymentPage = () => {
   const [rewardPointsUsed, setRewardPointsUsed] = useState(0);
   const [isOpenModalUpdateInfo, setIsOpenModalUpdateInfo] = useState(false)
   const [stateUserDetails, setStateUserDetails] = useState({
-    name: '',
-    phone: '',
-    address: '',
-    city: ''
+    shippingAddress: {
+      nameship: '',         // Tên người nhận
+      addressShip: '',      // Địa chỉ giao hàng
+      wardShip: '',         // Phường
+      districtShip: '',     // Quận/huyện
+      cityShip: '',         // Thành phố
+      phoneShip: '',        // Số điện thoại
+    },
   })
   const [form] = Form.useForm();
 
@@ -85,6 +91,7 @@ const PaymentPage = () => {
   
     return totalPrice - discountedPrice;
   }, [order]);
+  
   const diliveryPriceMemo = useMemo(() => {
     if(priceMemo > 2000000 && priceMemo < 5000000){
       return 10000
@@ -96,8 +103,8 @@ const PaymentPage = () => {
   },[priceMemo])
 
   const totalPriceMemo = useMemo(() => {
-    return Number(priceMemo) - Number(priceDiscountMemo) + Number(diliveryPriceMemo)
-  },[priceMemo,priceDiscountMemo, diliveryPriceMemo])
+    return Number(priceMemo) - Number(priceDiscountMemo) + Number(shippingFee)
+  },[priceMemo,priceDiscountMemo, shippingFee])
 
   const handleUseRewardPoints = (value) => {
     const maxUsablePoints = Math.min(user.rewardPoints, Math.floor(totalPriceMemo / 3)); // 1.000 điểm = 3.000 VND
@@ -110,18 +117,22 @@ const PaymentPage = () => {
 
   const handleAddOrder = () => {
     if(user?.access_token && order?.orderItemsSlected && user?.name
-      && user?.address && user?.phone && user?.city && priceMemo && user?.id) {
+      && shippingAddress?.addressShip && shippingAddress?.phoneShip 
+      && shippingAddress?.cityShip && shippingAddress?.wardShip
+      && shippingAddress?.districtShip && priceMemo && user?.id) {
       mutationAddOrder.mutate(
         { 
           token: user?.access_token, 
           orderItems: order?.orderItemsSlected, 
-          fullName: user?.name,
-          address:user?.address, 
-          phone:user?.phone,
-          city: user?.city,
+          fullName: shippingAddress?.nameship,
+          address: shippingAddress?.addressShip, 
+          phone: shippingAddress?.phoneShip,
+          ward: shippingAddress?.wardShip,
+          district: shippingAddress?.districtShip,
+          city: shippingAddress?.cityShip,
           paymentMethod: payment,
           itemsPrice: priceMemo,
-          shippingPrice: diliveryPriceMemo,
+          shippingPrice: shippingFee,
           totalPrice: totalPriceAfterDiscount,
           user: user?.id,
           email: user?.email,
@@ -214,13 +225,15 @@ const PaymentPage = () => {
       { 
         token: user?.access_token, 
         orderItems: order?.orderItemsSlected, 
-        fullName: user?.name,
-        address:user?.address, 
-        phone:user?.phone,
-        city: user?.city,
+        fullName: shippingAddress?.nameship,
+        address: shippingAddress?.addressShip, 
+        phone: shippingAddress?.phoneShip,
+        ward: shippingAddress?.wardShip,
+        district: shippingAddress?.districtShip,
+        city: shippingAddress?.cityShip,
         paymentMethod: payment,
         itemsPrice: priceMemo,
-        shippingPrice: diliveryPriceMemo,
+        shippingPrice: shippingFee,
         totalPrice: totalPriceAfterDiscount,
         user: user?.id,
         isPaid :true,
@@ -233,11 +246,13 @@ const PaymentPage = () => {
 
 
   const handleUpdateInforUser = () => {
-    const {name, address,city, phone} = stateUserDetails
-    if(name && address && city && phone){
-      mutationUpdate.mutate({ id: user?.id, token: user?.access_token, ...stateUserDetails }, {
+    const {nameship, addressShip,cityShip, phoneShip,wardShip,districtShip} = stateUserDetails.shippingAddress
+    if(nameship && addressShip && cityShip && phoneShip && wardShip && districtShip){
+      mutationUpdate.mutate({ id: user?.id, token: user?.access_token, ...stateUserDetails.shippingAddress }, {
         onSuccess: () => {
-          dispatch(updateUser({name, address,city, phone}))
+          dispatch(updateUser({
+            shippingAddress: { nameship, addressShip, wardShip, districtShip, cityShip, phoneShip }
+          }))
           setIsOpenModalUpdateInfo(false)
         }
       })
@@ -304,16 +319,15 @@ const PaymentPage = () => {
             <WrapperLeft>
               <WrapperInfo>
                 <div>
-                  <Lable>Chọn phương thức giao hàng</Lable>
+                  <Lable style={{fontSize: '15px'}}>Phương thức giao hàng</Lable>
                   <WrapperRadio onChange={handleDilivery} value={delivery}> 
-                    <Radio  value="fast"><span style={{color: '#ea8500', fontWeight: 'bold'}}>FAST</span> Giao hàng tiết kiệm</Radio>
-                    <Radio  value="gojek"><span style={{color: '#ea8500', fontWeight: 'bold'}}>GO_JEK</span> Giao hàng tiết kiệm</Radio>
+                    <Radio  value="fast"><span style={{color: '#ea8500', fontWeight: 'bold'}}>GHN</span> GIAO HÀNG NHANH</Radio>
                   </WrapperRadio>
                 </div>
               </WrapperInfo>
               <WrapperInfo>
                 <div>
-                  <Lable>Chọn phương thức thanh toán</Lable>
+                  <Lable style={{fontSize: '15px'}}>Chọn phương thức thanh toán</Lable>
                   <WrapperRadio onChange={handlePayment} value={payment}> 
                     <Radio value="later_money"> Thanh toán tiền mặt khi nhận hàng</Radio>
                     <Radio value="paypal"> Thanh toán tiền bằng PayPal</Radio>
@@ -326,8 +340,15 @@ const PaymentPage = () => {
                 <WrapperInfo>
                   <div>
                     <span style={{ fontSize: "15px" , fontWeight: 'bold'}}>Địa chỉ: </span>
-                    <span style={{fontSize: "18px"}}>{ `${user?.address} ${user?.city}`} </span>
-                    <span onClick={handleChangeAddress} style={{color: '#9255FD', cursor:'pointer'}}>Thay đổi</span>
+                    <span style={{ fontSize: "18px" }}>
+                      {shippingAddress.addressShip &&
+                      shippingAddress.wardShip &&
+                      shippingAddress.districtShip &&
+                      shippingAddress.cityShip
+                        ? `${shippingAddress.addressShip}, ${shippingAddress.wardShip}, ${shippingAddress.districtShip}, Thành phố ${shippingAddress.cityShip}`
+                        : "Chưa có thông tin địa chỉ"}
+                    </span>
+        
                   </div>
                 </WrapperInfo>
                 <WrapperInfo>
@@ -341,7 +362,7 @@ const PaymentPage = () => {
                   </div>
                   <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
                     <span style={{fontSize: "13px"}}>Phí giao hàng</span>
-                    <span style={{color: '#000', fontSize: '14px', fontWeight: 'bold'}}>+ {convertPrice(diliveryPriceMemo)}</span>
+                    <span style={{color: '#000', fontSize: '14px', fontWeight: 'bold'}}>+ {convertPrice(shippingFee)}</span>
                   </div>
                   <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
                     <span style={{fontSize: "13px"}}>Quy đổi điểm thưởng</span>

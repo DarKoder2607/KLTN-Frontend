@@ -61,6 +61,15 @@ export const markAsDelivered = async (id, access_token) => {
   return res.data
 }
 
+export const markAsDelivered2 = async (id, access_token) => {
+  const res = await axiosJWT.put(`${process.env.REACT_APP_API_KEY}/order/mark-as-delivered2/${id}`, {}, {
+    headers: {
+      token: `Bearer ${access_token}`,
+    }
+  })
+  return res.data
+}
+
 export const markAsPaid = async (id, access_token) => {
   const res = await axiosJWT.put(`${process.env.REACT_APP_API_KEY}/order/mark-as-paid/${id}`, {}, {
     headers: {

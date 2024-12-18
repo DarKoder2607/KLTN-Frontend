@@ -92,8 +92,12 @@ const StatisticsTable = () => {
     isDelivered: {
       type: "isDelivered",
       title: "Giao hàng",
-      mapping: { true: "Đã giao hàng", false: "Chưa giao hàng" },
-      colors: ["#2196f3", "#ff9800"],
+      mapping: {
+        'Chuẩn bị hàng': "Chuẩn bị hàng", 
+        'Đang vận chuyển': "Đang vận chuyển", 
+        'Đã giao': "Đã giao"
+      },
+      colors: ["#FF9800", "#2196F3", "#4CAF50"],
     },
   };
   
